@@ -1,11 +1,12 @@
-import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 export async function POST() {
-  const cookieStore = await cookies();
-  cookieStore.set('session', '', {
+  const response = NextResponse.json({ success: true });
+
+  response.cookies.set('session', '', {
     path: '/',
     maxAge: 0,
   });
 
-  return new Response(JSON.stringify({ success: true }));
+  return response;
 }

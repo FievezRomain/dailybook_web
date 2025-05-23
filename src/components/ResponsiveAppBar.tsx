@@ -10,6 +10,8 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useTheme } from '@mui/material/styles';
 import { useColorMode } from '@/context/ThemeContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const MenuButton = ({ label, items }: {
   label: string;
@@ -55,6 +57,16 @@ const ResponsiveAppBar = () => {
 
   const handleCloseNavMenu = () => setAnchorElNav(null);
   const handleCloseUserMenu = () => setAnchorElUser(null);
+
+    const handleLogout = async () => {
+        try {
+        await signOut(auth);
+        await fetch('/api/session/logout', { method: 'POST' });
+        window.location.href = '/login';
+        } catch (error) {
+        console.error('Erreur de déconnexion :', error);
+        }
+    };
 
   return (
     <AppBar position="static" color="default" elevation={1}>
@@ -123,7 +135,7 @@ const ResponsiveAppBar = () => {
             <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleCloseUserMenu}>
               <MenuItem onClick={handleCloseUserMenu} component="a" href="/abonnement">Gérer mon abonnement</MenuItem>
               <MenuItem onClick={handleCloseUserMenu} component="a" href="/support">Support utilisateur</MenuItem>
-              <MenuItem onClick={handleCloseUserMenu} component="a" href="/logout">Déconnexion</MenuItem>
+              <MenuItem onClick={handleLogout}>Déconnexion</MenuItem>
             </Menu>
           </Box>
         </Toolbar>
