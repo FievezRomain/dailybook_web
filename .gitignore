@@ -39,3 +39,5 @@ yarn-error.log*
 
 # Next.js static export (si tu l'utilises un jour)
 export/
+
+firebase-adminsdk.json
