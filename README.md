@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📘 Vasco - Application Web
 
-## Getting Started
+Bienvenue ! Ce projet contient l'application web **Vasco**, développée avec **Next.js** pour le front-end.  
+Il s'accompagne d'une API back-end sous Node.js, ainsi que d'une base de données **PostgreSQL**.
 
-First, run the development server:
+---
+
+## 🚀 Démarrage du projet
+
+### ✅ Prérequis
+
+- [Node.js](https://nodejs.org/) (v18 recommandé)
+- [npm](https://www.npmjs.com/)
+- [Docker](https://www.docker.com/) + [Docker Compose](https://docs.docker.com/compose/)
+- Git
+
+---
+
+## 📦 Installation
+
+### 1. Cloner le dépôt
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/FievezRomain/dailybook_web.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Installer les dépendances du front
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Lancer les services avec Docker
+Le projet nécessite un service Docker :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- La base de données PostgreSQL
 
-## Learn More
+Voici le fichier docker-compose.yaml
+```yaml
+version: '3.8'
 
-To learn more about Next.js, take a look at the following resources:
+services:
+  db:
+    image: postgres:15
+    container_name: dailybook_db
+    environment:
+      POSTGRES_USER: postgres # À modifier
+      POSTGRES_PASSWORD: postgres # À modifier
+      POSTGRES_DB: DailyBookDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - dailybook_data:/var/lib/postgresql/data
+      - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    restart: unless-stopped
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+volumes:
+  dailybook_data:
+```
+#### A. Place ce fichier dans un dossier par exemple vasco_env/
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Exemple de structure à avoir (contactez l'équipe pour obtenir un dump):
+```lua
+vasco_env/
+├── docker-compose.yml
+└── db/
+    └── dump.sql
+```
+#### B. Démarrage de la base
+```
+cd vasco_env
+docker compose up -d
+```
 
-## Deploy on Vercel
+#### C. Pour arrêter la base
+```
+docker compose down
+```
+### 4. Clôner le dépôt de l'API back (nécessite les accès, contactez l'équipe si besoin)
+```bash
+git clone https://github.com/FievezRomain/dailybook_srv_javascript.git
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5. Installer les dépendances du back
+```bash
+npm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 6. Installer nodemon
+```bash
+npm install -g nodemon
+```
+
+### 7. Lancer l'API back
+```bash
+nodemon
+```
+
+### 8. Démarrer le front localement
+```
+npm run dev
+```
+Puis ouvre ton navigateur à l’adresse : http://localhost:3000
