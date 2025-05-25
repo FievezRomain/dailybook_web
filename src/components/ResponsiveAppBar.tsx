@@ -60,11 +60,11 @@ const ResponsiveAppBar = () => {
 
     const handleLogout = async () => {
         try {
-        await signOut(auth);
-        await fetch('/api/session/logout', { method: 'POST' });
-        window.location.href = '/login';
+            await signOut(auth);
+            await fetch('/api/session/logout', { method: 'POST' });
+            window.location.href = '/login';
         } catch (error) {
-        console.error('Erreur de déconnexion :', error);
+            console.error('Erreur de déconnexion :', error);
         }
     };
 
@@ -129,7 +129,7 @@ const ResponsiveAppBar = () => {
           <Box sx={{ flexGrow: 0, ml: 2 }}>
             <Tooltip title="Menu utilisateur">
               <IconButton onClick={handleOpenUserMenu}>
-                <Avatar alt="Profil" src="/avatar.jpg" />
+                <Avatar alt="Profil" />
               </IconButton>
             </Tooltip>
             <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleCloseUserMenu}>

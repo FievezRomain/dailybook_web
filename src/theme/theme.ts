@@ -33,7 +33,7 @@ export const lightTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Quicksand", "Roboto", "Helvetica", "Arial", sans-serif',
   }
 });
 
@@ -70,6 +70,6 @@ export const darkTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Quicksand", "Roboto", "Helvetica", "Arial", sans-serif',
   }
 });

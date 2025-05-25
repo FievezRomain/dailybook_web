@@ -1,20 +1,19 @@
-@use '../base/variables' as *;
 @use 'sass:color';
 
 .container {
     max-width: 400px;
     margin: 4rem auto;
     padding: 2rem;
-    border: 1px solid #ddd;
+    border: 1px solid rgb(var(--color-background-paper));
     border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    background-color: rgb(var(--color-background));
+    box-shadow: 0 0 10px rgba(var(--color-text), 0.05);
 
     h1 {
       margin-bottom: 1.5rem;
       font-size: 1.5rem;
       text-align: center;
-      color: black;
+      color: rgb(var(--color-text));
     }
       
     form {
@@ -26,13 +25,13 @@
     input {
       width: 100%;
       padding: 0.5rem;
-      border: 1px solid #ccc;
+      border: 1px solid rgb(var(--color-background-paper));
       border-radius: 4px;
     }
     
     button {
-      background-color: $primary;
-      color: white;
+      background-color: rgba(var(--color-primary), 0.8);
+      color: rgb(var(--color-background));
       border: none;
       padding: 0.75rem;
       border-radius: 4px;
@@ -40,13 +39,13 @@
       font-weight: bold;
     
       &:hover {
-        background-color: color.scale($primary, $lightness: -10%);
+        background-color: rgba(var(--color-primary), 1);
       }
     }
 }
   
 .error {
-  color: red;
+  color: rgb(var(--color-error));
   font-size: 0.9rem;
   margin-top: -0.5rem;
 }

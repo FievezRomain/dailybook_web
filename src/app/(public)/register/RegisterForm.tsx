@@ -1,30 +1,34 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import styles from '@/styles/pages/login.module.scss';
+import { registerUser } from '@/lib/firebaseService';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const token = await userCredential.user.getIdToken();
+      await registerUser(email, password);
 
-      await fetch('/api/session/login', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      window.location.href = '/dashboard';
+      window.location.href = '/verify-email';
     } catch (err) {
-      setError("Erreur lors de la création du compte.");
+      console.error(err);
+      
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Une erreur inconnue est survenue.');
+      }
+      
+      setLoading(false);
     }
   };
 
@@ -41,7 +45,9 @@ export default function RegisterForm() {
           <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         </label>
         {error && <p className={styles.error}>{error}</p>}
-        <button type="submit">S’inscrire</button>
+        <button type="submit">
+          {loading ? 'Inscription...' : 'S’inscrire'}
+        </button>
       </form>
       <p className={styles.link}>
         Déjà inscrit ? <a href="/login">Se connecter</a>

@@ -1,9 +1,9 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { signInWithEmailAndPassword, getIdToken } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getIdToken } from 'firebase/auth';
 import styles from '@/styles/pages/login.module.scss';
+import { signInUser, isEmailVerified } from '@/lib/firebaseService';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -18,8 +18,15 @@ export default function LoginForm() {
 
     try {
       // 1. Authentification avec Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInUser(email, password);
       const user = userCredential.user;
+
+      // Vérification si l'utilisateur a son email validée
+      const verified = await isEmailVerified();
+      if (!verified) {
+        window.location.href = '/verify-email';
+        return;
+      }
 
       // 2. Récupérer le idToken
       const idToken = await getIdToken(user, true);
@@ -39,7 +46,11 @@ export default function LoginForm() {
       window.location.href = '/dashboard';
     } catch (err) {
       console.error(err);
-      setError("Email ou mot de passe incorrect");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Email ou mot de passe incorrect");
+      }
       setLoading(false);
     }
   };
@@ -48,28 +59,35 @@ export default function LoginForm() {
     <div className={styles.container}>
       <h1>Connexion</h1>
       <form onSubmit={handleSubmit}>
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
+        <label>
+          Email
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+        </label>
+        
 
-        <label>Mot de passe</label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-
+        <label>
+          Mot de passe
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+        </label>
         {error && <p className={styles.error}>{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>
+      <p className={styles.link}>
+        Pas encore inscrit ? <a href="/register">S'enregistrer</a>
+      </p>
     </div>
   );
 }

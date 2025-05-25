@@ -15,7 +15,7 @@ export const useColorMode = () => useContext(ColorModeContext);
 
 export const ThemeContextProvider = ({
   children,
-  forceSystem = false,
+  forceSystem = true,
 }: {
   children: React.ReactNode;
   forceSystem?: boolean;
@@ -35,7 +35,7 @@ export const ThemeContextProvider = ({
 
   return (
     <ColorModeContext.Provider value={{ mode, toggleMode }}>
-      <html lang="fr" className={montserrat.className}>
+      <html lang="fr" className={montserrat.className} data-theme={mode}>
         <body>
           <ThemeProvider theme={theme}>
             <CssBaseline />
