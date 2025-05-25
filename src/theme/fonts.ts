@@ -1,6 +1,6 @@
-import { Montserrat } from 'next/font/google';
+import { Quicksand } from 'next/font/google';
 
-export const montserrat = Montserrat({
+export const quicksand = Quicksand({
   subsets: ['latin'],
   display: 'swap',
   weight: ['400', '700'],

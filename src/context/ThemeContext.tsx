@@ -4,7 +4,6 @@ import { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import { lightTheme, darkTheme } from '@/theme/theme';
-import { montserrat } from '@/theme/fonts';
 
 const ColorModeContext = createContext({
   mode: 'light' as 'light' | 'dark',
@@ -15,7 +14,7 @@ export const useColorMode = () => useContext(ColorModeContext);
 
 export const ThemeContextProvider = ({
   children,
-  forceSystem = true,
+  forceSystem = false,
 }: {
   children: React.ReactNode;
   forceSystem?: boolean;
@@ -35,14 +34,10 @@ export const ThemeContextProvider = ({
 
   return (
     <ColorModeContext.Provider value={{ mode, toggleMode }}>
-      <html lang="fr" className={montserrat.className} data-theme={mode}>
-        <body>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-          </ThemeProvider>
-        </body>
-      </html>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
     </ColorModeContext.Provider>
   );
 };
