@@ -6,13 +6,23 @@
     --color-secondary: 244, 237, 235;
     --color-text: 30, 30, 30;
     --color-background: 255, 255, 255;
+    --color-background-transparent: 255, 255, 255, 0.9;
     --color-background-paper: 244, 244, 244;
     --color-success: 206, 152, 113;
     --color-info: 186, 168, 155;
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
+    --color-rouan: 211, 204, 201;
+    --color-isabelle: 201, 182, 159;
+    --color-baie: 149, 101, 64;
+    --color-aubere: 186, 168, 155;
+    --color-alezan: 206, 152, 113;
+    --color-baie-brun: 105, 66, 51;
+    --color-gris: 248, 235, 232;
+    --color-palomino: 246, 230, 206;
+    --color-baie-cerise: 176, 113, 97;
 }
-  
+
 [data-theme='dark'] {
     --color-primary: 206,152,113;
     --color-secondary: 244, 237, 235;
@@ -24,7 +34,7 @@
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
 }
-  
+
 
 // Espacements
 $spacing-sm: 0.5rem;
