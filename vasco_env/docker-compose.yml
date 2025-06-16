@@ -1,0 +1,17 @@
+services:
+        db:
+                image: postgres:15
+                container_name: dailybook_db
+                environment:
+                        POSTGRES_USER: postgres # À modifier
+                        POSTGRES_PASSWORD: postgres # À modifier
+                        POSTGRES_DB: DailyBookDB
+                ports:
+                        - "5432:5432"
+                volumes:
+                        - dailybook_data:/var/lib/postgresql/data
+                        - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+                restart: unless-stopped
+
+volumes:
+        dailybook_data:
