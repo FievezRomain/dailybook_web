@@ -3,29 +3,173 @@
 import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
 import useSWR from "swr";
+import styles from '@/styles/pages/dashboard.module.scss';
+import CircularProgressbar from 'react-circular-progressbar';
 
 type Props = {
-  email: string;
-  initialEvents: Event[];
-  token: string;
+        prenom: string;
+        initialEvents: Event[];
+        token: string;
 };
 
-export default function DashboardContent({ email, initialEvents, token }: Props) {
-  const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+let count_today = 0;
+let count_later = 0;
+let count_late = 0;
 
-  return (
-    <div>
-      <h1>Bienvenue {email} 👋</h1>
+export default function DashboardContent({ initialEvents, token, prenom }: Props) {
+        const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
 
-      {isLoading && <p>Chargement des événements...</p>}
+        return (
+                <div className={styles.page_body}>
+                        <div className={styles.page_container}>
+                                <div className={styles.page_section /*Partie gauche*/}>
+                                        <div className={styles.dashboard_desc}>
+                                                <div>
+                                                        <h1>
+                                                                Bienvenue, {prenom} !
+                                                        </h1>
+                                                        <h2>
+                                                                {today.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                                        </h2>
+                                                </div>
+                                                <span>
+                                                        <img src="/globe.svg"></img>
+                                                        <p>Tâches</p>
+                                                </span>
+                                        </div>
+                                        {isLoading && <p>Chargement des événements...</p>}
+                                        <div className={styles.tab_medium}>
+                                                <div className={styles.tab_header}>
+                                                        <span></span>
+                                                        <p>Aujourd'hui</p>
+                                                        <span></span>
+                                                </div>
+                                                <div className={styles.tab_content}>
+                                                        <ul>
+                                                                {events.map((event: Event) => {
+                                                                        const eventDate = new Date(event.dateevent);
+                                                                        eventDate.setHours(0, 0, 0, 0);
+                                                                        if (eventDate.getTime() === today.getTime()) {
+                                                                                count_today++;
+                                                                                return (
+                                                                                        <li key={event.id}>
+                                                                                                <div className={styles.activity}>
+                                                                                                        <div className={styles.activity_header}>
+                                                                                                                <img src="/globe.svg" alt="icone" />
+                                                                                                                <h2>{event.eventtype}</h2>
+                                                                                                                <input type="checkbox" name="checkbox" />
+                                                                                                        </div>
+                                                                                                        <div className={styles.activity_body}>
+                                                                                                                <div>
+                                                                                                                        <h2>{event.nom}</h2>
+                                                                                                                        <p>{eventDate.toLocaleDateString()}</p>
+                                                                                                                </div>
+                                                                                                                <h3>VOIR LES DETAILS</h3>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </li>
+                                                                                );
+                                                                        }
+                                                                        return null;
+                                                                })}
+                                                                {count_today === 0 && <h3>Vous n'avez aucun événement aujourd'hui.</h3>}
+                                                        </ul>
+                                                </div>
+                                        </div>
+                                </div>
 
-      <ul>
-        {events.map((event: Event) => (
-          <li key={event.id}>
-            <strong>{event.nom}</strong> – {new Date(event.dateevent).toLocaleDateString()}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+                                <div className={styles.page_section /*Partie du milieu*/}>
+                                        <div className={styles.tab_medium}>
+                                                <div className={styles.tab_header}>
+                                                        <span></span>
+                                                        <p>A venir</p>
+                                                        <span></span>
+                                                </div>
+                                                <div className={styles.tab_content}>
+                                                        <ul>
+                                                                {events.map((event: Event) => {
+                                                                        const eventDate = new Date(event.dateevent);
+                                                                        eventDate.setHours(0, 0, 0, 0);
+                                                                        if (eventDate > today) {
+                                                                                count_later++;
+                                                                                return (
+                                                                                        <li key={event.id}>
+                                                                                                <div className={styles.activity}>
+                                                                                                        <div className={styles.activity_header}>
+                                                                                                                <img src="/globe.svg" alt="icone" />
+                                                                                                                <h2>{event.eventtype}</h2>
+                                                                                                                <input type="checkbox" name="checkbox" />
+                                                                                                        </div>
+                                                                                                        <div className={styles.activity_body}>
+                                                                                                                <div>
+                                                                                                                        <h2>{event.nom}</h2>
+                                                                                                                        <p>{eventDate.toLocaleDateString()}</p>
+                                                                                                                </div>
+                                                                                                                <h3>VOIR LES DETAILS</h3>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </li>
+                                                                                );
+                                                                        }
+                                                                        return null;
+                                                                })}
+                                                                {count_later === 0 && <h3>Vous n'avez aucun événement à venir.</h3>}
+                                                        </ul>
+                                                </div>
+                                        </div>
+                                        <div className={styles.tab_small}>
+                                                <div className={styles.tab_header}>
+                                                        <span></span>
+                                                        <p>En retard</p>
+                                                        <span></span>
+                                                </div>
+                                                <div className={styles.tab_content}>
+                                                        <ul>
+                                                                {events.map((event: Event) => {
+                                                                        const eventDate = new Date(event.dateevent);
+                                                                        eventDate.setHours(0, 0, 0, 0);
+                                                                        if (eventDate < today) {
+                                                                                count_late++;
+                                                                                return (
+                                                                                        <li key={event.id}>
+                                                                                                <div className={styles.activity}>
+                                                                                                        <div className={styles.activity_header}>
+                                                                                                                <img src="/globe.svg" alt="icone" />
+                                                                                                                <h2>{event.eventtype}</h2>
+                                                                                                                <input type="checkbox" name="checkbox" />
+                                                                                                        </div>
+                                                                                                        <div className={styles.activity_body}>
+                                                                                                                <div>
+                                                                                                                        <h2>{event.nom}</h2>
+                                                                                                                        <p>{eventDate.toLocaleDateString()}</p>
+                                                                                                                </div>
+                                                                                                                <h3>VOIR LES DETAILS</h3>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </li>
+                                                                                );
+                                                                        }
+                                                                        return null;
+                                                                })}
+                                                                {count_late === 0 && <h3>Vous n'avez aucun événement à venir.</h3>}
+                                                        </ul>
+
+                                                </div>
+                                        </div>
+                                </div>
+                                <div className={styles.tab_large /*Partie droite*/}>
+                                        <div className={styles.tab_header}>
+                                                <span></span>
+                                                <p>Objectifs</p>
+                                                <span></span>
+                                        </div>
+                                        <div className={styles.tab_content}>
+
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        );
 }

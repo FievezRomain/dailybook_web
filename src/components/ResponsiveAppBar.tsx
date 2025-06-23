@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import {
-  AppBar, Box, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar,
-  Tooltip, Container, Button
+        AppBar, Box, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar,
+        Tooltip, Container, Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -14,134 +14,137 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 const MenuButton = ({ label, items }: {
-  label: string;
-  items: { label: string; href: string }[];
+        label: string;
+        items: { label: string; href: string }[];
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+        const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+        const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+        const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+                setAnchorEl(event.currentTarget);
+        };
 
-  const handleClose = () => setAnchorEl(null);
+        const handleClose = () => setAnchorEl(null);
 
-  return (
-    <>
-      <Button onClick={handleClick}>{label}</Button>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        {items.map((item) => (
-          <MenuItem key={item.href} onClick={handleClose} component="a" href={item.href}>
-            {item.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
-  );
+        return (
+                <>
+                        <Button onClick={handleClick}>{label}</Button>
+                        <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                                {items.map((item) => (
+                                        <MenuItem key={item.href} onClick={handleClose} component="a" href={item.href}>
+                                                {item.label}
+                                        </MenuItem>
+                                ))}
+                        </Menu>
+                </>
+        );
 };
 
 const ResponsiveAppBar = () => {
-  const theme = useTheme();
-  const { mode, toggleMode } = useColorMode();
+        const theme = useTheme();
+        const { mode, toggleMode } = useColorMode();
 
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+        const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+        const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
+        const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+                setAnchorElNav(event.currentTarget);
+        };
 
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
+        const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+                setAnchorElUser(event.currentTarget);
+        };
 
-  const handleCloseNavMenu = () => setAnchorElNav(null);
-  const handleCloseUserMenu = () => setAnchorElUser(null);
+        const handleCloseNavMenu = () => setAnchorElNav(null);
+        const handleCloseUserMenu = () => setAnchorElUser(null);
 
-    const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            await fetch('/api/session/logout', { method: 'POST' });
-            window.location.href = '/login';
-        } catch (error) {
-            console.error('Erreur de déconnexion :', error);
-        }
-    };
+        const handleLogout = async () => {
+                try {
+                        await signOut(auth);
+                        await fetch('/api/session/logout', { method: 'POST' });
+                        window.location.href = '/login';
+                } catch (error) {
+                        console.error('Erreur de déconnexion :', error);
+                }
+        };
 
-  return (
-    <AppBar position="static" color="default" elevation={1}>
-      <Container maxWidth={false}>
-        <Toolbar disableGutters>
-          {/* LOGO desktop */}
-          <Box component="a" href="/dashboard" sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
-            <img src="/logo.png" alt="logo" style={{ height: 60 }} />
-          </Box>
+        return (
+                <AppBar position="static" color="default" elevation={1} sx={{ boxShadow: 'none' }}>
+                        <Container sx={{ background: 'linear-gradient(to right, rgba(246,230,206,0.3) 20%, white 75%, rgba(246,230,206,0.3))' }} maxWidth={false}>
+                                <Toolbar disableGutters>
+                                        {/* LOGO desktop */}
+                                        <Box component="a" href="/dashboard" sx={{ display: { xs: 'none', md: 'flex' }, mr: 2, ml: 1 }}>
+                                                <img src="/logo.png" alt="logo" style={{ height: 80 }} />
+                                        </Box>
 
-          {/* MENU BURGER mobile */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton onClick={handleOpenNavMenu}>
-              <MenuIcon />
-            </IconButton>
-            <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/dashboard">Accueil</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/performances/objectifs">Objectifs</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/performances/statistiques">Statistiques</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/animaux">Animaux</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/contacts">Contacts</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/souhaits">Souhaits</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/notes">Notes</MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/groupes">Groupes</MenuItem>
-            </Menu>
-          </Box>
+                                        {/* MENU BURGER mobile */}
+                                        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+                                                <IconButton onClick={handleOpenNavMenu}>
+                                                        <MenuIcon />
+                                                </IconButton>
+                                                <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/dashboard">Accueil</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/performances/objectifs">Objectifs</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/performances/statistiques">Statistiques</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/animaux">Animaux</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/contacts">Contacts</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/souhaits">Souhaits</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/notes">Notes</MenuItem>
+                                                        <MenuItem onClick={handleCloseNavMenu} component="a" href="/autre/groupes">Groupes</MenuItem>
+                                                </Menu>
+                                        </Box>
 
-          {/* LOGO mobile */}
-          <Box component="a" href="/dashboard" sx={{ display: { xs: 'flex', md: 'none' }, mr: 2 }}>
-            <img src="/logo.png" alt="logo" style={{ height: 60 }} />
-          </Box>
+                                        {/* LOGO mobile */}
+                                        <Box component="a" href="/dashboard" sx={{ display: { xs: 'flex', md: 'none' }, mr: 2 }}>
+                                                <img src="/logo.png" alt="logo" style={{ height: 80 }} />
+                                        </Box>
 
-          {/* MENU desktop */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-            <Button href="/dashboard">Accueil</Button>
+                                        {/* MENU desktop */}
+                                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: '20px', '& Button': { color: 'rgba(105,66,51,1)', fontWeight: '500', fontSize: '22px', textTransform: 'none' } }}>
+                                                <Button sx={{ color: 'rgba(105,66,51,1)', fontWeight: '500', fontSize: '22px', textTransform: 'none' }} href="/dashboard">Accueil</Button>
 
-            <MenuButton label="Performances" items={[
-              { label: 'Objectifs', href: '/performances/objectifs' },
-              { label: 'Statistiques', href: '/performances/statistiques' },
-            ]} />
+                                                <MenuButton label="Performances" items={[
+                                                        { label: 'Objectifs', href: '/performances/objectifs' },
+                                                        { label: 'Statistiques', href: '/performances/statistiques' },
+                                                ]} />
 
-            <Button href="/animaux">Animaux</Button>
+                                                <Button sx={{ color: 'rgba(105,66,51,1)', fontWeight: '500', fontSize: '22px', textTransform: 'none' }} href="/calendar">Calendrier</Button>
 
-            <MenuButton label="Autre" items={[
-              { label: 'Contacts', href: '/autre/contacts' },
-              { label: 'Souhaits', href: '/autre/souhaits' },
-              { label: 'Notes', href: '/autre/notes' },
-              { label: 'Groupes', href: '/autre/groupes' },
-            ]} />
-          </Box>
+                                                <Button sx={{ color: 'rgba(105,66,51,1)', fontWeight: '500', fontSize: '22px', textTransform: 'none' }} href="/animaux">Animaux</Button>
 
-          <Box sx={{ flexGrow: 1 }} />
+                                                <MenuButton label="Autre" items={[
+                                                        { label: 'Contacts', href: '/autre/contacts' },
+                                                        { label: 'Souhaits', href: '/autre/souhaits' },
+                                                        { label: 'Notes', href: '/autre/notes' },
+                                                        { label: 'Groupes', href: '/autre/groupes' },
+                                                ]} />
+                                        </Box>
 
-          {/* SWITCH THÈME */}
-          <IconButton onClick={toggleMode} sx={{ ml: 1 }} aria-label="Changer de thème">
-            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+                                        <Box sx={{ flexGrow: 1 }} />
 
-          {/* AVATAR */}
-          <Box sx={{ flexGrow: 0, ml: 2 }}>
-            <Tooltip title="Menu utilisateur">
-              <IconButton onClick={handleOpenUserMenu}>
-                <Avatar alt="Profil" />
-              </IconButton>
-            </Tooltip>
-            <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleCloseUserMenu}>
-              <MenuItem onClick={handleCloseUserMenu} component="a" href="/abonnement">Gérer mon abonnement</MenuItem>
-              <MenuItem onClick={handleCloseUserMenu} component="a" href="/support">Support utilisateur</MenuItem>
-              <MenuItem onClick={handleLogout}>Déconnexion</MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
+                                        {/* SWITCH THÈME */}
+                                        <IconButton onClick={toggleMode} sx={{ ml: 1 }} aria-label="Changer de thème">
+                                                {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                                        </IconButton>
+
+                                        {/* AVATAR */}
+                                        <Box sx={{ flexGrow: 0, ml: 1 }}>
+                                                <Tooltip title="Menu utilisateur">
+                                                        <IconButton onClick={handleOpenUserMenu}>
+                                                                <Avatar sx={{ height: '50px', width: '50px', mr: 1 }} alt="Profil" />
+                                                        </IconButton>
+                                                </Tooltip>
+                                                <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleCloseUserMenu}>
+                                                        <MenuItem onClick={handleCloseUserMenu} component="a" href="/profil">Consulter mon profil</MenuItem>
+                                                        <MenuItem onClick={handleCloseUserMenu} component="a" href="/abonnement">Gérer mon abonnement</MenuItem>
+                                                        <MenuItem onClick={handleCloseUserMenu} component="a" href="/support">Support utilisateur</MenuItem>
+                                                        <MenuItem onClick={handleLogout}>Déconnexion</MenuItem>
+                                                </Menu>
+                                        </Box>
+                                </Toolbar>
+                        </Container>
+                </AppBar>
+        );
 };
 
 export default ResponsiveAppBar;
