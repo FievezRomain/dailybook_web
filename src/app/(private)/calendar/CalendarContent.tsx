@@ -4,6 +4,8 @@ import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
 import useSWR from "swr";
 import styles from '@/styles/components/dashboard.module.scss';
+import { Calendar } from "@/components/ui/calendar";
+import React from "react";
 
 
 type Props = {
@@ -15,6 +17,7 @@ type Props = {
 
 export default function CalendarContent({ initialEvents, token, email }: Props) {
         const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
+        const [date, setDate] = React.useState<Date | undefined>(new Date())
 
         return (
                 <div className={styles.page_body}>
@@ -27,7 +30,13 @@ export default function CalendarContent({ initialEvents, token, email }: Props) 
                                         </div>
 
                                         {isLoading && <p>Chargement des événements...</p>}
-
+                                        <Calendar
+                                                mode="single"
+                                                selected={date}
+                                                onSelect={setDate}
+                                                className="rounded-md border shadow-sm"
+                                                captionLayout="dropdown"
+                                        />
 
                                 </div>
                                 <div className={styles.tab_large /*Partie droite*/}>

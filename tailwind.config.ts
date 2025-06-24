@@ -19,6 +19,7 @@ const config: Config = {
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
         muted: 'hsl(var(--muted))',
         accent: 'hsl(var(--accent))',
+        baie: 'hsl(var(--baie))',
       },
       spacing: {
         'sm': '0.5rem',  // 8px

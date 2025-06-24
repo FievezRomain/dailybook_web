@@ -21,7 +21,7 @@ export default function ResponsiveAppBar() {
   const pathname = usePathname()
 
   return (
-    <header className="border-b bg-background px-4 flex items-center justify-between">
+    <header className="border-b bg-baie px-4 flex items-center justify-between">
       {/* Burger menu visible uniquement en mobile */}
       <div className="md:hidden">
         <Sheet>
@@ -64,7 +64,7 @@ export default function ResponsiveAppBar() {
                 <Link
                   href="/dashboard"
                   className={`text-sm font-medium hover:text-primary ${
-                    pathname === '/dashboard' && 'text-muted-foreground'
+                    pathname === '/dashboard' && 'text-accent'
                   }`}
                 >
                   Accueil
@@ -79,7 +79,7 @@ export default function ResponsiveAppBar() {
                   <Link 
                       href="/performances/objectifs" 
                       className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${
-                        pathname === '/objectifs' && 'text-muted-foreground'
+                        pathname === '/objectifs' && 'text-accent'
                       }`}
                   >
                     <li>
@@ -89,7 +89,7 @@ export default function ResponsiveAppBar() {
                   <Link 
                     href="/performances/statistiques" 
                     className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${
-                      pathname === '/statistiques' && 'text-muted-foreground'
+                      pathname === '/statistiques' && 'text-accent'
                     }`}
                   >
                     <li>
@@ -105,7 +105,7 @@ export default function ResponsiveAppBar() {
                 <Link
                   href="/calendar"
                   className={`text-sm font-medium hover:text-primary ${
-                    pathname === '/calendar' && 'text-muted-foreground'
+                    pathname === '/calendar' && 'text-accent'
                   }`}
                 >
                   Calendrier
@@ -118,7 +118,7 @@ export default function ResponsiveAppBar() {
                 <Link
                   href="/animaux"
                   className={`text-sm font-medium hover:text-primary ${
-                    pathname === '/animaux' && 'text-muted-foreground'
+                    pathname === '/animaux' && 'text-accent'
                   }`}
                 >
                   Animaux
@@ -133,7 +133,7 @@ export default function ResponsiveAppBar() {
                   <Link 
                     href="/souhaits" 
                     className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${
-                      pathname === '/souhaits' && 'text-muted-foreground'
+                      pathname === '/souhaits' && 'text-accent'
                     }`}
                   >
                     <li>
@@ -143,7 +143,7 @@ export default function ResponsiveAppBar() {
                   <Link 
                     href="/notes" 
                     className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${
-                      pathname === '/notes' && 'text-muted-foreground'
+                      pathname === '/notes' && 'text-accent'
                     }`}
                   >
                     <li>
@@ -153,7 +153,7 @@ export default function ResponsiveAppBar() {
                   <Link 
                     href="/contacts" 
                     className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${
-                      pathname === '/contacts' && 'text-muted-foreground'
+                      pathname === '/contacts' && 'text-accent'
                     }`}
                   >
                     <li>
