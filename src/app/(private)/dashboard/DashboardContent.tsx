@@ -3,8 +3,7 @@
 import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
 import useSWR from "swr";
-import styles from '@/styles/pages/dashboard.module.scss';
-import CircularProgressbar from 'react-circular-progressbar';
+import styles from '@/styles/components/dashboard.module.scss';
 
 type Props = {
         prenom: string;

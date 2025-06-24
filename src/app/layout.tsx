@@ -1,16 +1,15 @@
-import './globals.scss';
 import { quicksand } from '@/theme/fonts';
 import { ReactNode } from 'react';
-import '@/app/globals.scss'
-import { ThemeContextProvider } from '@/context/ThemeContext';
+import '@/app/globals.css'
+import { ThemeProvider } from 'next-themes'
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className={quicksand.className}>
-        <body>
-            <ThemeContextProvider>
+    <html lang="fr" suppressHydrationWarning>
+        <body className={quicksand.className}>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 {children}
-            </ThemeContextProvider>
+            </ThemeProvider>
         </body>
     </html>
   );

@@ -1,8 +1,8 @@
 import { withAuthPage } from '@/lib/auth/server/withAuthPage';
-import CalendarContent from './CalendarContent';
 import { getEvents } from '@/api/events';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from '@/constants/cookies';
+import CalendarContent from './CalendarContent';
 
 export default async function DashboardPage() {
         return withAuthPage(async (user) => {

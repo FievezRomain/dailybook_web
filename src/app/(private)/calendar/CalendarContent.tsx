@@ -3,33 +3,21 @@
 import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
 import useSWR from "swr";
-import styles from '@/styles/pages/dashboard.module.scss';
-import Calendar from "react-calendar";
-import styled from 'styled-components';
-
-const CalendarContainer = styled.div`
-  /* Your custom styles here */
-  max-width: 600px;
-  margin: auto;
-  margin-top: 20px;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgb(var(--color-baie-transparent-fond));
-  div{
-        justify-self: center;
-  }
-`;
+import styles from '@/styles/components/dashboard.module.scss';
+import { Calendar } from "@/components/ui/calendar";
+import React from "react";
 
 
 type Props = {
-        prenom: string;
+        email: string;
         initialEvents: Event[];
         token: string;
 };
 
 
-export default function CalendarContent({ initialEvents, token, prenom }: Props) {
+export default function CalendarContent({ initialEvents, token, email }: Props) {
         const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
+        const [date, setDate] = React.useState<Date | undefined>(new Date())
 
         return (
                 <div className={styles.page_body}>
@@ -42,9 +30,13 @@ export default function CalendarContent({ initialEvents, token, prenom }: Props)
                                         </div>
 
                                         {isLoading && <p>Chargement des événements...</p>}
-                                        <CalendarContainer>
-                                                <Calendar></Calendar>
-                                        </CalendarContainer>
+                                        <Calendar
+                                                mode="single"
+                                                selected={date}
+                                                onSelect={setDate}
+                                                className="rounded-md border shadow-sm"
+                                                captionLayout="dropdown"
+                                        />
 
                                 </div>
                                 <div className={styles.tab_large /*Partie droite*/}>

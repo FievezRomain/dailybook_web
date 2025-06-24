@@ -1,8 +1,8 @@
 import { withAuthPage } from '@/lib/auth/server/withAuthPage';
-import ObjectifsContent from './ObjectifsContent';
 import { getEvents } from '@/api/events';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from '@/constants/cookies';
+import ObjectifsContent from './ObjectifsContent';
 
 export default async function ObjectifsPage() {
         return withAuthPage(async (user) => {

@@ -3,15 +3,15 @@
 import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
 import useSWR from "swr";
-import styles from '@/styles/pages/dashboard.module.scss';
+import styles from '@/styles/components/dashboard.module.scss';
 
 type Props = {
-        prenom: string;
+        email: string;
         initialEvents: Event[];
         token: string;
 };
 
-export default function ObjectifsContent({ initialEvents, token, prenom }: Props) {
+export default function ObjectifsContent({ initialEvents, token, email }: Props) {
         const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
 
         return (
