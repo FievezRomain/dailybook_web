@@ -38,6 +38,7 @@ export default function ResponsiveAppBar() {
               <Link href="/dashboard" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Accueil</Link>
               <Link href="/performances/objectifs" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Objectifs</Link>
               <Link href="/performances/statistiques" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Statistiques</Link>
+              <Link href="/calendar" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Calendrier</Link>
               <Link href="/animaux" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Animaux</Link>
               <Link href="/souhaits" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Souhaits</Link>
               <Link href="/notes" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Notes</Link>
@@ -97,6 +98,19 @@ export default function ResponsiveAppBar() {
                   </Link>
                 </ul>
               </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/calendar"
+                  className={`text-sm font-medium hover:text-primary ${
+                    pathname === '/calendar' && 'text-muted-foreground'
+                  }`}
+                >
+                  Calendrier
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
