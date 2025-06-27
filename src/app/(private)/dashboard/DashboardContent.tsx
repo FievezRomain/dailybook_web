@@ -2,12 +2,15 @@
 
 import { getEvents } from "@/api/events";
 import { Event } from "@/types/event";
+import { getObjectifs } from "@/api/objectifs";
+import { Objectifs } from "@/types/objectifs";
 import useSWR from "swr";
 import styles from '@/styles/components/dashboard.module.scss';
 
 type Props = {
         prenom: string;
         initialEvents: Event[];
+        initialObjectifs: Objectifs[];
         token: string;
 };
 
@@ -17,9 +20,9 @@ let count_today = 0;
 let count_later = 0;
 let count_late = 0;
 
-export default function DashboardContent({ initialEvents, token, prenom }: Props) {
-        const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
-
+export default function DashboardContent({ initialEvents, initialObjectifs, token, prenom }: Props) {
+        const { data: events = initialEvents, isLoading: isLoadingEvents } = useSWR(['events', token], () => getEvents(token));
+        const { data: objectifs = initialObjectifs, isLoading: isLoadingObjectifs } = useSWR(['objectifs', token], () => getObjectifs(token));
         return (
                 <div className={styles.page_body}>
                         <div className={styles.page_container}>
@@ -38,7 +41,8 @@ export default function DashboardContent({ initialEvents, token, prenom }: Props
                                                         <p>Tâches</p>
                                                 </span>
                                         </div>
-                                        {isLoading && <p>Chargement des événements...</p>}
+                                        {isLoadingEvents && <p>Chargement des événements...</p>}
+                                        {isLoadingObjectifs && <p>Chargement des objectifs...</p>}
                                         <div className={styles.tab_medium}>
                                                 <div className={styles.tab_header}>
                                                         <span></span>
@@ -125,6 +129,7 @@ export default function DashboardContent({ initialEvents, token, prenom }: Props
                                                         <span></span>
                                                 </div>
                                                 <div className={styles.tab_content}>
+
                                                         <ul>
                                                                 {events.map((event: Event) => {
                                                                         const eventDate = new Date(event.dateevent);
@@ -154,7 +159,6 @@ export default function DashboardContent({ initialEvents, token, prenom }: Props
                                                                 })}
                                                                 {count_late === 0 && <h3>Vous n'avez aucun événement à venir.</h3>}
                                                         </ul>
-
                                                 </div>
                                         </div>
                                 </div>
@@ -165,6 +169,33 @@ export default function DashboardContent({ initialEvents, token, prenom }: Props
                                                 <span></span>
                                         </div>
                                         <div className={styles.tab_content}>
+                                                <ul>
+                                                        {objectifs && objectifs.length > 0 ? (
+                                                                objectifs.map((objectif: Objectifs) => {
+                                                                        const objectifDate = new Date(objectif.datedebut);
+                                                                        objectifDate.setHours(0, 0, 0, 0);
+                                                                        return (
+                                                                                <li key={objectif.id}>
+                                                                                        <div className={styles.activity}>
+                                                                                                <div className={styles.activity_header}>
+                                                                                                        <img src="/globe.svg" alt="icone" />
+                                                                                                        <h2>{objectif.title}</h2>
+                                                                                                        <input type="checkbox" name="checkbox" />
+                                                                                                </div>
+                                                                                                <div className={styles.activity_body}>
+                                                                                                        <div>
+                                                                                                                <p>{objectifDate.toLocaleDateString()}</p>
+                                                                                                        </div>
+                                                                                                        <h3>VOIR LES DETAILS</h3>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </li>
+                                                                        );
+                                                                })
+                                                        ) : (
+                                                                <h3>Vous n'avez aucun objectif.</h3>
+                                                        )}
+                                                </ul>
 
                                         </div>
                                 </div>

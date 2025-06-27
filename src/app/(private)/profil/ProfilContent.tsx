@@ -1,19 +1,25 @@
 'use client';
 
-import { getEvents } from "@/api/events";
-import { Event } from "@/types/event";
+import { getUser } from "@/api/user";
+import { User } from "@/types/user";
+import { getUserPicture } from "@/api/user_picture";
+import { UserPicture } from "@/types/user_picture";
 import useSWR from "swr";
 import styles from '@/styles/pages/dashboard.module.scss';
 
 type Props = {
         prenom: string;
-        initialEvents: Event[];
+        initialUser: User[];
+        initialUserPicture: UserPicture[];
         token: string;
+        email: string;
+        filename: string;
 };
 
 
-export default function ProfilContent({ initialEvents, token, prenom }: Props) {
-        const { data: events = initialEvents, isLoading } = useSWR(['events', token], () => getEvents(token));
+export default function ProfilContent({ initialUser, initialUserPicture, token, prenom, email, filename }: Props) {
+        const { data: user = initialUser, isLoading: isLoadingUser } = useSWR(['user', token], () => getUser(token));
+        const { data: user_picture = initialUserPicture, isLoading: isLoadingUserPicture } = useSWR(['user_picture', token], () => getUserPicture(token));
 
         return (
                 <div className={styles.page_body}>
@@ -24,11 +30,14 @@ export default function ProfilContent({ initialEvents, token, prenom }: Props) {
                                                         Espace compte
                                                 </h1>
                                                 <div>
-
+                                                        <img src={filename}></img>
+                                                        <h3>{prenom}</h3>
+                                                        <h4>{email}</h4>
                                                 </div>
                                         </div>
 
-                                        {isLoading && <p>Chargement des événements...</p>}
+                                        {isLoadingUser && <p>Chargement des événements...</p>}
+                                        {isLoadingUserPicture && <p>Chargement des événements...</p>}
 
                                 </div>
                                 <div className={styles.page_section /*Partie droite*/}>
