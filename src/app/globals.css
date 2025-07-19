@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
- 
+@import "react-day-picker/style.css";
+
 @custom-variant dark (&:is(.dark *));
- 
+
 :root {
     /* Charte de l'application */
     --color-primary: 206,152,113;
@@ -16,14 +17,22 @@
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
     --color-rouan: 211, 204, 201;
+    --color-rouan-transparent: 211, 204, 201, 0.5;
     --color-isabelle: 201, 182, 159;
+    --color-isabelle-transparent: 201, 182, 159, 0.5;
     --color-baie: 149, 101, 64;
+    --color-baie-transparent: 149, 101, 64, 0.5;
+    --color-baie-transparent-fond: 149, 101, 64, 0.25;
     --color-aubere: 186, 168, 155;
+    --color-aubere-transparent: 186, 168, 155, 0.5;
     --color-alezan: 206, 152, 113;
+    --color-alezan-transparent: 206, 152, 113, 0.5;
     --color-baie-brun: 105, 66, 51;
+    --color-baie-brun-transparent: 105, 66, 51, 0.5;
     --color-gris: 248, 235, 232;
     --color-palomino: 246, 230, 206;
     --color-baie-cerise: 176, 113, 97;
+    --color-baie-cerise-transparent: 176, 113, 97, 0.5;
 
     /* Charte TAILWIN/SHADCN */
     --background: rgb(var(--color-background));
@@ -63,7 +72,7 @@
     /* Charte SHADCN personnalisée */
     --baie: rgb(var(--color-baie));
 }
- 
+
 .dark {
     /* Charte de l'application */
     --color-primary: 206,152,113;
@@ -114,6 +123,34 @@
     --baie: rgb(var(--color-baie));
 }
 
+.rdp-root{
+        display: flex;
+    --rdp-accent-color: rgb(var(--color-baie));
+    --rdp-accent-background-color: rgb(var(--color-baie-transparent-fond));
+    --rdp-day_button-border-radius: 10px;
+}
+
+.rdp-day_button{
+        font-size: 24px;
+}
+
+.rdp-weekday{
+        font-size: 20px;
+        color: rgb(var(--color-text));
+}
+
+.rdp-selected .rdp-day_button{
+        background-color: rgb(var(--color-baie));
+        color: rgb(var(--color-background));
+        font-weight: 500;
+}
+
+.rdp-month_caption{
+        font-size: 24px;
+        color: rgb(var(--color-baie-brun));
+        font-weight: 500;
+}
+
 @theme inline {
     /* Permet de substituer les variables --color-background etc vers --background, la charte TAILWIND/SHADCN */
     --color-background: var(--background);
@@ -156,7 +193,7 @@
     /* Substitution personnalisée */
     --color-baie: var(--baie);
 }
- 
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
