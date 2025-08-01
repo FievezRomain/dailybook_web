@@ -4,6 +4,8 @@ import { FormEvent, useState } from 'react';
 import { getIdToken } from 'firebase/auth';
 import styles from '@/styles/pages/login.module.scss';
 import { signInUser, isEmailVerified } from '@/lib/firebaseService';
+import { Button } from '@/components/ui';
+import Link from 'next/link';
 
 export default function LoginForm() {
         const [email, setEmail] = useState('');
@@ -60,37 +62,44 @@ export default function LoginForm() {
                         <h1 className={styles.title}>Connexion</h1>
                         <div className={styles.container}>
                                 <form onSubmit={handleSubmit}>
-                                        <label>
-                                                Identifiant :
-                                                <input
-                                                        type="email"
-                                                        value={email}
-                                                        onChange={e => setEmail(e.target.value)}
-                                                        required
-                                                        placeholder="Email"
-                                                />
-                                        </label>
+                                        <div className={styles.inputs_container}>
+                                                <label>
+                                                        Identifiant :
+                                                        <input
+                                                                type="email"
+                                                                value={email}
+                                                                onChange={e => setEmail(e.target.value)}
+                                                                required
+                                                                placeholder="Email"
+                                                        />
+                                                </label>
 
 
-                                        <label>
-                                                Mot de passe :
-                                                <input
-                                                        type="password"
-                                                        value={password}
-                                                        onChange={e => setPassword(e.target.value)}
-                                                        required
-                                                        placeholder="Mot de passe"
-                                                />
-                                        </label>
-                                        {error && <p className={styles.error}>{error}</p>}
-
-                                        <button className={styles.brown_button} type="submit" disabled={loading}>
-                                                {loading ? 'Connexion...' : 'Je me connecte'}
-                                        </button>
+                                                <label>
+                                                        Mot de passe :
+                                                        <input
+                                                                type="password"
+                                                                value={password}
+                                                                onChange={e => setPassword(e.target.value)}
+                                                                required
+                                                                placeholder="Mot de passe"
+                                                        />
+                                                </label>
+                                                {error && <p className={styles.error}>{error}</p>}
+                                        </div>
+                                        <div className={styles.button_container}>
+                                                <Button type="submit" size={"lg"} disabled={loading}>
+                                                        {loading ? 'Connexion...' : 'Je me connecte'}
+                                                </Button>
+                                        </div>
+                                        
                                 </form>
-                                <a className={styles.brown_link}>Mot de passe oublié ?</a>
-                                <a className={styles.light_brown_button} href="/register">Pas de compte ? S'inscrire</a>
-
+                                <a className={styles.link}>Mot de passe oublié ?</a>
+                                <Button asChild size={"lg"}>
+                                        <Link href="/register">
+                                                Pas de compte ? S'inscrire
+                                        </Link>
+                                </Button>
                         </div>
                 </div>
         );

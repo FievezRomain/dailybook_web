@@ -1,12 +1,9 @@
+import apiClient from '@/lib/apiClient';
 import api from '@/lib/axios';
 import { Objectifs } from '@/types/objectifs';
 
-export const getObjectifs = async (token: string): Promise<Objectifs[]> => {
-    const res = await api.get('objectifsByUser', {
-        headers: {
-        'x-access-token': token,
-        },
-    });
+export const getObjectifs = async () : Promise<Objectifs[]> => {
+    const res = await apiClient.get('/objectifs');
     return res.data;
 };
 

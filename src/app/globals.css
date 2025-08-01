@@ -35,13 +35,13 @@
     --color-baie-cerise-transparent: 176, 113, 97, 0.5;
 
     /* Charte TAILWIN/SHADCN */
-    --background: rgb(var(--color-background));
+    --background: rgb(var(--color-background-paper));
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: rgb(var(--color-primary));
+    --primary: rgb(var(--color-baie));
     --primary-foreground: oklch(0.985 0 0);
     --secondary: rgb(var(--color-secondary));
     --secondary-foreground: oklch(0.205 0 0);
@@ -68,9 +68,16 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    
 
     /* Charte SHADCN personnalisée */
     --baie: rgb(var(--color-baie));
+    --text: rgb(var(--color-text));
+    --rouan: rgb(var(--color-rouan));
+    --isabelle: rgb(var(--color-isabelle));
+    --aubere: rgb(var(--color-aubere));
+    --bai_cerise: rgb(var(--color-bai-cerise));
+    --bai_brun: rgb(var(--color-bai-brun));
 }
 
 .dark {
@@ -85,14 +92,31 @@
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
 
+    --color-rouan: 211, 204, 201;
+    --color-rouan-transparent: 211, 204, 201, 0.5;
+    --color-isabelle: 201, 182, 159;
+    --color-isabelle-transparent: 201, 182, 159, 0.5;
+    --color-baie: 149, 101, 64;
+    --color-baie-transparent: 149, 101, 64, 0.5;
+    --color-baie-transparent-fond: 149, 101, 64, 0.25;
+    --color-aubere: 186, 168, 155;
+    --color-aubere-transparent: 186, 168, 155, 0.5;
+    --color-alezan: 206, 152, 113;
+    --color-alezan-transparent: 206, 152, 113, 0.5;
+    --color-baie-brun: 105, 66, 51;
+    --color-baie-brun-transparent: 105, 66, 51, 0.5;
+    --color-gris: 248, 235, 232;
+    --color-palomino: 246, 230, 206;
+    --color-baie-cerise: 176, 113, 97;
+
     /* Charte TAILWIN/SHADCN */
-    --background: rgb(var(--color-background));
+    --background: rgb(var(--color-background-paper));
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
+    --card: rgb(var(--color-background));
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: rgb(var(--color-primary));
+    --primary: rgb(var(--color-baie));
     --primary-foreground: oklch(0.205 0 0);
     --secondary: rgb(var(--color-secondary));
     --secondary-foreground: oklch(0.985 0 0);
@@ -121,6 +145,12 @@
 
     /* Charte SHADCN personnalisée */
     --baie: rgb(var(--color-baie));
+    --text: rgb(var(--color-text));
+    --rouan: rgb(var(--color-rouan));
+    --isabelle: rgb(var(--color-isabelle));
+    --aubere: rgb(var(--color-aubere));
+    --bai_cerise: rgb(var(--color-bai-cerise));
+    --bai_brun: rgb(var(--color-bai-brun));
 }
 
 .rdp-root{
@@ -189,9 +219,15 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+    --color-text: var(--text);
 
     /* Substitution personnalisée */
     --color-baie: var(--baie);
+    --color-rouan: var(--rouan);
+    --color-isabelle: var(--isabelle);
+    --color-aubere: var(--aubere);
+    --color-bai_cerise: var(--bai_cerise);
+    --color-bai_brun: var(--bai_brun);
 }
 
 @layer base {

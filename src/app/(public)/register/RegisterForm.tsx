@@ -1,8 +1,9 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import styles from '@/styles/pages/login.module.scss';
+import styles from '@/styles/pages/register.module.scss';
 import { registerUser } from '@/lib/firebaseService';
+import { Button } from '@/components/ui';
 
 export default function RegisterForm() {
         const [email, setEmail] = useState('');
@@ -34,47 +35,51 @@ export default function RegisterForm() {
 
         return (
                 <div className={styles.form_page}>
-                        <h1 className={styles.brown_title}>S'inscrire</h1>
+                        <h1 className={styles.title}>S'inscrire</h1>
                         <div className={styles.container}>
                                 <form onSubmit={handleSubmit}>
-                                        <div>
-                                                <label>
-                                                        Email :
-                                                        <input type="email"
-                                                                value={email}
-                                                                onChange={e => setEmail(e.target.value)}
-                                                                required
-                                                                placeholder="Email" />
-                                                </label>
-                                                <label>
-                                                        Prénom :
-                                                        <input type="text"
-                                                                required
-                                                                placeholder="Votre prénom" />
-                                                </label>
-                                        </div>
-                                        <div>
-                                                <label>
-                                                        Mot de passe :
-                                                        <input type="password"
-                                                                value={password}
-                                                                onChange={e => setPassword(e.target.value)}
-                                                                required
-                                                                placeholder="Mot de passe" />
-                                                </label>
-                                                <label>
-                                                        Confirmation du mot de passe :
-                                                        <input type="password"
-                                                                required
-                                                                placeholder="Confirmation du mot de passe" />
-                                                </label>
+                                        <div className={styles.inputs_container}>
+                                                <div>
+                                                        <label>
+                                                                Email :
+                                                                <input type="email"
+                                                                        value={email}
+                                                                        onChange={e => setEmail(e.target.value)}
+                                                                        required
+                                                                        placeholder="Email" />
+                                                        </label>
+                                                        <label>
+                                                                Prénom :
+                                                                <input type="text"
+                                                                        required
+                                                                        placeholder="Votre prénom" />
+                                                        </label>
+                                                </div>
+                                                <div>
+                                                        <label>
+                                                                Mot de passe :
+                                                                <input type="password"
+                                                                        value={password}
+                                                                        onChange={e => setPassword(e.target.value)}
+                                                                        required
+                                                                        placeholder="Mot de passe" />
+                                                        </label>
+                                                        <label>
+                                                                Confirmation du mot de passe :
+                                                                <input type="password"
+                                                                        required
+                                                                        placeholder="Confirmation du mot de passe" />
+                                                        </label>
+                                                </div>
                                         </div>
                                         {error && <p className={styles.error}>{error}</p>}
-                                        <button className={styles.brown_button} type="submit">
-                                                {loading ? 'Inscription...' : 'S’enregistrer'}
-                                        </button>
+                                        <div className={styles.button_container}>
+                                                <Button size={"lg"} type="submit" disabled={loading}>
+                                                        {loading ? 'Inscription...' : 'S’enregistrer'}
+                                                </Button>
+                                        </div>
                                 </form>
-                                <a className={styles.brown_link} href="/login">Vous avez déjà un compte ?</a>
+                                <a className={styles.link} href="/login">Vous avez déjà un compte ?</a>
                         </div>
                 </div>
         );

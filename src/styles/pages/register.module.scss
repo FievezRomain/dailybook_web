@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use '../base/mixins' as *;
 
 //Formulaires
 .container {
@@ -6,7 +7,6 @@
         border-radius: 15px;
         background-color: var(--card);
         box-shadow: 0 0 10px rgba(var(--color-text), 0.1);
-        width: fit-content;
         
         .inputs_container{
                 display: flex;
@@ -33,6 +33,14 @@
                 input::placeholder {
                         color: rgb(var(--color-gris));
                 }
+                div{
+                        display: flex;
+                        flex-direction: row;
+                        gap: 2rem;
+                        @include respond-to(desktop) {
+                                flex-direction: column;
+                        }
+                }
         }
 }
 .link{
@@ -50,26 +58,26 @@
         display: flex;
         justify-content: center;
         margin-top: 1.5rem;
-      }
+}
 
 
 //Pages de connexion et inscription
 .form_page{
         justify-content: center;
-        height: 100vh;
+        align-items: center;
+        align-self: center;
+        background-color: var(--background-paper);
+        min-height: 100vh;
 
         .title{
                 font-size: 55px;
                 letter-spacing: 3px;
                 font-weight: 400;
-        }
-        .title{
                 color: rgb(var(--color-text));
         }
 }
 
 .container,
-.welcome_page,
 .form_page{
         display: flex;
         flex-direction: column;

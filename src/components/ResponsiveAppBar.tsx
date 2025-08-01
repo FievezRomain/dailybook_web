@@ -21,7 +21,7 @@ export default function ResponsiveAppBar() {
         const pathname = usePathname()
 
         return (
-                <header className="border-b bg-baie px-4 flex items-center justify-between">
+                <header className="border-b bg-card px-4 flex items-center justify-between">
                         {/* Burger menu visible uniquement en mobile */}
                         <div className="md:hidden">
                                 <Sheet>
@@ -49,10 +49,11 @@ export default function ResponsiveAppBar() {
                         </div>
 
                         {/* Logo centré sur desktop */}
-                        <div>
+                        <div className={"flex md:flex-row items-center"}>
                                 <Link href="/dashboard">
                                         <img src="/logo.png" alt="Logo" className="h-15 w-auto" />
                                 </Link>
+                                <span className='text-primary'>Vasco and co</span>
                         </div>
 
                         {/* Menu centré desktop */}
@@ -63,7 +64,7 @@ export default function ResponsiveAppBar() {
                                                         <NavigationMenuLink asChild>
                                                                 <Link
                                                                         href="/dashboard"
-                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/dashboard' && 'text-accent'
+                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/dashboard' && 'bg-accent text-primary'
                                                                                 }`}
                                                                 >
                                                                         Accueil
@@ -72,12 +73,12 @@ export default function ResponsiveAppBar() {
                                                 </NavigationMenuItem>
 
                                                 <NavigationMenuItem>
-                                                        <NavigationMenuTrigger className="text-sm font-medium">Performances</NavigationMenuTrigger>
-                                                        <NavigationMenuContent>
+                                                        <NavigationMenuTrigger className={`text-sm font-medium ${( pathname.includes('/performances') ) && 'bg-accent text-primary'}`}>Performances</NavigationMenuTrigger>
+                                                        <NavigationMenuContent className="z-50">
                                                                 <ul className="grid gap-2 w-48">
                                                                         <Link
                                                                                 href="/performances/objectifs"
-                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/objectifs' && 'text-accent'
+                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/performances/objectifs' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >
                                                                                 <li>
@@ -86,7 +87,7 @@ export default function ResponsiveAppBar() {
                                                                         </Link>
                                                                         <Link
                                                                                 href="/performances/statistiques"
-                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/statistiques' && 'text-accent'
+                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/performances/statistiques' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >
                                                                                 <li>
@@ -101,7 +102,7 @@ export default function ResponsiveAppBar() {
                                                         <NavigationMenuLink asChild>
                                                                 <Link
                                                                         href="/calendar"
-                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/calendar' && 'text-accent'
+                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/calendar' && 'bg-accent text-primary'
                                                                                 }`}
                                                                 >
                                                                         Calendrier
@@ -113,7 +114,7 @@ export default function ResponsiveAppBar() {
                                                         <NavigationMenuLink asChild>
                                                                 <Link
                                                                         href="/animaux"
-                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/animaux' && 'text-accent'
+                                                                        className={`text-sm font-medium hover:text-primary ${pathname === '/animaux' && 'bg-accent text-primary'
                                                                                 }`}
                                                                 >
                                                                         Animaux
@@ -122,12 +123,12 @@ export default function ResponsiveAppBar() {
                                                 </NavigationMenuItem>
 
                                                 <NavigationMenuItem>
-                                                        <NavigationMenuTrigger className="text-sm font-medium">Autre</NavigationMenuTrigger>
-                                                        <NavigationMenuContent>
+                                                        <NavigationMenuTrigger className={`text-sm font-medium ${pathname.includes('/autre') && 'bg-accent text-primary'}`}>Autre</NavigationMenuTrigger>
+                                                        <NavigationMenuContent className="z-50">
                                                                 <ul className="grid gap-2 w-48">
                                                                         <Link
                                                                                 href="/souhaits"
-                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/souhaits' && 'text-accent'
+                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/autre/souhaits' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >
                                                                                 <li>
@@ -136,7 +137,7 @@ export default function ResponsiveAppBar() {
                                                                         </Link>
                                                                         <Link
                                                                                 href="/notes"
-                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/notes' && 'text-accent'
+                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/autre/notes' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >
                                                                                 <li>
@@ -145,7 +146,7 @@ export default function ResponsiveAppBar() {
                                                                         </Link>
                                                                         <Link
                                                                                 href="/contacts"
-                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/contacts' && 'text-accent'
+                                                                                className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/autre/contacts' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >
                                                                                 <li>
