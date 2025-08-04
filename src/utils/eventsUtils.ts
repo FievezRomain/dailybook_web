@@ -21,9 +21,7 @@ export const filterLate = (events: Event[]) => {
   return events.filter(e => new Date(e.dateevent) < now && e.state === "À faire");
 };
 
-export const mapEventData = (event: Event): MappedEvent => {
-
-  const iconsMap: Record<string, React.ComponentType> = {
+export const iconsMap: Record<string, React.ComponentType> = {
     depense: FaMoneyBillWave,
     balade: TiCompass,
     soins: FaHandHoldingMedical,
@@ -31,7 +29,9 @@ export const mapEventData = (event: Event): MappedEvent => {
     entrainement: LuTrafficCone,
     autre: FaCheckCircle,
     rdv: FaStethoscope,
-  };
+};
+
+export const mapEventData = (event: Event): MappedEvent => {
 
   const colorsMap: Record<string, string> = {
     depense: "--color-rouan",

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface CustomCheckboxProps {
   checked: boolean;
-  onChange: () => void;
+  onChange: (e: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => void;
 }
 
 export function CustomCheckbox({ checked, onChange }: CustomCheckboxProps) {

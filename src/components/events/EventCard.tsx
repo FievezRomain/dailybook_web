@@ -1,5 +1,5 @@
 import { Animal } from "@/types/animal";
-import { Event, MappedEvent } from "@/types/event";
+import { MappedEvent } from "@/types/event";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui";
 import { MoreVertical } from "lucide-react";
@@ -14,9 +14,11 @@ interface EventCardProps {
     onEdit: () => void;
     onDelete: () => void;
     onComplete: () => void;
+    onOpenDrawer: (event:MappedEvent) => void;
+    onDuplicate: () => void;
 }
 
-export const EventCard = ({ event, animals, onEdit, onDelete, onComplete }: EventCardProps) => {
+export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate }: EventCardProps) => {
     const [completed, setCompleted] = useState<boolean>(event.state === "Terminé");
 
     const handleComplete = () => {
@@ -51,16 +53,16 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete }: Even
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => console.log("Modifier", event.id)}>
+                        <DropdownMenuItem onClick={onEdit}>
                             Modifier
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => console.log("Dupliquer", event.id)}>
+                        <DropdownMenuItem onClick={onDuplicate}>
                             Dupliquer
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => console.log("Supprimer", event.id)}
+                            onClick={onDelete}
                         >
                             Supprimer
                         </DropdownMenuItem>
@@ -69,8 +71,14 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete }: Even
             </CardHeader>
             
             {/* Body */}
-            <CardContent className="flex items-center justify-between px-4 py-3">
-                <CustomCheckbox checked={completed} onChange={handleComplete} />
+            <CardContent className="flex items-center justify-between px-4 py-3 cursor-pointer" onClick={() => onOpenDrawer(event)}>
+                <CustomCheckbox 
+                    checked={completed} 
+                    onChange={(e) => {
+                        e.stopPropagation(); // évite d'ouvrir le drawer quand on clique sur la checkbox
+                        handleComplete();
+                    }} 
+                />
                 <span className="text-base font-semibold flex-1 mx-3">{event.nom}</span>
         
                 {/* Images des animaux liés */}
