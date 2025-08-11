@@ -33,10 +33,7 @@ export type Event = {
     idparent?: string;
     documents?: string[];
     issharedevent?: string;
-    color?: string;
-    delay?: number;
-    icon?: ComponentType;
-    titleType?: string;
+    todisplay?: boolean;
 };
 
 export type MappedEvent = Event & {

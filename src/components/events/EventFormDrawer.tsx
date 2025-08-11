@@ -1,13 +1,20 @@
-import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/index";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useEventForm } from "@/hooks/useEventForm";
 import type { Event } from "@/types/event";
+import { colorsMap, titleMap } from "@/utils/eventsUtils";
+import { X } from "lucide-react";
+import { StarRating } from "../ui/StarRating";
+import { AnimalSelector } from "../ui/AnimalSelector";
+import { Animal } from "@/types/animal";
+import { useEffect } from "react";
+import { getLocalDateString } from "@/utils/datesUtils";
 
 type EventFormDrawerProps = {
   open: boolean;
+  animals: Animal[] | undefined; // undefined = en cours de chargement
   onClose: () => void;
   onSubmit: (data: Partial<Event>) => void;
   initialEvent?: Partial<Event>;
@@ -17,6 +24,7 @@ type EventFormDrawerProps = {
 
 export const EventFormDrawer = ({
   open,
+  animals,
   onClose,
   onSubmit,
   initialEvent,
@@ -32,31 +40,64 @@ export const EventFormDrawer = ({
     resetForm,
     setValues,
   } = useEventForm(initialEvent);
+  const eventtype = values.eventtype as keyof typeof titleMap;
+  const eventTitle = titleMap[eventtype] || "Événement";
+  const isEdit = !!initialEvent?.id;
 
   // Détermine le titre et le bouton selon le mode
   const getTitle = () => {
-    if (isDuplicate) return "Dupliquer l'événement";
-    if (initialEvent?.id) return "Modifier l'événement";
-    return "Créer un événement";
+    if (isDuplicate) return `Dupliquer l'événement ${eventTitle.toLocaleLowerCase()}`;
+    if (isEdit) return `Modifier l'événement ${eventTitle.toLocaleLowerCase()}`;
+    return `Créer un événement ${eventTitle.toLocaleLowerCase()}`;
   };
   const getButtonLabel = () => {
     if (isSubmitting) {
       if (isDuplicate) return "Duplication...";
-      if (initialEvent?.id) return "Enregistrement...";
+      if (isEdit) return "Enregistrement...";
       return "Création...";
     }
     if (isDuplicate) return "Dupliquer";
-    if (initialEvent?.id) return "Enregistrer";
+    if (isEdit) return "Enregistrer";
     return "Créer";
   };
 
+  // Récupère la couleur selon le type d'event
+  const colorVar = colorsMap[values.eventtype as keyof typeof colorsMap];
+  const headerBg = colorVar ? `rgba(var(${colorVar}), 1)` : "#A3A3A3";
+
+  // Met à jour l'état selon la date
+  useEffect(() => {
+    if (!values.dateevent) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(values.dateevent);
+    eventDate.setHours(0, 0, 0, 0);
+
+    if (eventDate < today && values.state !== "Terminé") {
+      setValues((prev) => ({ ...prev, state: "Terminé" }));
+    } else if (eventDate >= today && values.state !== "À faire") {
+      setValues((prev) => ({ ...prev, state: "À faire" }));
+    }
+  }, [values.dateevent]);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-full p-0 flex flex-col h-[90vh] rounded-2xl overflow-hidden">
-        <DialogHeader className="bg-primary/90 px-6 py-4">
-          <DialogTitle className="text-white text-lg">
-            {getTitle()}
-          </DialogTitle>
+      <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col  rounded-2xl overflow-hidden">
+        <DialogHeader
+          className="px-6 py-4 flex flex-row items-center justify-between"
+          style={{ backgroundColor: headerBg }}
+        >
+          <DialogTitle className="text-white text-lg">{getTitle()}</DialogTitle>
+          <Button
+            onClick={onClose}
+            className="p-2 rounded hover:bg-white/20 text-white"
+            variant="ghost"
+            type="button"
+            tabIndex={0}
+            aria-label="Fermer"
+          >
+            <X size={20} />
+          </Button>
         </DialogHeader>
         <form
           className="flex-1 overflow-y-auto p-6 flex flex-col gap-6"
@@ -70,60 +111,216 @@ export const EventFormDrawer = ({
             }
           })}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Nom *</label>
-              <Input
-                name="nom"
-                value={values.nom || ""}
-                onChange={handleChange}
-                required
-                autoFocus
-                placeholder="Nom de l'événement"
-              />
-              {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium mb-1">Nom *</label>
+                    <Input
+                        name="nom"
+                        value={values.nom || ""}
+                        onChange={handleChange}
+                        required
+                        autoFocus
+                        placeholder="Nom de l'événement"
+                    />
+                    {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Date *</label>
+                    <Input
+                        type="date"
+                        name="dateevent"
+                        value={values.dateevent || getLocalDateString()}
+                        onChange={handleChange}
+                        required
+                    />
+                    {errors.dateevent && <p className="text-xs text-red-500">{errors.dateevent}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">État</label>
+                    <div className="flex w-fit overflow-hidden border border-muted rounded-xl">
+                        <button
+                            type="button"
+                            className={`px-4 py-1 font-semibold transition-colors
+                                ${values.state !== "Terminé"
+                                ? "text-white"
+                                : "text-muted-foreground bg-muted"}
+                                rounded-l-xl
+                                `}
+                            style={
+                                values.state !== "Terminé" && colorVar
+                                ? { backgroundColor: `rgba(var(${colorVar}), 1)` }
+                                : undefined
+                            }
+                            onClick={() => setValues((prev) => ({ ...prev, state: "À faire" }))}
+                            aria-pressed={values.state !== "Terminé"}
+                        >
+                            À faire
+                        </button>
+                        <button
+                            type="button"
+                            className={`px-4 py-1 font-semibold transition-colors
+                                ${values.state === "Terminé"
+                                ? "text-white"
+                                : "text-muted-foreground bg-muted"}
+                                rounded-r-xl
+                                `}
+                            style={
+                                values.state === "Terminé" && colorVar
+                                ? { backgroundColor: `rgba(var(${colorVar}), 1)` }
+                                : undefined
+                            }
+                            onClick={() => setValues((prev) => ({ ...prev, state: "Terminé" }))}
+                            aria-pressed={values.state === "Terminé"}
+                        >
+                            Terminé
+                        </button>
+                    </div>
+                </div>
+                {/* Sélection des animaux */}
+                {animals && (
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium mb-1">Animaux liés</label>
+                        <AnimalSelector
+                            animals={animals}
+                            selectedIds={values.animaux || []}
+                            onChange={(ids) => setValues((prev) => ({ ...prev, animaux: ids }))}
+                            showSelectAll={true}
+                        />
+                    </div>
+                )}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Heure de début</label>
+                    <Input
+                        type="time"
+                        name="heuredebutevent"
+                        value={values.heuredebutevent || ""}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Lieu</label>
+                    <Input
+                        name="lieu"
+                        value={values.lieu || ""}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Dépense</label>
+                    <Input
+                        type="number"
+                        name="depense"
+                        value={values.depense || ""}
+                        onChange={handleChange}
+                        step="0.01"
+                        min="0"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
+                    />
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                    <input
+                        type="checkbox"
+                        id="todisplay"
+                        name="todisplay"
+                        checked={!!values.todisplay}
+                        onChange={e => setValues(prev => ({ ...prev, todisplay: e.target.checked }))}
+                        className="accent-primary w-4 h-4"
+                    />
+                    <label htmlFor="todisplay" className="text-sm select-none cursor-pointer">
+                        Afficher cet événement dans le calendrier
+                    </label>
+                </div>
+                {/* Champs conditionnels */}
+                {(eventtype === "soins" || eventtype === "rdv") && (
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Spécialiste</label>
+                        <Input name="specialiste" value={values.specialiste || ""} onChange={handleChange} />
+                    </div>
+                )}
+                {eventtype === "depense" && (
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Catégorie de dépense</label>
+                        <Input name="categoriedepense" value={values.categoriedepense || ""} onChange={handleChange} />
+                    </div>
+                )}
+                {eventtype === "balade" && (
+                <>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Heure début balade</label>
+                        <Input name="heuredebutbalade" value={values.heuredebutbalade || ""} onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Date fin balade</label>
+                        <Input type="date" name="datefinbalade" value={values.datefinbalade || undefined} onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Heure fin balade</label>
+                        <Input type="time" name="heurefinbalade" value={values.heurefinbalade || ""} onChange={handleChange} />
+                    </div>
+                </>
+                )}
+                {eventtype === "entrainement" && (
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Discipline</label>
+                        <Input name="discipline" value={values.discipline || ""} onChange={handleChange} />
+                    </div>
+                )}
+                {eventtype !== "depense" && (
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Note</label>
+                        <StarRating
+                            value={Number(values.note) || 0}
+                            onChange={(v) => setValues((prev) => ({ ...prev, note: v.toString() }))}
+                            color={colorVar ? `rgba(var(${colorVar}), 1)` : undefined}
+                        />
+                    </div>
+                )}
+                {eventtype === "concours" && (
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Épreuve</label>
+                            <Input name="epreuve" value={values.epreuve || ""} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Dossart</label>
+                            <Input name="dossart" value={values.dossart || ""} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Placement</label>
+                            <Input name="placement" value={values.placement || ""} onChange={handleChange} />
+                        </div>
+                    </>
+                )}
+                {eventtype === "soins" && (
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Traitement</label>
+                            <Input name="traitement" value={values.traitement || ""} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Date fin soins</label>
+                            <Input type="date" name="datefinsoins" value={values.datefinsoins || undefined} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Type de fréquence</label>
+                            <Input name="frequencetype" value={values.frequencetype || ""} onChange={handleChange} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Valeur de fréquence</label>
+                            <Input name="frequencevalue" value={values.frequencevalue || ""} onChange={handleChange} />
+                        </div>
+                    </>
+                )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Type *</label>
-              <Input
-                name="eventtype"
-                value={values.eventtype || ""}
-                onChange={handleChange}
-                required
-                placeholder="Type d'événement"
-              />
-              {errors.eventtype && <p className="text-xs text-red-500">{errors.eventtype}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Date *</label>
-              <Input
-                type="date"
-                name="dateevent"
-                value={values.dateevent || ""}
-                onChange={handleChange}
-                required
-              />
-              {errors.dateevent && <p className="text-xs text-red-500">{errors.dateevent}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">État</label>
-              <Input
-                name="state"
-                value={values.state || ""}
-                onChange={handleChange}
-                placeholder="État"
-              />
-            </div>
-            {/* Ajoute ici d'autres champs selon tes besoins */}
-          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Commentaire</label>
             <Textarea
-              name="commentaire"
-              value={values.commentaire || ""}
-              onChange={handleTextareaChange}
-              placeholder="Ajouter un commentaire"
-              rows={3}
+                name="commentaire"
+                value={values.commentaire || ""}
+                onChange={handleTextareaChange}
+                placeholder="Ajouter un commentaire"
+                rows={3}
             />
           </div>
           {/* Ajoute ici d'autres champs spécifiques (animaux, documents, etc.) */}
@@ -131,7 +328,7 @@ export const EventFormDrawer = ({
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Annuler
             </Button>
-            <Button type="submit" variant={"default"} disabled={isSubmitting}>
+            <Button type="submit" variant={"outline"} disabled={isSubmitting}>
               {getButtonLabel()}
             </Button>
           </DialogFooter>

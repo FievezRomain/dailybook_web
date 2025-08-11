@@ -1,19 +1,17 @@
 "use client";
 
-import { getEvents } from "@/api/events";
 import { EventList } from "@/components/events/EventList";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Event } from "@/types/event";
+import { useEvents } from "@/context/EventContext";
 import { filterToday } from "@/utils/eventsUtils";
-import useSWR from "swr";
 
 type Props = {
   height?: number;
 };
 
 const TodayTasksCard = ({ height = 4 }: Props) => {
-  const { data: events, isLoading: isLoadingEvents } = useSWR(['events'], () => getEvents());
+  const { events, isLoading: isLoadingEvents } = useEvents();
   const rowHeightPx = 30;
   const computedMaxHeight = height * rowHeightPx;
 

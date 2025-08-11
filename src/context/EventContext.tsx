@@ -10,8 +10,8 @@ type EventContextType = {
   isLoading: boolean;
   isError: any;
   addEvent: (event: Partial<Event>) => Promise<void>;
-  updateEvent: (id: string, event: Partial<Event>) => Promise<void>;
-  deleteEvent: (id: string) => Promise<void>;
+  updateEvent: (id: number, event: Event) => Promise<void>;
+  deleteEvent: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
@@ -35,7 +35,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     await mutate(); // revalide
   };
 
-  const updateEvent = async (id: string, event: Partial<Event>) => {
+  const updateEvent = async (id: number, event: Event) => {
     await fetch(`/api/events/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -44,7 +44,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     await mutate();
   };
 
-  const deleteEvent = async (id: string) => {
+  const deleteEvent = async (id: number) => {
     await fetch(`/api/events/${id}`, { method: "DELETE" });
     await mutate();
   };

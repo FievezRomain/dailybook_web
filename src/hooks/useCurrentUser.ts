@@ -11,5 +11,6 @@ export function useCurrentUser() {
     user: data,
     isLoading,
     isError: error,
+    isPremium: false
   };
 }

@@ -1,6 +1,5 @@
 import { Event, MappedEvent } from '@/types/event';
 import { differenceInDays, isBefore, startOfDay } from 'date-fns';
-import { JSX } from 'react';
 import { FaMoneyBillWave, FaTrophy, FaStethoscope, FaCheckCircle } from "react-icons/fa";
 import { FaHandHoldingMedical } from "react-icons/fa6";
 import { LuTrafficCone } from "react-icons/lu";
@@ -21,19 +20,17 @@ export const filterLate = (events: Event[]) => {
   return events.filter(e => new Date(e.dateevent) < now && e.state === "À faire");
 };
 
-export const iconsMap: Record<string, React.ComponentType> = {
-    depense: FaMoneyBillWave,
-    balade: TiCompass,
-    soins: FaHandHoldingMedical,
-    concours: FaTrophy,
-    entrainement: LuTrafficCone,
-    autre: FaCheckCircle,
-    rdv: FaStethoscope,
+export const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  depense: FaMoneyBillWave,
+  balade: TiCompass,
+  soins: FaHandHoldingMedical,
+  concours: FaTrophy,
+  entrainement: LuTrafficCone,
+  autre: FaCheckCircle,
+  rdv: FaStethoscope,
 };
 
-export const mapEventData = (event: Event): MappedEvent => {
-
-  const colorsMap: Record<string, string> = {
+export const colorsMap: Record<string, string> = {
     depense: "--color-rouan",
     balade: "--color-baie",
     soins: "--color-isabelle",
@@ -41,9 +38,9 @@ export const mapEventData = (event: Event): MappedEvent => {
     entrainement: "--color-aubere",
     autre: "--color-baie-cerise",
     rdv: "--color-baie-brun",
-  };
+};
 
-  const titleMap: Record<string, string> = {
+export const titleMap: Record<string, string> = {
     depense: "Dépense",
     balade: "Balade",
     soins: "Soins",
@@ -51,7 +48,9 @@ export const mapEventData = (event: Event): MappedEvent => {
     entrainement: "Entraînement",
     autre: "Autre",
     rdv: "Rendez-vous",
-  };
+};
+
+export const mapEventData = (event: Event): MappedEvent => {
 
   let delay;
   const eventDate = startOfDay(new Date(event.dateevent));
@@ -69,3 +68,14 @@ export const mapEventData = (event: Event): MappedEvent => {
 };
 
 export const mapEvents = (events: Event[]) => events.map(mapEventData);
+
+export function isEventComplete(event: Partial<Event>): event is Event {
+  return (
+    typeof event.id === "number" &&
+    typeof event.nom === "string" &&
+    typeof event.dateevent === "string" &&
+    typeof event.eventtype === "string" &&
+    Array.isArray(event.animaux) &&
+    typeof event.state === "string"
+  );
+}

@@ -12,27 +12,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const body = await req.json();
   try {
-    const data = await apiBack('eventsByUser', 'POST', body);
-    return Response.json(data);
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 401 });
-  }
-}
-
-export async function PUT(req: Request) {
-  const body = await req.json();
-  try {
-    const data = await apiBack('xxxByUser', 'PUT', body);
-    return Response.json(data);
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 401 });
-  }
-}
-
-export async function DELETE(req: Request) {
-  const body = await req.json();
-  try {
-    const data = await apiBack('xxxByUser', 'DELETE', body);
+    const data = await apiBack('createEvent', 'POST', body);
     return Response.json(data);
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), { status: 401 });

@@ -7,7 +7,7 @@ type User = {
   name: string;
   email: string;
   uid: string;
-  // Ajoute ici d'autres attributs si besoin (isPremium, etc.)
+  isPremium: boolean;
 };
 
 type UserContextType = {
