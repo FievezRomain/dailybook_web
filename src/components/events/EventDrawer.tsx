@@ -5,6 +5,7 @@ import { MappedEvent } from "@/types/event";
 import { Animal } from "@/types/animal";
 import { Button } from "../ui";
 import { Skeleton } from "../ui/skeleton";
+import { getPresignedGetUrl } from "@/services/storage";
 
 type EventDrawerProps = {
   open: boolean;
@@ -113,13 +114,27 @@ export const EventDrawer = ({ open, onClose, event, animals, onDelete }: EventDr
                         <p className="text-sm font-medium mb-2">Documents</p>
                         <div className="flex flex-wrap gap-2">
                             {event.documents.map((doc, index) => (
-                                <Button
-                                    key={index}
-                                    className="text-primary underline hover:text-primary/80 text-sm"
-                                    onClick={() => window.open(doc, "_blank")}
-                                >
-                                    📄 {doc.split("/").pop()}
-                                </Button>
+                                <div key={index} className="flex items-center gap-2">
+                                    <span>📄 {doc.name.split("/").pop()}</span>
+                                    <Button
+                                        className="text-text underline text-sm"
+                                        onClick={async () => {
+                                            const url = await getPresignedGetUrl(doc.name, "event", event.id);
+                                            window.open(url, "_blank");
+                                        }}
+                                    >
+                                        Visualiser
+                                    </Button>
+                                    <Button
+                                        className="text-text underline text-sm"
+                                        onClick={async () => {
+                                            const url = await getPresignedGetUrl(doc.name, "event", event.id);
+                                            window.open(url + "?download=true", "_blank");
+                                        }}
+                                    >
+                                        Télécharger
+                                    </Button>
+                                </div>
                             ))}
                         </div>
                     </div>

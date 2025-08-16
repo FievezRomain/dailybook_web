@@ -1,8 +1,8 @@
 'use client';
 
-import { getUser } from "@/api/user";
+import { getUser } from "@/services/user";
 import { User } from "@/types/user";
-import { getUserPicture } from "@/api/user_picture";
+import { getUserPicture } from "@/services/user_picture";
 import { UserPicture } from "@/types/user_picture";
 import useSWR from "swr";
 import styles from '@/styles/pages/dashboard.module.scss';

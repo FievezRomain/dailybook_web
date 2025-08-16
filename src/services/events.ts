@@ -8,12 +8,12 @@ export const getEvents = async () : Promise<Event[]> => {
 
 export const createEvent = async (event: Partial<Event>) => {
     const res = await apiClient.post('/events', event);
-    return res.data;
+    return res;
 };
 
 export const updateEvent = async (id: number, event: Event) => {
     const res = await apiClient.put(`/events/${id}`, event);
-    return res.data;
+    return res;
 };
 
 export const deleteEvent = async (id: number) => {

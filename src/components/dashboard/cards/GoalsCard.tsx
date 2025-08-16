@@ -1,6 +1,6 @@
 "use client";
 
-import { getObjectifs } from "@/api/objectifs";
+import { getObjectifs } from "@/services/objectifs";
 import { ObjectiveList } from "@/components/objectives/ObjectiveList";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

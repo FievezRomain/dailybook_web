@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/index";
 import { Input } from "../ui/input";
@@ -9,8 +10,11 @@ import { X } from "lucide-react";
 import { StarRating } from "../ui/StarRating";
 import { AnimalSelector } from "../ui/AnimalSelector";
 import { Animal } from "@/types/animal";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getLocalDateString } from "@/utils/datesUtils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { deleteFromStorage, getPresignedUrl, uploadToStorage } from "@/services/storage";
+import { toast } from "sonner";
 
 type EventFormDrawerProps = {
   open: boolean;
@@ -43,6 +47,20 @@ export const EventFormDrawer = ({
   const eventtype = values.eventtype as keyof typeof titleMap;
   const eventTitle = titleMap[eventtype] || "Événement";
   const isEdit = !!initialEvent?.id;
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const allFiles = [
+    ...(initialEvent?.documents?.map(doc => ({ name: doc.name, fromS3: true })) || []),
+    ...selectedFiles.map(file => ({ name: file.name, file, fromS3: false }))
+  ];
+
+  const maxFiles = 3;
+  const filesCount = allFiles.length;
+  const filesLeft = maxFiles - filesCount;
+
+  const [removedLinkedFiles, setRemovedLinkedFiles] = useState<string[]>([]);
 
   // Détermine le titre et le bouton selon le mode
   const getTitle = () => {
@@ -80,6 +98,86 @@ export const EventFormDrawer = ({
     }
   }, [values.dateevent]);
 
+  useEffect(() => {
+    // Quand le drawer s'ouvre ou que l'event change, reset les fichiers sélectionnés
+    setSelectedFiles([]);
+
+    // Réinitialisation des fichiers supprimés
+    setRemovedLinkedFiles([]);
+  }, [open, initialEvent?.id]);
+
+
+  // Ajout de fichiers
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(
+      (file) =>
+        (file.type.startsWith("image/") || file.type === "application/pdf") &&
+        file.size <= 3 * 1024 * 1024
+    );
+    if (selectedFiles.length + validFiles.length > 3) {
+      alert("Vous pouvez sélectionner jusqu'à 3 fichiers maximum.");
+      return;
+    }
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    // Reset input pour pouvoir re-sélectionner le même fichier si besoin
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  // Suppression d’un fichier
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // À l’enregistrement
+  const handleSave = async (data: Partial<Event>) => {
+    const alreadyUploaded = initialEvent?.documents || [];
+    const uploadedNames: { name: string }[] = [...alreadyUploaded];
+    const filesToUpload: File[] = selectedFiles.filter(
+      file => !alreadyUploaded.some(doc => doc.name.endsWith(file.name))
+    );
+    const uploadedThisSession: string[] = [];
+
+    try {
+      // Upload uniquement les nouveaux fichiers
+      for (const file of filesToUpload) {
+        const fileName = `${Date.now()}_${file.name.replace(/\s/g, "_")}`;
+        const presignedUrl = await getPresignedUrl(fileName, file.type, "event");
+        await uploadToStorage(file, presignedUrl);
+        uploadedNames.push({ name: fileName });
+        uploadedThisSession.push(fileName);
+      }
+
+      // Suppression des fichiers retirés (en modification uniquement)
+      for (const fileName of removedLinkedFiles) {
+          await deleteFromStorage(fileName);
+      }
+
+      data.documents = uploadedNames;
+
+      if (isDuplicate && data.id) {
+        const { id, ...rest } = data;
+        await onSubmit(rest);
+      } else {
+        await onSubmit(data);
+      }
+    } catch (error) {
+      // Rollback : supprime les fichiers uploadés lors de cette session
+      await Promise.all(
+        uploadedThisSession.map(async (fileName) => {
+          try {
+            await deleteFromStorage(fileName);
+          } catch (e) {
+            toast.error("Une erreur est survenue lors du rollback de l'enregistrement des fichiers suite à une erreur du serveur.");
+            Sentry.captureException(e);
+          }
+        })
+      );
+      toast.error("Une erreur est survenue lors de l'enregistrement ou de l'upload des fichiers.");
+      Sentry.captureException(error);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col  rounded-2xl overflow-hidden">
@@ -101,40 +199,9 @@ export const EventFormDrawer = ({
         </DialogHeader>
         <form
           className="flex-1 overflow-y-auto p-6 flex flex-col gap-6"
-          onSubmit={handleSubmit((data) => {
-            // On retire l'id si duplication
-            if (isDuplicate && data.id) {
-              const { id, ...rest } = data;
-              onSubmit(rest);
-            } else {
-              onSubmit(data);
-            }
-          })}
+          onSubmit={handleSubmit(handleSave)}
         >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium mb-1">Nom *</label>
-                    <Input
-                        name="nom"
-                        value={values.nom || ""}
-                        onChange={handleChange}
-                        required
-                        autoFocus
-                        placeholder="Nom de l'événement"
-                    />
-                    {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">Date *</label>
-                    <Input
-                        type="date"
-                        name="dateevent"
-                        value={values.dateevent || getLocalDateString()}
-                        onChange={handleChange}
-                        required
-                    />
-                    {errors.dateevent && <p className="text-xs text-red-500">{errors.dateevent}</p>}
-                </div>
                 <div>
                     <label className="block text-sm font-medium mb-1">État</label>
                     <div className="flex w-fit overflow-hidden border border-muted rounded-xl">
@@ -176,6 +243,38 @@ export const EventFormDrawer = ({
                         </button>
                     </div>
                 </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Nom *</label>
+                    <Input
+                        name="nom"
+                        value={values.nom || ""}
+                        onChange={handleChange}
+                        required
+                        autoFocus
+                        placeholder="Nom de l'événement"
+                    />
+                    {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Date *</label>
+                    <Input
+                        type="date"
+                        name="dateevent"
+                        value={values.dateevent || getLocalDateString()}
+                        onChange={handleChange}
+                        required
+                    />
+                    {errors.dateevent && <p className="text-xs text-red-500">{errors.dateevent}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Heure de début</label>
+                    <Input
+                        type="time"
+                        name="heuredebutevent"
+                        value={values.heuredebutevent || ""}
+                        onChange={handleChange}
+                    />
+                </div>
                 {/* Sélection des animaux */}
                 {animals && (
                     <div className="md:col-span-2">
@@ -186,17 +285,11 @@ export const EventFormDrawer = ({
                             onChange={(ids) => setValues((prev) => ({ ...prev, animaux: ids }))}
                             showSelectAll={true}
                         />
+                        {errors.animaux && (
+                            <p className="text-xs text-red-500">{errors.animaux}</p>
+                        )}
                     </div>
                 )}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Heure de début</label>
-                    <Input
-                        type="time"
-                        name="heuredebutevent"
-                        value={values.heuredebutevent || ""}
-                        onChange={handleChange}
-                    />
-                </div>
                 <div>
                     <label className="block text-sm font-medium mb-1">Lieu</label>
                     <Input
@@ -239,10 +332,36 @@ export const EventFormDrawer = ({
                     </div>
                 )}
                 {eventtype === "depense" && (
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Catégorie de dépense</label>
-                        <Input name="categoriedepense" value={values.categoriedepense || ""} onChange={handleChange} />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Catégorie de dépense</label>
+                    <Select
+                      name="categoriedepense"
+                      value={values.categoriedepense || ""}
+                      onValueChange={value => setValues(prev => ({ ...prev, categoriedepense: value }))}
+                      required
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sélectionner une catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="alimentation">Alimentation</SelectItem>
+                        <SelectItem value="equipement">Équipement</SelectItem>
+                        <SelectItem value="accessoire">Accessoire</SelectItem>
+                        <SelectItem value="garde">Service de garde / Pension</SelectItem>
+                        <SelectItem value="formation">Formation</SelectItem>
+                        <SelectItem value="assurance">Assurance</SelectItem>
+                        <SelectItem value="balade">Balade</SelectItem>
+                        <SelectItem value="entrainement">Entraînement</SelectItem>
+                        <SelectItem value="concours">Concours</SelectItem>
+                        <SelectItem value="rdv">Rendez-vous</SelectItem>
+                        <SelectItem value="soins">Soin</SelectItem>
+                        <SelectItem value="autre">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.categoriedepense && (
+                      <p className="text-xs text-red-500">{errors.categoriedepense}</p>
+                    )}
+                  </div>
                 )}
                 {eventtype === "balade" && (
                 <>
@@ -252,7 +371,7 @@ export const EventFormDrawer = ({
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Date fin balade</label>
-                        <Input type="date" name="datefinbalade" value={values.datefinbalade || undefined} onChange={handleChange} />
+                        <Input type="date" name="datefinbalade" value={values.datefinbalade || ""} onChange={handleChange} />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Heure fin balade</label>
@@ -300,15 +419,67 @@ export const EventFormDrawer = ({
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Date fin soins</label>
-                            <Input type="date" name="datefinsoins" value={values.datefinsoins || undefined} onChange={handleChange} />
+                            <Input type="date" name="datefinsoins" value={values.datefinsoins || ""} onChange={handleChange} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Type de fréquence</label>
-                            <Input name="frequencetype" value={values.frequencetype || ""} onChange={handleChange} />
+                            <label className="block text-sm font-medium mb-1">Fréquence</label>
+                            <Select
+                                name="frequencevalue"
+                                value={values.frequencevalue || ""}
+                                onValueChange={value => setValues(prev => ({ ...prev, frequencevalue: value }))}
+                                required
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Sélectionner une fréquence" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="tlj2">Le jour J</SelectItem>
+                                    <SelectItem value="tlj">Tous les jours</SelectItem>
+                                    <SelectItem value="tls">Toutes les semaines</SelectItem>
+                                    <SelectItem value="tl2s">Toutes les 2 semaines</SelectItem>
+                                    <SelectItem value="tlm">Tous les mois</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.frequencevalue && (
+                                <p className="text-xs text-red-500">{errors.frequencevalue}</p>
+                            )}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Valeur de fréquence</label>
-                            <Input name="frequencevalue" value={values.frequencevalue || ""} onChange={handleChange} />
+                            <label className="block text-sm font-medium mb-1">Documents (PDF ou images, 3 fichiers maximum, 3 Mo maximum par fichier)</label>
+                            <Input
+                                ref={inputRef}
+                                type="file"
+                                name="documents"
+                                accept="application/pdf,image/*"
+                                multiple
+                                onChange={handleFileChange}
+                                disabled={filesLeft <= 0}
+                            />
+                                <ul className="mt-1 text-xs text-muted-foreground">
+                                    {allFiles.map((fileObj, idx) => (
+                                        <li key={idx} className="flex items-center gap-2">
+                                            {fileObj.name}
+                                            <button
+                                                type="button"
+                                                className="text-red-500 ml-2"
+                                                onClick={() => {
+                                                    if (fileObj.fromS3) {
+                                                        setRemovedLinkedFiles(prev => [...prev, fileObj.name]);
+                                                    } else {
+                                                        setSelectedFiles(prev => prev.filter((_, i) => i !== idx - (initialEvent?.documents?.length || 0)));
+                                                    }
+                                                }}
+                                                aria-label="Supprimer ce fichier"
+                                            >
+                                                Supprimer
+                                            </button>
+                                            {fileObj.fromS3 && <span className="ml-2 text-green-600">(déjà lié)</span>}
+                                        </li>
+                                    ))}
+                                </ul>
+                                {errors.documents && (
+                                    <p className="text-xs text-red-500">{errors.documents}</p>
+                                )}
                         </div>
                     </>
                 )}

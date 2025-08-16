@@ -3,7 +3,7 @@ import { EventFormDrawer } from "./EventFormDrawer";
 import { useEvents } from "@/context/EventContext";
 import { useUserContext } from "@/context/UserContext";
 import useSWR from "swr";
-import { getAnimals } from "@/api/animals";
+import { getAnimals } from "@/services/animals";
 import { enrichAnimals } from "@/utils/animalsUtils";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/react";

@@ -1,5 +1,5 @@
 import { withAuthPage } from '@/lib/auth/server/withAuthPage';
-import { getEvents } from '@/api/events';
+import { getEvents } from '@/services/events';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from '@/constants/cookies';
 import ObjectifsContent from './ObjectifsContent';

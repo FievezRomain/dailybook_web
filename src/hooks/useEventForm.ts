@@ -19,7 +19,7 @@ export function useEventForm(initial: Partial<Event> = {}) {
 
     // Fonctions pour gérer les changements de champs
     // et la validation des données
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setValues((v) => ({ ...v, [e.target.name]: e.target.value }));
     };
 
@@ -36,6 +36,12 @@ export function useEventForm(initial: Partial<Event> = {}) {
         if (!vals.nom) errs.nom = "Le nom est requis";
         if (!vals.eventtype) errs.eventtype = "Le type est requis";
         if (!vals.dateevent) errs.dateevent = "La date est requise";
+        if (vals.eventtype === "depense" && !vals.categoriedepense) {
+            errs.categoriedepense = "La catégorie de dépense est requise";
+        }
+        if (!vals.animaux || vals.animaux.length === 0) {
+            errs.animaux = "Sélectionnez au moins un animal";
+        }
         return errs;
     };
 

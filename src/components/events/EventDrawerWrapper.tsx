@@ -2,7 +2,7 @@ import { useEventDrawer } from "@/context/EventDrawerContext";
 import { EventDrawer } from "./EventDrawer";
 import { useUserContext } from "@/context/UserContext";
 import useSWR from "swr";
-import { getAnimals } from "@/api/animals";
+import { getAnimals } from "@/services/animals";
 import { filterAndEnrichAnimals } from "@/utils/animalsUtils";
 import { useEventDelete } from "@/context/EventDeleteContext";
 

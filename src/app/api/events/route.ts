@@ -5,7 +5,8 @@ export async function GET() {
     const data = await apiBack('eventsByUser', 'GET');
     return Response.json(data);
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 401 });
+    const status = getStatusFromError(error);
+    return new Response(JSON.stringify({ error: error.message }), { status });
   }
 }
 
@@ -15,6 +16,15 @@ export async function POST(req: Request) {
     const data = await apiBack('createEvent', 'POST', body);
     return Response.json(data);
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 401 });
+    const status = getStatusFromError(error);
+    return new Response(JSON.stringify({ error: error.message }), { status });
   }
+}
+
+function getStatusFromError(error: any) {
+  if (error.status) return error.status;
+  if (error.code === "UNAUTHORIZED" || error.message?.toLowerCase().includes("unauthorized")) return 401;
+  if (error.code === "NOT_FOUND" || error.message?.toLowerCase().includes("not found")) return 404;
+  if (error.code === "BAD_REQUEST" || error.message?.toLowerCase().includes("invalid")) return 400;
+  return 500;
 }

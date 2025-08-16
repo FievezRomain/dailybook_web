@@ -27,25 +27,37 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   // CRUD
   const addEvent = async (event: Partial<Event>) => {
-    await fetch("/api/events", {
+    const res = await fetch("/api/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(event),
     });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error?.error || "Erreur lors de la création de l'événement");
+    }
     await mutate(); // revalide
   };
 
   const updateEvent = async (id: number, event: Event) => {
-    await fetch(`/api/events/${id}`, {
+    const res = await fetch(`/api/events/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(event),
     });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error?.error || "Erreur lors de la mise à jour de l'événement");
+    }
     await mutate();
   };
 
   const deleteEvent = async (id: number) => {
-    await fetch(`/api/events/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error?.error || "Erreur lors de la suppression de l'événement");
+    }
     await mutate();
   };
 

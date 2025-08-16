@@ -4,7 +4,7 @@ import { Event, MappedEvent } from "@/types/event";
 import { EventCard } from "./EventCard";
 import { mapEvents } from "@/utils/eventsUtils";
 import useSWR from "swr";
-import { getAnimals } from "@/api/animals";
+import { getAnimals } from "@/services/animals";
 import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
 import { useUserContext } from "@/context/UserContext";

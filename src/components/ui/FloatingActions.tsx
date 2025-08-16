@@ -8,6 +8,7 @@ import { PawPrint } from "lucide-react";
 import { useUserContext } from "@/context/UserContext";
 import { useEventFormDrawer } from "@/context/EventFormDrawerContext";
 import React from "react";
+import { getLocalDateString } from "@/utils/datesUtils";
 
 type FloatingAction = {
   label: string;
@@ -37,7 +38,7 @@ export function FloatingActions({
 
   // Fonctions de création
   function onCreateEvent(type: string) {
-    openDrawer({ initialEvent: { eventtype: type, todisplay: true } });
+    openDrawer({ initialEvent: { eventtype: type, todisplay: true, dateevent: getLocalDateString(), ...(type === "soins" && { frequencevalue: 'tlj' }) } });
   }
   function onCreateAnimal() { alert("Créer un animal"); }
   function onCreateContact() { alert("Créer un contact"); }

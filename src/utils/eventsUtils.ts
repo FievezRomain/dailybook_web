@@ -16,8 +16,8 @@ export const filterUpcoming = (events: Event[]) => {
 };
 
 export const filterLate = (events: Event[]) => {
-  const now = new Date();
-  return events.filter(e => new Date(e.dateevent) < now && e.state === "À faire");
+  const today = startOfDay(new Date());
+  return events.filter(e => new Date(e.dateevent) < today && e.state === "À faire");
 };
 
 export const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {

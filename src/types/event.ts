@@ -31,7 +31,7 @@ export type Event = {
     frequencetype?: string;
     frequencevalue?: string;
     idparent?: string;
-    documents?: string[];
+    documents?: {name: string}[];
     issharedevent?: string;
     todisplay?: boolean;
 };

@@ -1,8 +1,8 @@
 'use client';
 
-import { getEvents } from "@/api/events";
+import { getEvents } from "@/services/events";
 import { Event } from "@/types/event";
-import { getObjectifs } from "@/api/objectifs";
+import { getObjectifs } from "@/services/objectifs";
 import { Objectifs } from "@/types/objectifs";
 import useSWR from "swr";
 import styles from '@/styles/components/dashboard.module.scss';

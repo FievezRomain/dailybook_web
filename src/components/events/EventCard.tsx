@@ -31,7 +31,7 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpen
     
     return (
         <Card
-            className="flex flex-col rounded-lg overflow-hidden border shadow-sm py-0 transition-transform hover:scale-[1.01] hover:shadow-xl dark:hover:shadow-black/50"
+            className="flex flex-col rounded-lg overflow-hidden border shadow-sm py-0 transition-transform hover:scale-[1.01] hover:shadow-md dark:hover:shadow-black/50"
             aria-label={`Carte d'événement ${event.nom}`}
         >
             {/* Header */}
