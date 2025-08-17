@@ -6,6 +6,7 @@ import { Animal } from "@/types/animal";
 import { Button } from "../ui";
 import { Skeleton } from "../ui/skeleton";
 import { getPresignedGetUrl } from "@/services/storage";
+import { useState } from "react";
 
 type EventDrawerProps = {
   open: boolean;
@@ -16,8 +17,23 @@ type EventDrawerProps = {
 };
 
 export const EventDrawer = ({ open, onClose, event, animals, onDelete }: EventDrawerProps) => {
-  const Icon = event.icon;
+    const Icon = event.icon;
+    const [signedUrls, setSignedUrls] = useState<{ [fileName: string]: { url: string, expiresAt: number } }>({});
 
+    const handleOpenFile = async (fileName: string) => {
+        const cached = signedUrls[fileName];
+        const now = Date.now();
+        if (cached && cached.expiresAt > now) {
+            window.open(cached.url, "_blank");
+        } else {
+            const url = await getPresignedGetUrl(fileName, "event", event.id);
+            setSignedUrls(prev => ({
+                ...prev,
+                [fileName]: { url, expiresAt: now + 4.5 * 60 * 1000 }
+            }));
+            window.open(url, "_blank");
+        }
+    };
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] rounded-2xl shadow-3xl p-0 overflow-hidden flex flex-col">
@@ -118,19 +134,13 @@ export const EventDrawer = ({ open, onClose, event, animals, onDelete }: EventDr
                                     <span>📄 {doc.name.split("/").pop()}</span>
                                     <Button
                                         className="text-text underline text-sm"
-                                        onClick={async () => {
-                                            const url = await getPresignedGetUrl(doc.name, "event", event.id);
-                                            window.open(url, "_blank");
-                                        }}
+                                        onClick={async () => await handleOpenFile(doc.name)}
                                     >
                                         Visualiser
                                     </Button>
                                     <Button
                                         className="text-text underline text-sm"
-                                        onClick={async () => {
-                                            const url = await getPresignedGetUrl(doc.name, "event", event.id);
-                                            window.open(url + "?download=true", "_blank");
-                                        }}
+                                        onClick={async () => await handleOpenFile(doc.name)}
                                     >
                                         Télécharger
                                     </Button>

@@ -2,18 +2,16 @@ import { useEventFormDrawer } from "@/context/EventFormDrawerContext";
 import { EventFormDrawer } from "./EventFormDrawer";
 import { useEvents } from "@/context/EventContext";
 import { useUserContext } from "@/context/UserContext";
-import useSWR from "swr";
-import { getAnimals } from "@/services/animals";
-import { enrichAnimals } from "@/utils/animalsUtils";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/react";
 import { isEventComplete } from "@/utils/eventsUtils";
+import { useAnimals } from "@/context/AnimalContext";
 
 export function EventFormDrawerWrapper() {
   const { drawer, closeDrawer } = useEventFormDrawer();
   const { addEvent, updateEvent } = useEvents();
   const { user } = useUserContext();
-  const { data: animals, isLoading: isLoadingAnimals } = useSWR(['animals'], () => getAnimals());
+  const { animals, isLoading: isLoadingAnimals } = useAnimals();
 
   async function handleSubmit(data: any) {
     try {
@@ -49,7 +47,7 @@ export function EventFormDrawerWrapper() {
       open={drawer.open}
       initialEvent={drawer.initialEvent}
       isDuplicate={drawer.isDuplicate}
-      animals={isLoadingAnimals || !user || !animals ? undefined : enrichAnimals(animals, user.uid)}
+      animals={isLoadingAnimals || !animals ? undefined : animals}
       onClose={closeDrawer}
       onSubmit={handleSubmit}
     />

@@ -12,5 +12,5 @@ export type Objective = {
   temporalityobjectif: string;
   datedebut: Date;
   datefin: Date;
-  sousEtapes: SousEtape[]; // ou un type plus structuré si besoin
+  sousEtapes: SousEtape[];
 };

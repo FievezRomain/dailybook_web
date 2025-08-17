@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { Note } from "@/types/note";
+import * as noteService from "@/services/notes";
+import * as Sentry from "@sentry/react";
 
 type NoteContextType = {
   notes: Note[] | undefined;
@@ -16,7 +18,9 @@ type NoteContextType = {
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  return await noteService.getNotes();
+};
 
 export function NoteProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/notes", fetcher);
@@ -24,26 +28,33 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
   const notes: Note[] | undefined = data;
 
   const addNote = async (note: Partial<Note>) => {
-    await fetch("/api/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(note),
-    });
-    await mutate();
+    try {
+      await noteService.addNote(note as any);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création de la note");
+    }
   };
 
   const updateNote = async (id: string, note: Partial<Note>) => {
-    await fetch(`/api/notes/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(note),
-    });
-    await mutate();
+    try {
+      await noteService.updateNote(id, note);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification de la note");
+    }
   };
 
   const deleteNote = async (id: string) => {
-    await fetch(`/api/notes/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await noteService.deleteNote(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression de la note");
+    }
   };
 
   const refresh = () => mutate();

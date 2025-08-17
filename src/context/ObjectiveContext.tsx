@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { Objective } from "@/types/objective";
+import * as objectiveService from "@/services/objectifs";
+import * as Sentry from "@sentry/react";
 
 type ObjectiveContextType = {
   objectives: Objective[] | undefined;
@@ -16,7 +18,9 @@ type ObjectiveContextType = {
 
 const ObjectiveContext = createContext<ObjectiveContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  return await objectiveService.getObjectifs();
+};
 
 export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/objectives", fetcher);
@@ -24,26 +28,33 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
   const objectives: Objective[] | undefined = data;
 
   const addObjective = async (objective: Partial<Objective>) => {
-    await fetch("/api/objectives", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(objective),
-    });
-    await mutate();
+    try {
+      await objectiveService.addObjectifs(objective as any);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création de l'objectif");
+    }
   };
 
   const updateObjective = async (id: string, objective: Partial<Objective>) => {
-    await fetch(`/api/objectives/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(objective),
-    });
-    await mutate();
+    try {
+      await objectiveService.updateObjectifs(id, objective);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification de l'objectif");
+    }
   };
 
   const deleteObjective = async (id: string) => {
-    await fetch(`/api/objectives/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await objectiveService.deleteObjectifs(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression de l'objectif");
+    }
   };
 
   const refresh = () => mutate();

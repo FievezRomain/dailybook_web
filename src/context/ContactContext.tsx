@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { Contact } from "@/types/contact";
+import * as contactService from "@/services/contacts";
+import * as Sentry from "@sentry/react";
 
 type ContactContextType = {
   contacts: Contact[] | undefined;
@@ -16,7 +18,9 @@ type ContactContextType = {
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  return await contactService.getContacts();
+};
 
 export function ContactProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/contacts", fetcher);
@@ -24,26 +28,33 @@ export function ContactProvider({ children }: { children: React.ReactNode }) {
   const contacts: Contact[] | undefined = data;
 
   const addContact = async (contact: Partial<Contact>) => {
-    await fetch("/api/contacts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact),
-    });
-    await mutate();
+    try {
+      await contactService.addContact(contact as any);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création du contact");
+    }
   };
 
   const updateContact = async (id: string, contact: Partial<Contact>) => {
-    await fetch(`/api/contacts/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact),
-    });
-    await mutate();
+    try {
+      await contactService.updateContact(id, contact);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification du contact");
+    }
   };
 
   const deleteContact = async (id: string) => {
-    await fetch(`/api/contacts/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await contactService.deleteContact(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression du contact");
+    }
   };
 
   const refresh = () => mutate();

@@ -1,25 +1,21 @@
 import apiClient from '@/lib/apiClient';
-import api from '@/lib/axios';
-import { Objectifs } from '@/types/objectifs';
+import { Objective } from '@/types/objective';
 
-export const getObjectifs = async () : Promise<Objectifs[]> => {
-    const res = await apiClient.get('/objectifs');
+export const getObjectifs = async () : Promise<Objective[]> => {
+    const res = await apiClient.get('/objectives');
     return res.data;
 };
 
-export const addObjectifs = async (objectif: Objectifs, token: string) => {
-    const res = await api.post('/evenements', objectif, {
-        headers: {
-        'x-access-token': token,
-        },
-    });
+export const addObjectifs = async (objectif: Objective) => {
+    const res = await apiClient.post('/objectives', objectif);
     return res.data;
 };
 
-export const deleteObjectifs = async (id: string, token: string) => {
-    await api.delete(`/evenements/${id}`, {
-        headers: {
-        'x-access-token': token,
-        },
-    });
+export const updateObjectifs = async (id: string, objectif: Partial<Objective>) => {
+    const res = await apiClient.put(`/objectives/${id}`, objectif);
+    return res.data;
+};
+
+export const deleteObjectifs = async (id: string) => {
+    await apiClient.delete(`/objectives/${id}`);
 };

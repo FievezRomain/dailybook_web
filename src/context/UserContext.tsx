@@ -2,13 +2,7 @@
 
 import { createContext, useContext } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
-type User = {
-  name: string;
-  email: string;
-  uid: string;
-  isPremium: boolean;
-};
+import { User } from "@/types/user";
 
 type UserContextType = {
   user: User | undefined;

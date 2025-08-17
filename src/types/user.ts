@@ -1,7 +1,8 @@
-export type User={
-        email: string;
-        prenom: string;
-        id: string;
-        expotoken: string;
-        timezone: string;
-}
+export type User = {
+  name: string;
+  email: string;
+  uid: string;
+  expotoken: string;
+  timezone: string;
+  isPremium: boolean;
+};

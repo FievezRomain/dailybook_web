@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { Group } from "@/types/group";
+import * as groupService from "@/services/groups";
+import * as Sentry from "@sentry/react";
 
 type GroupContextType = {
   groups: Group[] | undefined;
@@ -16,7 +18,9 @@ type GroupContextType = {
 
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  return await groupService.getGroups();
+};
 
 export function GroupProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/groups", fetcher);
@@ -24,26 +28,33 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
   const groups: Group[] | undefined = data;
 
   const addGroup = async (group: Partial<Group>) => {
-    await fetch("/api/groups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(group),
-    });
-    await mutate();
+    try {
+      await groupService.addGroup(group as any);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création du groupe");
+    }
   };
 
   const updateGroup = async (id: string, group: Partial<Group>) => {
-    await fetch(`/api/groups/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(group),
-    });
-    await mutate();
+    try {
+      await groupService.updateGroup(id, group);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification du groupe");
+    }
   };
 
   const deleteGroup = async (id: string) => {
-    await fetch(`/api/groups/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await groupService.deleteGroup(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression du groupe");
+    }
   };
 
   const refresh = () => mutate();

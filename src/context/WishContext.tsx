@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { Wish } from "@/types/wish";
+import * as wishService from "@/services/wishs";
+import * as Sentry from "@sentry/react";
 
 type WishContextType = {
   wishes: Wish[] | undefined;
@@ -16,7 +18,9 @@ type WishContextType = {
 
 const WishContext = createContext<WishContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  return await wishService.getWishs();
+};
 
 export function WishProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/wishes", fetcher);
@@ -24,26 +28,33 @@ export function WishProvider({ children }: { children: React.ReactNode }) {
   const wishes: Wish[] | undefined = data;
 
   const addWish = async (wish: Partial<Wish>) => {
-    await fetch("/api/wishes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(wish),
-    });
-    await mutate();
+    try {
+      await wishService.addWish(wish as any);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création du souhait");
+    }
   };
 
   const updateWish = async (id: string, wish: Partial<Wish>) => {
-    await fetch(`/api/wishes/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(wish),
-    });
-    await mutate();
+    try {
+      await wishService.updateWish(id, wish);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification du souhait");
+    }
   };
 
   const deleteWish = async (id: string) => {
-    await fetch(`/api/wishes/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await wishService.deleteWish(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression du souhait");
+    }
   };
 
   const refresh = () => mutate();

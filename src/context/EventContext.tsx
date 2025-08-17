@@ -4,6 +4,8 @@ import { createContext, useContext } from "react";
 import useSWR from "swr";
 import { mapEvents } from "@/utils/eventsUtils";
 import { Event, MappedEvent } from "@/types/event";
+import * as Sentry from "@sentry/react";
+import * as eventService from "@/services/events";
 
 type EventContextType = {
   events: MappedEvent[] | undefined;
@@ -17,48 +19,46 @@ type EventContextType = {
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  const data = await eventService.getEvents();
+  return data;
+};
 
 export function EventProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/events", fetcher);
 
   // Mappe les events dès la récupération
-  const events: MappedEvent[] | undefined = data ? mapEvents(data) : undefined;
+  const events: MappedEvent[] | undefined = data && !isLoading ? mapEvents(data) : undefined;
 
   // CRUD
   const addEvent = async (event: Partial<Event>) => {
-    const res = await fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-    });
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error?.error || "Erreur lors de la création de l'événement");
+    try {
+      await eventService.createEvent(event);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création de l'événement");
     }
-    await mutate(); // revalide
   };
 
   const updateEvent = async (id: number, event: Event) => {
-    const res = await fetch(`/api/events/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-    });
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error?.error || "Erreur lors de la mise à jour de l'événement");
+    try {
+      await eventService.updateEvent(id, event);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la mise à jour de l'événement");
     }
-    await mutate();
   };
 
   const deleteEvent = async (id: number) => {
-    const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error?.error || "Erreur lors de la suppression de l'événement");
+    try {
+      await eventService.deleteEvent(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression de l'événement");
     }
-    await mutate();
   };
 
   const refresh = () => mutate();

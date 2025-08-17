@@ -1,8 +1,12 @@
 'use client';
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import useSWR from "swr";
 import { Animal } from "@/types/animal";
+import { useUserContext } from "./UserContext";
+import { enrichAnimals } from "@/utils/animalsUtils";
+import * as animalService from "@/services/animals";
+import * as Sentry from "@sentry/react";
 
 type AnimalContextType = {
   animals: Animal[] | undefined;
@@ -16,34 +20,54 @@ type AnimalContextType = {
 
 const AnimalContext = createContext<AnimalContextType | undefined>(undefined);
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async () => {
+  const data = await animalService.getAnimals();
+  return data;
+};
 
 export function AnimalProvider({ children }: { children: React.ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR("/api/animals", fetcher);
 
-  const animals: Animal[] | undefined = data;
+  const { user, isLoading: isUserLoading } = useUserContext();
+
+  const [animals, setAnimals] = useState<Animal[] | undefined>(undefined);
+
+  useEffect(() => {
+    if (data && user && !isLoading && !isUserLoading) {
+      enrichAnimals(data, user.uid).then(setAnimals);
+    } else {
+      setAnimals(undefined);
+    }
+  }, [data, user, isLoading, isUserLoading]);
 
   const addAnimal = async (animal: Partial<Animal>) => {
-    await fetch("/api/animals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(animal),
-    });
-    await mutate();
+    try {
+      await animalService.createAnimal(animal);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la création de l'animal");
+    }
   };
 
   const updateAnimal = async (id: string, animal: Partial<Animal>) => {
-    await fetch(`/api/animals/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(animal),
-    });
-    await mutate();
+    try {
+      await animalService.updateAnimal(id, animal);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification de l'animal");
+    }
   };
 
   const deleteAnimal = async (id: string) => {
-    await fetch(`/api/animals/${id}`, { method: "DELETE" });
-    await mutate();
+    try {
+      await animalService.deleteAnimal(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression de l'animal");
+    }
   };
 
   const refresh = () => mutate();
@@ -52,7 +76,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     <AnimalContext.Provider
       value={{
         animals,
-        isLoading,
+        isLoading: isLoading || isUserLoading,
         isError: error,
         addAnimal,
         updateAnimal,
