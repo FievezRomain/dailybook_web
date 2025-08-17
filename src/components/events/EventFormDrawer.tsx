@@ -180,7 +180,7 @@ export const EventFormDrawer = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col  rounded-2xl overflow-hidden">
+      <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col rounded-2xl overflow-hidden">
         <DialogHeader
           className="px-6 py-4 flex flex-row items-center justify-between"
           style={{ backgroundColor: headerBg }}

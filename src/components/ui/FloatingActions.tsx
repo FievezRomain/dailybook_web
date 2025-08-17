@@ -9,6 +9,7 @@ import { useUserContext } from "@/context/UserContext";
 import { useEventFormDrawer } from "@/context/EventFormDrawerContext";
 import React from "react";
 import { getLocalDateString } from "@/utils/datesUtils";
+import { useAnimalFormDrawer } from "@/context/AnimalFormDrawerContext";
 
 type FloatingAction = {
   label: string;
@@ -35,17 +36,30 @@ export function FloatingActions({
 
   // Utilise le context pour ouvrir le formulaire
   const { openDrawer } = useEventFormDrawer();
+  const { openDrawer: openAnimalDrawer } = useAnimalFormDrawer();
 
   // Fonctions de création
   function onCreateEvent(type: string) {
     openDrawer({ initialEvent: { eventtype: type, todisplay: true, dateevent: getLocalDateString(), ...(type === "soins" && { frequencevalue: 'tlj' }) } });
   }
-  function onCreateAnimal() { alert("Créer un animal"); }
-  function onCreateContact() { alert("Créer un contact"); }
-  function onCreateWish() { alert("Créer un souhait"); }
-  function onCreateNote() { alert("Créer une note"); }
-  function onCreateObjective() { alert("Créer un objectif"); }
-  function onCreateGroup() { alert("Créer un groupe"); }
+  function onCreateAnimal() {
+    openAnimalDrawer({ initialAnimal: { datenaissance: getLocalDateString(), email: user?.email } });
+  }
+  function onCreateContact() {
+    alert("Créer un contact");
+  }
+  function onCreateWish() {
+    alert("Créer un souhait");
+  }
+  function onCreateNote() {
+    alert("Créer une note");
+  }
+  function onCreateObjective() {
+    alert("Créer un objectif");
+  }
+  function onCreateGroup() {
+    alert("Créer un groupe");
+  }
 
   const eventTypes = [
     "depense",

@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const body = await req.json();
   try {
-    const data = await apiBack('equideByUser', 'POST', body);
+    const data = await apiBack('createEquide', 'POST', body);
     return Response.json(data);
   } catch (error: any) {
     const status = getStatusFromError(error);
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   const body = await req.json();
   try {
-    const data = await apiBack('xxxByUser', 'PUT', body);
+    const data = await apiBack('modifyEquide', 'PUT', body);
     return Response.json(data);
   } catch (error: any) {
     const status = getStatusFromError(error);
@@ -36,7 +36,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const body = await req.json();
   try {
-    const data = await apiBack('xxxByUser', 'DELETE', body);
+    const data = await apiBack('deleteEquide', 'DELETE', body);
     return Response.json(data);
   } catch (error: any) {
     const status = getStatusFromError(error);

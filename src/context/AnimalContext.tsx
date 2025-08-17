@@ -13,8 +13,8 @@ type AnimalContextType = {
   isLoading: boolean;
   isError: any;
   addAnimal: (animal: Partial<Animal>) => Promise<void>;
-  updateAnimal: (id: string, animal: Partial<Animal>) => Promise<void>;
-  deleteAnimal: (id: string) => Promise<void>;
+  updateAnimal: (id: number, animal: Partial<Animal>) => Promise<void>;
+  deleteAnimal: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
@@ -50,7 +50,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateAnimal = async (id: string, animal: Partial<Animal>) => {
+  const updateAnimal = async (id: number, animal: Partial<Animal>) => {
     try {
       await animalService.updateAnimal(id, animal);
       await mutate();
@@ -60,7 +60,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteAnimal = async (id: string) => {
+  const deleteAnimal = async (id: number) => {
     try {
       await animalService.deleteAnimal(id);
       await mutate();

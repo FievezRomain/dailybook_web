@@ -11,11 +11,11 @@ export const createAnimal = async (animal: Partial<Animal>) => {
     return res.data;
 };
 
-export const updateAnimal = async (id: string, animal: Partial<Animal>) => {
+export const updateAnimal = async (id: number, animal: Partial<Animal>) => {
     const res = await apiClient.put(`/animals/${id}`, animal);
     return res.data;
 };
 
-export const deleteAnimal = async (id: string) => {
+export const deleteAnimal = async (id: number) => {
     await apiClient.delete(`/animals/${id}`);
 };
