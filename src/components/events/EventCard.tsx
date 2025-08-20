@@ -97,6 +97,7 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpen
                                 onUpdateAnimalImage={onUpdateAnimalImage}
                                 width={36}
                                 height={36}
+                                classNames="border-2 border-background rounded-full"
                             />
                         ))
                     )}

@@ -30,3 +30,8 @@
 .fc-button:not([disabled]):focus {
   background: rgba(var(--color-primary), 0.8) !important;
 }
+
+/* Affichage d'un indicateur de sélection */
+.fc-event {
+  cursor: pointer !important;
+}
