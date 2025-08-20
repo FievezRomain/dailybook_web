@@ -4,7 +4,6 @@ import { Skeleton } from "../ui/skeleton";
 import { EventCard } from "./EventCard";
 import { MappedEvent } from "@/types/event";
 import { Animal } from "@/types/animal";
-import { User } from "@/types/user";
 
 type EventCardWrapperProps = {
   event: MappedEvent;
@@ -12,16 +11,8 @@ type EventCardWrapperProps = {
   [key: string]: any;
 };
 
-export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, ...props }: EventCardWrapperProps) {
-  const [enrichedAnimals, setEnrichedAnimals] = useState<Animal[] | undefined>(undefined);
-
-  useEffect(() => {
-    if (animals) {
-      setEnrichedAnimals(filterAnimals(event, animals));
-    } else {
-      setEnrichedAnimals(undefined);
-    }
-  }, [event, animals]);
+export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, onUpdateAnimalImage, ...props }: EventCardWrapperProps) {
+  const enrichedAnimals = animals ? filterAnimals(event, animals) : undefined;
 
   if (!enrichedAnimals) {
     return (
@@ -39,6 +30,7 @@ export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete,
       onComplete={onComplete}
       onOpenDrawer={onOpenDrawer}
       onDuplicate={onDuplicate}
+      onUpdateAnimalImage={onUpdateAnimalImage}
       event={event}
       animals={enrichedAnimals}
       {...props}

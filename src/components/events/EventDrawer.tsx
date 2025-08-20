@@ -1,12 +1,13 @@
 import { X, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import Image from "next/image";
 import { MappedEvent } from "@/types/event";
 import { Animal } from "@/types/animal";
 import { Button } from "../ui";
 import { Skeleton } from "../ui/skeleton";
 import { getPresignedGetUrl } from "@/services/storage";
 import { useState } from "react";
+import { ImageSigned } from "@/types/image";
+import { AnimalAvatar } from "../animals/AnimalAvatar";
 
 type EventDrawerProps = {
   open: boolean;
@@ -14,9 +15,10 @@ type EventDrawerProps = {
   event: MappedEvent;
   animals: Animal[] | undefined; // undefined = en cours de chargement
   onDelete: () => void;
+  onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
 };
 
-export const EventDrawer = ({ open, onClose, event, animals, onDelete }: EventDrawerProps) => {
+export const EventDrawer = ({ open, onClose, event, animals, onDelete, onUpdateAnimalImage }: EventDrawerProps) => {
     const Icon = event.icon;
     const [signedUrls, setSignedUrls] = useState<{ [fileName: string]: { url: string, expiresAt: number } }>({});
 
@@ -88,28 +90,15 @@ export const EventDrawer = ({ open, onClose, event, animals, onDelete }: EventDr
                                         <Skeleton key={i} className="w-9 h-9 rounded-full" />
                                     ))
                                 ) : (
-                                    animals.map((animal) =>
-                                        animal.image ? 
-                                            (
-                                                <Image
-                                                    key={animal.id}
-                                                    src={animal.image}
-                                                    alt={animal.nom}
-                                                    width={40}
-                                                    height={40}
-                                                    className="rounded-full border-2 border-background"
-                                                />
-                                            ) 
-                                            : 
-                                            (
-                                                <div
-                                                    key={animal.id}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-semibold uppercase"
-                                                >
-                                                    {animal.nom.charAt(0)}
-                                                </div>
-                                            )
-                                    )
+                                    animals.map((animal) => (
+                                        <AnimalAvatar
+                                            key={animal.id}
+                                            animal={animal}
+                                            onUpdateAnimalImage={onUpdateAnimalImage}
+                                            width={40}
+                                            height={40}
+                                        />
+                                    ))
                                 )}
                             </div>
                         </div>

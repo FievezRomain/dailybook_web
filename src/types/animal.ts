@@ -1,3 +1,5 @@
+import { ImageSigned } from "./image";
+
 export type Animal = {
     id: number;
     nom: string;
@@ -22,5 +24,7 @@ export type Animal = {
     informations?: string;
     datearrivee?: string;
     datedepart?: string;
+
+    imageSigned?: ImageSigned;
 
 }

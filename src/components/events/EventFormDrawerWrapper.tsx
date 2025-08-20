@@ -11,7 +11,7 @@ export function EventFormDrawerWrapper() {
   const { drawer, closeDrawer } = useEventFormDrawer();
   const { addEvent, updateEvent } = useEvents();
   const { user } = useUserContext();
-  const { animals, isLoading: isLoadingAnimals } = useAnimals();
+  const { animals, isLoading: isLoadingAnimals, updateAnimalImage } = useAnimals();
 
   async function handleSubmit(data: any) {
     try {
@@ -50,6 +50,7 @@ export function EventFormDrawerWrapper() {
       animals={isLoadingAnimals || !animals ? undefined : animals}
       onClose={closeDrawer}
       onSubmit={handleSubmit}
+      onUpdateAnimalImage={updateAnimalImage}
     />
   );
 }

@@ -1,16 +1,20 @@
 import { Animal } from "@/types/animal";
 import { Skeleton } from "./skeleton";
 import { FaPlus, FaUsers } from "react-icons/fa";
+import { ImageSigned } from "@/types/image";
+import { AnimalAvatar } from "../animals/AnimalAvatar";
 
 function AnimalSelector({
   animals,
   selectedIds,
   onChange,
+  onUpdateAnimalImage,
   showSelectAll = false,
 }: {
   animals: Animal[] | undefined;
   selectedIds: number[];
   onChange: (ids: number[]) => void;
+  onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void; 
   showSelectAll?: boolean;
 }) {
   const allSelected =
@@ -71,6 +75,7 @@ function AnimalSelector({
       ) : (
         animals.map((animal) => {
           const selected = selectedIds.includes(animal.id);
+
           return (
             <button
               key={animal.id}
@@ -112,20 +117,15 @@ function AnimalSelector({
                     style={{
                       width: 64,
                       height: 64,
-                      background: animal.image ? "#232323" : "#222",
+                      background: animal.imageSigned ? "#232323" : "#222",
                     }}
                   >
-                    {animal.image ? (
-                      <img
-                        src={animal.image}
-                        alt={animal.nom}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <span className="text-2xl text-white font-semibold">
-                        {animal.nom.charAt(0)}
-                      </span>
-                    )}
+                    <AnimalAvatar
+                      animal={animal}
+                      width={40}
+                      height={40}
+                      onUpdateAnimalImage={onUpdateAnimalImage}
+                    />
                     {/* Icône groupe si provenance === "group" */}
                     {animal.provenance === "group" && (
                       <span

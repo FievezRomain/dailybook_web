@@ -7,6 +7,7 @@ import { useUserContext } from "./UserContext";
 import { enrichAnimals } from "@/utils/animalsUtils";
 import * as animalService from "@/services/animals";
 import * as Sentry from "@sentry/react";
+import { ImageSigned } from "@/types/image";
 
 type AnimalContextType = {
   animals: Animal[] | undefined;
@@ -15,6 +16,7 @@ type AnimalContextType = {
   addAnimal: (animal: Partial<Animal>) => Promise<void>;
   updateAnimal: (id: number, animal: Partial<Animal>) => Promise<void>;
   deleteAnimal: (id: number) => Promise<void>;
+  updateAnimalImage: (id: number, imageObj: ImageSigned) => void;
   refresh: () => void;
 };
 
@@ -39,6 +41,12 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
       setAnimals(undefined);
     }
   }, [data, user, isLoading, isUserLoading]);
+
+  const updateAnimalImage = (id: number, imageObj: ImageSigned) => {
+    setAnimals(prev =>
+      prev?.map(a => (a.id === id ? { ...a, imageSigned: imageObj } : a))
+    );
+  };
 
   const addAnimal = async (animal: Partial<Animal>) => {
     try {
@@ -81,6 +89,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
         addAnimal,
         updateAnimal,
         deleteAnimal,
+        updateAnimalImage,
         refresh,
       }}
     >

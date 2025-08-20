@@ -4,9 +4,10 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui";
 import { MoreVertical } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import Image from "next/image";
 import { CustomCheckbox } from "../ui/CustomCheckbox";
 import { useState } from "react";
+import { ImageSigned } from "@/types/image";
+import { AnimalAvatar } from "../animals/AnimalAvatar";
 
 interface EventCardProps {
     event: MappedEvent;
@@ -16,9 +17,10 @@ interface EventCardProps {
     onComplete: () => void;
     onOpenDrawer: (event:MappedEvent) => void;
     onDuplicate: () => void;
+    onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
 }
 
-export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate }: EventCardProps) => {
+export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, onUpdateAnimalImage }: EventCardProps) => {
     const [completed, setCompleted] = useState<boolean>(event.state === "Terminé");
 
     const handleComplete = () => {
@@ -88,25 +90,15 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpen
                             <Skeleton key={i} className="w-9 h-9 rounded-full" />
                         ))
                     ) : (
-                        animals.map((animal) =>
-                            animal.image ? (
-                                <Image
-                                    key={animal.id}
-                                    src={animal.image}
-                                    alt={animal.nom}
-                                    width={36}
-                                    height={36}
-                                    className="rounded-full border-2 border-background"
-                                />
-                            ) : (
-                                <div
-                                    key={animal.id}
-                                    className="w-9 h-9 flex items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-semibold uppercase"
-                                >
-                                    {animal.nom.charAt(0)}
-                                </div>
-                            )
-                        )
+                        animals.map((animal) => (
+                            <AnimalAvatar
+                                key={animal.id}
+                                animal={animal}
+                                onUpdateAnimalImage={onUpdateAnimalImage}
+                                width={36}
+                                height={36}
+                            />
+                        ))
                     )}
                 </div>
             </CardContent>

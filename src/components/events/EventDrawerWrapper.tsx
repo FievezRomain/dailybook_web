@@ -8,7 +8,7 @@ import { useAnimals } from "@/context/AnimalContext";
 export function EventDrawerWrapper() {
     const { drawer, closeDrawer } = useEventDrawer();
     const { user } = useUserContext();
-    const { animals, isLoading: isLoadingAnimals } = useAnimals();
+    const { animals, isLoading: isLoadingAnimals, updateAnimalImage } = useAnimals();
 
     // Gestion de l'ouverture du dialog pour confirmer la suppression d'un event
     const { openDelete } = useEventDelete();
@@ -22,6 +22,7 @@ export function EventDrawerWrapper() {
             event={drawer.event}
             animals={isLoadingAnimals || !user || !animals ? undefined : filterAnimals(drawer.event, animals)}
             onDelete={() => {openDelete(drawer.event!); closeDrawer();}}
+            onUpdateAnimalImage={updateAnimalImage}
         />
     );
 }

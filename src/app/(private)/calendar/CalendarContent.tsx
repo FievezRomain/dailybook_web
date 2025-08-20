@@ -1,97 +1,93 @@
 'use client';
 
-import { getEvents } from "@/services/events";
-import { Event } from "@/types/event";
-import { getObjectifs } from "@/services/objectifs";
-import { Objectifs } from "@/types/objectifs";
-import useSWR from "swr";
-import styles from '@/styles/components/dashboard.module.scss';
-import { Calendar } from "@/components/ui/calendar";
-import React from "react";
-import { DayPicker } from "react-day-picker";
+import { useState, useMemo } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import { useEvents } from "@/context/EventContext";
+import { EventList } from "@/components/events/EventList";
+import { Input } from "@/components/ui/input";
+import frLocale from "@fullcalendar/core/locales/fr";
+import "@/styles/pages/calendar.css";
 
-import { useState } from "react";
+export default function CalendarContent() {
+  const { events, isLoading: isLoadingEvents } = useEvents();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [filter, setFilter] = useState<string>("");
 
-type Props = {
-        email: string;
-        initialEvents: Event[];
-        initialObjectifs: Objectifs[];
-        token: string;
-};
+  // Format events for FullCalendar
+  const calendarEvents = useMemo(() =>
+    events?.map(e => ({
+      title: e.nom,
+      date: e.dateevent,
+      id: String(e.id),
+      color: `rgb(var(${e.color}))`,
+      extendedProps: { ...e }
+    })) ?? [],
+    [events]
+  );
 
-let count_day = 0; // Nombre d'événements sur le jour sélectionné
+  // Filtrage des événements selon la date sélectionnée et le filtre texte
+  const filteredEvents = useMemo(() => {
+    if (!events) return [];
+    return events.filter(event => {
+      const eventDate = new Date(event.dateevent);
+      eventDate.setHours(0, 0, 0, 0);
+      const isSameDay = selectedDate
+        ? eventDate.getTime() === new Date(selectedDate).setHours(0, 0, 0, 0)
+        : true;
+      const matchesFilter = filter
+        ? event.nom?.toLowerCase().includes(filter.toLowerCase()) ||
+          event.eventtype?.toLowerCase().includes(filter.toLowerCase())
+        : true;
+      return isSameDay && matchesFilter;
+    });
+  }, [events, selectedDate, filter]);
 
+  return (
+    <div className="flex flex-col md:flex-row gap-8 p-6 h-[calc(100vh-80px)]">
+      {/* Calendrier à gauche */}
+      <div className="md:w-2/3 w-full flex flex-col h-full">
+        <div className="flex-1 w-full h-full bg-card rounded-2xl p-6 shadow">
+          <FullCalendar
+            plugins={[dayGridPlugin]}
+            initialView="dayGridMonth"
+            events={calendarEvents}
+            eventClick={info => setSelectedDate(new Date(info.event.startStr))}
+            selectable={true}
+            height="100%"
+            contentHeight="100%"
+            locale={frLocale}
+            eventClassNames="rounded-lg"
+            viewClassNames="bg-card"
+            dayCellClassNames="rounded-lg"
+          />
+        </div>
+      </div>
 
-export default function CalendarContent({ initialEvents, token, email }: Props) {
-        const { data: events = initialEvents, isLoading: isLoadingEvents } = useSWR(['events', token], () => getEvents(token));
-        const [date, setDate] = React.useState<Date | undefined>(new Date())
-        const [selected, setSelected] = useState<Date>();
-
-        return (
-                <div className={styles.page_body}>
-                        <div className={styles.page_container /*Partie gauche*/}>
-                                <div className={styles.page_section}>
-                                        <input type="text" name="filter"></input>
-
-                                        <div className={styles.page_desc}>
-                                                <h2>
-                                                        {selected ? `Date : ${selected.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` : "choisissez une date."}
-                                                </h2>
-                                        </div>
-
-                                        {isLoadingEvents && <p>Chargement des événements...</p>}
-                                        <DayPicker
-                                                animate
-                                                mode="single"
-                                                selected={selected}
-                                                onSelect={setSelected}
-                                        /*mode="single"
-                                        selected={date}
-                                        onSelect={setDate}
-                                        className="rounded-md border shadow-sm"
-                                        captionLayout="dropdown"*/
-                                        />
-
-                                </div>
-                                <div className={styles.tab_large /*Partie droite*/}>
-                                        <div className={styles.tab_header}>
-                                                <span></span>
-                                                <p>Evénements</p>
-                                                <span></span>
-                                        </div>
-                                        <div className={styles.tab_content}>
-                                                <ul>
-                                                        {events.map((event: Event) => {
-                                                                const eventDate = new Date(event.dateevent);
-                                                                eventDate.setHours(0, 0, 0, 0);
-                                                                if (eventDate.getTime() === selected?.getTime()) {
-                                                                        count_day++;
-                                                                        return (
-                                                                                <li key={event.id}>
-                                                                                        <div className={styles.activity}>
-                                                                                                <div className={styles.activity_header}>
-                                                                                                        <img src="/globe.svg" alt="icone" />
-                                                                                                        <h2>{event.eventtype}</h2>
-                                                                                                        <input type="checkbox" name="checkbox" />
-                                                                                                </div>
-                                                                                                <div className={styles.activity_body}>
-                                                                                                        <div>
-                                                                                                                <h2>{event.nom}</h2>
-                                                                                                                <p>{eventDate.toLocaleDateString()}</p>
-                                                                                                        </div>
-                                                                                                        <h3>VOIR LES DETAILS</h3>
-                                                                                                </div>
-                                                                                        </div>
-                                                                                </li>
-                                                                        );
-                                                                }
-                                                                return null;
-                                                        })}
-                                                        {count_day === 0 && <h3>Vous n'avez aucun événement à cette date.</h3>}
-                                                </ul>
-                                        </div>
-                                </div>
-                        </div>
-                </div>
-        );
+      {/* Liste des événements à droite */}
+      <div className="md:w-1/3 w-full flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">
+            {selectedDate
+              ? selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+              : "Sélectionnez une date"}
+          </h2>
+        </div>
+        <Input
+          type="text"
+          placeholder="Filtrer par nom ou type..."
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          className="mb-4"
+        />
+        <div className="overflow-y-auto max-h-[60vh] px-2 py-2">
+          {isLoadingEvents ? (
+            <p className="text-muted-foreground">Chargement des événements...</p>
+          ) : (
+            <EventList events={filteredEvents} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

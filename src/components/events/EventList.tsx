@@ -18,7 +18,7 @@ export const EventList = ({ events }: { events: Event[] }) => {
   }
 
   // Récupération des animaux
-  const { animals, isLoading: isLoadingAnimals } = useAnimals();
+  const { animals, isLoading: isLoadingAnimals, updateAnimalImage } = useAnimals();
 
   // Gestion de l'ouverture du drawer de visualisation d'event
   const { openDrawer: openDrawerDetail } = useEventDrawer();
@@ -54,6 +54,7 @@ export const EventList = ({ events }: { events: Event[] }) => {
             onDelete={() => openDelete(event)}
             onEdit={() => handleEdit(event)}
             onDuplicate={() => handleDuplicate(event)}
+            onUpdateAnimalImage={updateAnimalImage}
             onOpenDrawer={() => openDrawerDetail(event)}
           />
         </div>

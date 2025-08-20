@@ -15,6 +15,7 @@ import { getLocalDateString } from "@/utils/datesUtils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { deleteFromStorage, getPresignedUrl, uploadToStorage } from "@/services/storage";
 import { toast } from "sonner";
+import { ImageSigned } from "@/types/image";
 
 type EventFormDrawerProps = {
   open: boolean;
@@ -24,6 +25,7 @@ type EventFormDrawerProps = {
   initialEvent?: Partial<Event>;
   isSubmitting?: boolean;
   isDuplicate?: boolean;
+  onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
 };
 
 export const EventFormDrawer = ({
@@ -34,6 +36,7 @@ export const EventFormDrawer = ({
   initialEvent,
   isSubmitting = false,
   isDuplicate = false,
+  onUpdateAnimalImage,
 }: EventFormDrawerProps) => {
   const {
     values,
@@ -284,6 +287,7 @@ export const EventFormDrawer = ({
                             selectedIds={values.animaux || []}
                             onChange={(ids) => setValues((prev) => ({ ...prev, animaux: ids }))}
                             showSelectAll={true}
+                            onUpdateAnimalImage={onUpdateAnimalImage}
                         />
                         {errors.animaux && (
                             <p className="text-xs text-red-500">{errors.animaux}</p>
