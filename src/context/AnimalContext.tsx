@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import useSWR from "swr";
-import { Animal } from "@/types/animal";
+import { Animal, AnimalBodyPicture } from "@/types/animal";
 import { useUserContext } from "./UserContext";
 import { enrichAnimals } from "@/utils/animalsUtils";
 import * as animalService from "@/services/animals";
 import * as Sentry from "@sentry/react";
 import { ImageSigned } from "@/types/image";
+import { getPresignedGetUrl } from "@/services/storage";
 
 type AnimalContextType = {
   animals: Animal[] | undefined;
@@ -17,6 +18,7 @@ type AnimalContextType = {
   updateAnimal: (id: number, animal: Partial<Animal>) => Promise<void>;
   deleteAnimal: (id: number) => Promise<void>;
   updateAnimalImage: (id: number, imageObj: ImageSigned) => void;
+  getBodyPicturesAnimal: (id: number) => Promise<AnimalBodyPicture[]>;
   refresh: () => void;
 };
 
@@ -46,6 +48,23 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     setAnimals(prev =>
       prev?.map(a => (a.id === id ? { ...a, imageSigned: imageObj } : a))
     );
+  };
+
+  const getBodyPicturesAnimal = async (id: number): Promise<AnimalBodyPicture[]> => {
+    try {
+      const bodyPictures = await animalService.getBodyPicturesAnimal(id);
+      return await Promise.all(
+        bodyPictures.map(async (pic) => ({
+          id: pic.id,
+          filename: pic.filename,
+          url: await getPresignedGetUrl(pic.filename, "body", id),
+          date: pic.date_enregistrement,
+        }))
+      );
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la récupération des images de l'évolution du physique de l'animal");
+    }
   };
 
   const addAnimal = async (animal: Partial<Animal>) => {
@@ -90,6 +109,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
         updateAnimal,
         deleteAnimal,
         updateAnimalImage,
+        getBodyPicturesAnimal,
         refresh,
       }}
     >

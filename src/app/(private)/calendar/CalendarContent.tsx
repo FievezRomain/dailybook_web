@@ -44,10 +44,10 @@ export default function CalendarContent() {
   }, [events, selectedDate, filter]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-6 h-[calc(100vh-80px)]">
+    <div className="flex flex-col md:flex-row gap-8 p-7 h-[calc(100vh-80px)]">
       {/* Calendrier à gauche */}
       <div className="md:w-2/3 w-full flex flex-col h-full">
-        <div className="flex-1 w-full h-full bg-card rounded-2xl p-6 shadow">
+        <div className="flex-1 w-full h-full bg-card rounded-2xl p-6 shadow-sm dark:shadow-lg dark:shadow-black/30">
           <FullCalendar
             plugins={[dayGridPlugin]}
             initialView="dayGridMonth"

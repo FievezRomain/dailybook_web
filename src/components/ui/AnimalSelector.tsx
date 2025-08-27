@@ -10,19 +10,22 @@ function AnimalSelector({
   onChange,
   onUpdateAnimalImage,
   showSelectAll = false,
+  singleSelect = false,
 }: {
   animals: Animal[] | undefined;
   selectedIds: number[];
   onChange: (ids: number[]) => void;
   onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void; 
   showSelectAll?: boolean;
+  singleSelect?: boolean;
 }) {
   const allSelected =
     animals && animals.length > 0 && selectedIds.length === animals.length;
 
   return (
     <div className="flex gap-4 overflow-x-auto py-2">
-      {showSelectAll && animals && (
+      {/* Affiche le bouton "Tous" seulement si singleSelect est false */}
+      {showSelectAll && !singleSelect && animals && (
         <button
           type="button"
           className="flex flex-col items-center focus:outline-none"
@@ -81,11 +84,13 @@ function AnimalSelector({
               key={animal.id}
               type="button"
               onClick={() =>
-                onChange(
-                  selected
-                    ? selectedIds.filter((id) => id !== animal.id)
-                    : [...selectedIds, animal.id]
-                )
+                singleSelect
+                  ? onChange([animal.id])
+                  : onChange(
+                      selected
+                        ? selectedIds.filter((id) => id !== animal.id)
+                        : [...selectedIds, animal.id]
+                    )
               }
               className="flex flex-col items-center focus:outline-none"
               tabIndex={0}
@@ -122,8 +127,8 @@ function AnimalSelector({
                   >
                     <AnimalAvatar
                       animal={animal}
-                      width={40}
-                      height={40}
+                      width={64}
+                      height={64}
                       onUpdateAnimalImage={onUpdateAnimalImage}
                     />
                     {/* Icône groupe si provenance === "group" */}

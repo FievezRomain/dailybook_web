@@ -1,8 +1,13 @@
 import apiClient from '@/lib/apiClient';
-import { Animal } from '@/types/animal';
+import { Animal, AnimalBodyPicture } from '@/types/animal';
 
 export const getAnimals = async () : Promise<Animal[]> => {
     const res = await apiClient.get('/animals');
+    return res.data.rows;
+};
+
+export const getBodyPicturesAnimal = async (id: number) : Promise<AnimalBodyPicture[]> => {
+    const res = await apiClient.get(`/animals/${id}`);
     return res.data.rows;
 };
 

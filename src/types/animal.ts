@@ -27,4 +27,14 @@ export type Animal = {
 
     imageSigned?: ImageSigned;
 
+    bodyPictures?: AnimalBodyPicture[];
+
 }
+
+export type AnimalBodyPicture = {
+    id: number;
+    filename: string;
+    date_enregistrement?: string;
+    id_animal?: number;
+    url?: string; // URL signée, peut être ajoutée après récupération
+};

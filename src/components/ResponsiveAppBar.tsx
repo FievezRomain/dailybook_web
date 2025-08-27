@@ -39,7 +39,7 @@ export default function ResponsiveAppBar() {
                                                         <Link href="/performances/objectifs" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Objectifs</Link>
                                                         <Link href="/performances/statistiques" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Statistiques</Link>
                                                         <Link href="/calendar" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Calendrier</Link>
-                                                        <Link href="/animaux" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Animaux</Link>
+                                                        <Link href="/animals" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Animaux</Link>
                                                         <Link href="/souhaits" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Souhaits</Link>
                                                         <Link href="/notes" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Notes</Link>
                                                         <Link href="/contacts" className='px-2 py-1.5 hover:bg-accent hover:text-primary'>Contacts</Link>
@@ -113,7 +113,7 @@ export default function ResponsiveAppBar() {
                                                 <NavigationMenuItem>
                                                         <NavigationMenuLink asChild>
                                                                 <Link
-                                                                        href="/animaux"
+                                                                        href="/animals"
                                                                         className={`text-sm font-medium hover:text-primary ${pathname === '/animaux' && 'bg-accent text-primary'
                                                                                 }`}
                                                                 >

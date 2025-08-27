@@ -63,7 +63,7 @@ const GridCards = () => {
     };
 
     return (
-        <div style={{ padding: '2rem 0rem' }}>
+        <div className="pt-8 pb-8 px-0">
             <div className="flex justify-end mb-2">
                 <Button
                     onClick={resetLayout}
