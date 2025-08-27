@@ -37,16 +37,29 @@ export function filterAnimals(event: MappedEvent, animals: Animal[]): Animal[] {
   return linked;
 }
 
-export function getValidAnimalImage(animal: Animal, updateAnimalImage?: (id: number, imageObj: ImageSigned) => void): string | undefined {
-  if (!animal.image || !animal.imageSigned || typeof animal.imageSigned === "string") return undefined;
-  const { url, expiresAt } = animal.imageSigned;
+export function getValidAnimalImage(
+  imageSigned: ImageSigned | undefined,
+  filename: string,
+  idAnimal: number,
+  ressourceType: "animal" | "animal_body",
+  updateImage?: (idAnimal: number, imageObj: ImageSigned) => void,
+  updateBodyPictureImage?: (idAnimal: number, bodyPictureId: number, imageObj: ImageSigned) => void,
+  bodyPictureId?: number
+): string | undefined {
+  if (!imageSigned || typeof imageSigned === "string") return undefined;
+
+  const { url, expiresAt } = imageSigned;
   if (expiresAt > Date.now()) {
     return url;
   }
-  // URL expirée, lance le refresh en arrière-plan
-  getPresignedGetUrl(animal.image, "animal", animal.id).then(newUrl => {
+
+  getPresignedGetUrl(filename, ressourceType, idAnimal).then(newUrl => {
     const newImageObj: ImageSigned = { url: newUrl, expiresAt: Date.now() + 4.5 * 60 * 1000 };
-    if (updateAnimalImage) updateAnimalImage(animal.id, newImageObj);
+    if (ressourceType === "animal" && updateImage) {
+      updateImage(idAnimal, newImageObj);
+    } else if (ressourceType === "animal_body" && updateBodyPictureImage && bodyPictureId !== undefined) {
+      updateBodyPictureImage(idAnimal, bodyPictureId, newImageObj);
+    }
   });
-  return undefined; // On retourne undefined, le composant affichera un Skeleton ou une valeur par défaut le temps que l'image se charge
+  return undefined;
 }

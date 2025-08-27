@@ -118,11 +118,10 @@ function AnimalSelector({
                   }}
                 >
                   <div
-                    className="rounded-full flex items-center justify-center overflow-hidden relative"
+                    className="rounded-full flex items-center justify-center overflow-hidden relative bg-card"
                     style={{
                       width: 64,
                       height: 64,
-                      background: animal.imageSigned ? "#232323" : "#222",
                     }}
                   >
                     <AnimalAvatar

@@ -10,6 +10,7 @@ import { EventDrawerWrapper } from "../events/EventDrawerWrapper";
 import { EventDeleteProvider } from "@/context/EventDeleteContext";
 import { AnimalFormDrawerProvider } from "@/context/AnimalFormDrawerContext";
 import { AnimalFormDrawerWrapper } from "../animals/AnimalFormDrawerWrapper";
+import { AnimalDeleteProvider } from "@/context/AnimalDeleteContext";
 
 export function PrivateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,24 +20,26 @@ export function PrivateLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AnimalFormDrawerProvider>
-      <EventFormDrawerProvider>
-        <EventDeleteProvider>
-          <EventDrawerProvider>
-            <ResponsiveAppBar />
-            {children}
-            <EventFormDrawerWrapper />
-            <EventDrawerWrapper />
-            <AnimalFormDrawerWrapper />
-            {/* Affiche le FAB sauf sur certaines pages */}
-            {!hideFabOnPaths.some((path) => pathname.startsWith(path)) && (
-              <FloatingActions
-                currentPath={pathname}
-                hideOnPaths={hideFabOnPaths}
-              />
-            )}
-          </EventDrawerProvider>
-        </EventDeleteProvider>
-      </EventFormDrawerProvider>
+      <AnimalDeleteProvider>
+        <EventFormDrawerProvider>
+          <EventDeleteProvider>
+            <EventDrawerProvider>
+              <ResponsiveAppBar />
+              {children}
+              <EventFormDrawerWrapper />
+              <EventDrawerWrapper />
+              <AnimalFormDrawerWrapper />
+              {/* Affiche le FAB sauf sur certaines pages */}
+              {!hideFabOnPaths.some((path) => pathname.startsWith(path)) && (
+                <FloatingActions
+                  currentPath={pathname}
+                  hideOnPaths={hideFabOnPaths}
+                />
+              )}
+            </EventDrawerProvider>
+          </EventDeleteProvider>
+        </EventFormDrawerProvider>
+      </AnimalDeleteProvider>
     </AnimalFormDrawerProvider>
   );
 }

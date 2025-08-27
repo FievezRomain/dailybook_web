@@ -18,6 +18,7 @@ type AnimalContextType = {
   updateAnimal: (id: number, animal: Partial<Animal>) => Promise<void>;
   deleteAnimal: (id: number) => Promise<void>;
   updateAnimalImage: (id: number, imageObj: ImageSigned) => void;
+  updateBodyPictureImage: (animalId: number, bodyPictureId: number, imageObj: ImageSigned) => void;
   getBodyPicturesAnimal: (id: number) => Promise<AnimalBodyPicture[]>;
   refresh: () => void;
 };
@@ -50,16 +51,35 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const updateBodyPictureImage = (animalId: number, bodyPictureId: number, imageObj: ImageSigned) => {
+    setAnimals(prev =>
+      prev?.map(a =>
+        a.id === animalId
+          ? {
+              ...a,
+              bodyPictures: a.bodyPictures?.map(bp =>
+                bp.id === bodyPictureId ? { ...bp, imageSigned: imageObj } : bp
+              ),
+            }
+          : a
+      )
+    );
+  };
+
   const getBodyPicturesAnimal = async (id: number): Promise<AnimalBodyPicture[]> => {
     try {
       const bodyPictures = await animalService.getBodyPicturesAnimal(id);
       return await Promise.all(
-        bodyPictures.map(async (pic) => ({
+        bodyPictures.map(async (pic): Promise<AnimalBodyPicture> => {
+        const imageSigned = await getPresignedGetUrl(pic.filename, "body", id);
+        return {
           id: pic.id,
           filename: pic.filename,
-          url: await getPresignedGetUrl(pic.filename, "body", id),
-          date: pic.date_enregistrement,
-        }))
+          imageSigned: {url: imageSigned, expiresAt: Date.now() + 4.5 * 60 * 1000},
+          date_enregistrement: pic.date_enregistrement,
+          id_animal: pic.id_animal,
+        };
+      })
       );
     } catch (err: any) {
       Sentry.captureException(err);
@@ -109,6 +129,7 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
         updateAnimal,
         deleteAnimal,
         updateAnimalImage,
+        updateBodyPictureImage,
         getBodyPicturesAnimal,
         refresh,
       }}

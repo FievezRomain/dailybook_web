@@ -14,7 +14,7 @@ export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, class
 
   return (
     <>
-      {animal.imageSigned && !hasError ? (
+      {animal.imageSigned && animal.image && !hasError ? (
         <Image
           src={animal.imageSigned.url}
           alt={animal.nom}
@@ -23,13 +23,15 @@ export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, class
           height={height}
           onError={() => {
             setHasError(true);
-            getValidAnimalImage(animal, onUpdateAnimalImage);
+            getValidAnimalImage(animal.imageSigned, animal.image ?? "", animal.id, 'animal', onUpdateAnimalImage, undefined, undefined);
           }}
         />
       ) : hasError ? (
         <Skeleton className="w-full h-full rounded-full" />
       ) : (
-        <span className="text-2xl text-white font-semibold">{animal.nom.charAt(0)}</span>
+        <div className="w-full h-full rounded-full flex items-center justify-center shadow-sm" style={{ width: `${width}px`, height: `${height}px` }}>
+          <span className="text-2xl font-semibold">{animal.nom.charAt(0)}</span>
+        </div>
       )}
     </>
   );

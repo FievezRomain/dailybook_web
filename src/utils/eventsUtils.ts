@@ -54,7 +54,7 @@ export const mapEventData = (event: Event): MappedEvent => {
 
   let delay;
   const eventDate = startOfDay(new Date(event.dateevent));
-  if (isBefore(eventDate, startOfDay(new Date()))) {
+  if (isBefore(eventDate, startOfDay(new Date())) && event.state === "À faire") {
     delay = differenceInDays(startOfDay(new Date()), eventDate);
   }
 
