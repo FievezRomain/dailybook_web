@@ -45,7 +45,7 @@ export function AnimalGeneralCard({ animal, isLoading, onEdit, onDelete }: Anima
             <div><strong>Numéro d'identification :</strong> {animal.numeroidentification ?? ""}</div>
             <div><strong>Robe :</strong> {animal.robe ?? ""}</div>
             <div><strong>Sexe :</strong> {animal.sexe ?? ""}</div>
-            {animal.datedeces && <div><strong>Date de décès :</strong> {animal.datedeces}</div>}
+            {animal.datedeces && <div><strong>Date de décès :</strong> {new Date(animal.datedeces).toLocaleDateString()}</div>}
         </>
       )}
     </div>

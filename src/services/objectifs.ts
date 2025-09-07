@@ -6,16 +6,16 @@ export const getObjectifs = async () : Promise<Objective[]> => {
     return res.data;
 };
 
-export const addObjectifs = async (objectif: Objective) => {
+export const addObjectifs = async (objectif: Partial<Objective>) => {
     const res = await apiClient.post('/objectives', objectif);
     return res.data;
 };
 
-export const updateObjectifs = async (id: string, objectif: Partial<Objective>) => {
+export const updateObjectifs = async (id: number, objectif: Partial<Objective>) => {
     const res = await apiClient.put(`/objectives/${id}`, objectif);
     return res.data;
 };
 
-export const deleteObjectifs = async (id: string) => {
+export const deleteObjectifs = async (id: number) => {
     await apiClient.delete(`/objectives/${id}`);
 };

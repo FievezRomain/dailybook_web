@@ -6,16 +6,16 @@ export const getGroups = async (): Promise<Group[]> => {
     return res.data;
 };
 
-export const addGroup = async (group: Group) => {
+export const addGroup = async (group: Partial<Group>) => {
     const res = await apiClient.post('/groups', group);
     return res.data;
 };
 
-export const updateGroup = async (id: string, group: Partial<Group>) => {
+export const updateGroup = async (id: number, group: Partial<Group>) => {
     const res = await apiClient.put(`/groups/${id}`, group);
     return res.data;
 };
 
-export const deleteGroup = async (id: string) => {
+export const deleteGroup = async (id: number) => {
     await apiClient.delete(`/groups/${id}`);
 };

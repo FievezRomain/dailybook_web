@@ -1,35 +1,29 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { Objective } from "@/types/objective";
+import { useObjectivesData } from "@/hooks/useObjectivesData";
 import * as objectiveService from "@/services/objectifs";
 import * as Sentry from "@sentry/react";
+import { Objective } from "@/types/objective";
 
 type ObjectiveContextType = {
   objectives: Objective[] | undefined;
   isLoading: boolean;
   isError: any;
   addObjective: (objective: Partial<Objective>) => Promise<void>;
-  updateObjective: (id: string, objective: Partial<Objective>) => Promise<void>;
-  deleteObjective: (id: string) => Promise<void>;
+  updateObjective: (id: number, objective: Partial<Objective>) => Promise<void>;
+  deleteObjective: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const ObjectiveContext = createContext<ObjectiveContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  return await objectiveService.getObjectifs();
-};
-
 export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/objectives", fetcher);
-
-  const objectives: Objective[] | undefined = data;
+  const { objectives, isLoading, isError, mutate } = useObjectivesData();
 
   const addObjective = async (objective: Partial<Objective>) => {
     try {
-      await objectiveService.addObjectifs(objective as any);
+      await objectiveService.addObjectifs(objective);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -37,7 +31,7 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateObjective = async (id: string, objective: Partial<Objective>) => {
+  const updateObjective = async (id: number, objective: Partial<Objective>) => {
     try {
       await objectiveService.updateObjectifs(id, objective);
       await mutate();
@@ -47,7 +41,7 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteObjective = async (id: string) => {
+  const deleteObjective = async (id: number) => {
     try {
       await objectiveService.deleteObjectifs(id);
       await mutate();
@@ -64,7 +58,7 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
       value={{
         objectives,
         isLoading,
-        isError: error,
+        isError,
         addObjective,
         updateObjective,
         deleteObjective,

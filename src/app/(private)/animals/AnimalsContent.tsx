@@ -42,32 +42,30 @@ export default function AnimalsContent() {
   const [bodyPics, setBodyPics] = useState<AnimalBodyPicture[]>([]);
   const [isLoadingBodyPics, setIsLoadingBodyPics] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchBodyPics() {
-      setIsLoadingBodyPics(true);
-      setBodyPics([]);
-      if (!selectedAnimal) {
-        setIsLoadingBodyPics(false);
-        return;
-      }
-      try {
-        if(isPremium === false) {
-          setBodyPics([]);
-        } else {
-          const pics = await getBodyPicturesAnimal(selectedAnimal.id);
-          if (!cancelled) setBodyPics(pics);
-        }
-      } catch {
-        if (!cancelled) setBodyPics([]);
-      } finally {
-        if (!cancelled) setIsLoadingBodyPics(false);
-      }
+  // Fonction unique pour fetch et refresh
+  const fetchBodyPics = async () => {
+    setIsLoadingBodyPics(true);
+    setBodyPics([]);
+    if (!selectedAnimal) {
+      setIsLoadingBodyPics(false);
+      return;
     }
+    try {
+      if(isPremium === false) {
+        setBodyPics([]);
+      } else {
+        const pics = await getBodyPicturesAnimal(selectedAnimal.id);
+        setBodyPics(pics);
+      }
+    } catch {
+      setBodyPics([]);
+    } finally {
+      setIsLoadingBodyPics(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBodyPics();
-    return () => {
-      cancelled = true;
-    };
   }, [selectedAnimal, getBodyPicturesAnimal]);
 
   // --- Events médicaux ---
@@ -123,8 +121,8 @@ export default function AnimalsContent() {
                 isLoading={isLoadingBodyPics}
                 bodyPics={bodyPics}
                 isPremium={isPremium}
-                onAddPhoto={() => console.log("ajout photo")}
-                onUpdateBodyPictureImage={updateBodyPictureImage}
+                onChange={fetchBodyPics}
+                onUpdateUrlBodyPictureImage={updateBodyPictureImage}
             />
 
             {/* 3. Infos physiques — prend le reste pour égaliser la hauteur */}

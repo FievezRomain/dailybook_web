@@ -8,6 +8,7 @@ import { EventList } from "@/components/events/EventList";
 import { Input } from "@/components/ui/input";
 import frLocale from "@fullcalendar/core/locales/fr";
 import "@/styles/pages/calendar.css";
+import { mapEvents } from "@/utils/eventsUtils";
 
 export default function CalendarContent() {
   const { events, isLoading: isLoadingEvents } = useEvents();
@@ -16,7 +17,7 @@ export default function CalendarContent() {
 
   // Format events for FullCalendar
   const calendarEvents = useMemo(() =>
-    events?.map(e => ({
+    mapEvents(events || []).map(e => ({
       title: e.nom,
       date: e.dateevent,
       id: String(e.id),

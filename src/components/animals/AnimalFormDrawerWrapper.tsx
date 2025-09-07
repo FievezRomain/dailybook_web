@@ -15,7 +15,7 @@ export function AnimalFormDrawerWrapper() {
     try {
       // Suppression S3 si demandé
       if (drawer.initialAnimal?.image && data.image === undefined) {
-        await deleteFromStorage(drawer.initialAnimal.image);
+        await deleteFromStorage(drawer.initialAnimal.image, "animal", drawer.initialAnimal.id!);
         imageName = undefined;
       }
 

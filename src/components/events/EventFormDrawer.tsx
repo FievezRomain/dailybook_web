@@ -153,7 +153,7 @@ export const EventFormDrawer = ({
 
       // Suppression des fichiers retirés (en modification uniquement)
       for (const fileName of removedLinkedFiles) {
-          await deleteFromStorage(fileName);
+          await deleteFromStorage(fileName, "event", initialEvent?.id!);
       }
 
       data.documents = uploadedNames;
@@ -169,7 +169,7 @@ export const EventFormDrawer = ({
       await Promise.all(
         uploadedThisSession.map(async (fileName) => {
           try {
-            await deleteFromStorage(fileName);
+            await deleteFromStorage(fileName, "event", initialEvent?.id!);
           } catch (e) {
             toast.error("Une erreur est survenue lors du rollback de l'enregistrement des fichiers suite à une erreur du serveur.");
             Sentry.captureException(e);

@@ -1,14 +1,13 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { mapEvents } from "@/utils/eventsUtils";
-import { Event, MappedEvent } from "@/types/event";
-import * as Sentry from "@sentry/react";
+import { useEventsData } from "@/hooks/useEventsData";
 import * as eventService from "@/services/events";
+import * as Sentry from "@sentry/react";
+import { Event } from "@/types/event";
 
 type EventContextType = {
-  events: MappedEvent[] | undefined;
+  events: Event[] | undefined;
   isLoading: boolean;
   isError: any;
   addEvent: (event: Partial<Event>) => Promise<void>;
@@ -19,18 +18,9 @@ type EventContextType = {
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  const data = await eventService.getEvents();
-  return data;
-};
-
 export function EventProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/events", fetcher);
+  const { events, isLoading, isError, mutate } = useEventsData();
 
-  // Mappe les events dès la récupération
-  const events: MappedEvent[] | undefined = data && !isLoading ? mapEvents(data) : undefined;
-
-  // CRUD
   const addEvent = async (event: Partial<Event>) => {
     try {
       await eventService.createEvent(event);
@@ -47,7 +37,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
-      throw new Error(err?.message || "Erreur lors de la mise à jour de l'événement");
+      throw new Error(err?.message || "Erreur lors de la modification de l'événement");
     }
   };
 
@@ -68,7 +58,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       value={{
         events,
         isLoading,
-        isError: error,
+        isError,
         addEvent,
         updateEvent,
         deleteEvent,

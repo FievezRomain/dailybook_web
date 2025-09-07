@@ -40,8 +40,10 @@ export async function uploadToStorage(file: File, presignedUrl: string): Promise
 
 /**
  * Supprime un fichier du système de stockage
+ * @param fileName Nom du fichier à supprimer
+ * @param ressourceType Type de ressource (par exemple, "image", "document", etc.)
+ * @param ressourceId ID de la ressource associée (par exemple, l'ID d'un événement)
  */
-export async function deleteFromStorage(fileName: string) {
-  // Appelle ton backend (via apiBack ou apiClient) pour supprimer le fichier sur le système de stockage
-  await apiClient.delete(`/storage?fileName=${encodeURIComponent(fileName)}`);
+export async function deleteFromStorage(fileName: string, ressourceType: string, ressourceId: number) {
+  await apiClient.delete(`/storage?fileName=${encodeURIComponent(fileName)}&ressourceType=${ressourceType}&ressourceId=${ressourceId}`);
 }

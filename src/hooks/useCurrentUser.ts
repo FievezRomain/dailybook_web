@@ -1,16 +1,16 @@
 'use client';
 
+import { User } from '@/types/user';
+import * as userService from "@/services/user";
 import useSWR from 'swr';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export function useCurrentUser() {
-  const { data, error, isLoading } = useSWR('/api/me', fetcher);
+  const { data, error, isLoading } = useSWR<User>('/api/me', userService.getUser);
 
   return {
     user: data,
     isLoading,
     isError: error,
-    isPremium: false
+    isPremium: data?.isPremium || false,
   };
 }

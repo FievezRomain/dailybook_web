@@ -22,6 +22,7 @@ export async function GET() {
         name: decodedToken.name || decodedToken.email,
         email: decodedToken.email,
         uid: decodedToken.uid,
+        picture: decodedToken.picture || null,
       }),
       { status: 200 }
     );

@@ -42,9 +42,10 @@ export function SignedImage({
     <Image
       src={imageSigned.url}
       alt={alt || ""}
-      className={classNames ? classNames : rounded ? "w-full h-full object-cover rounded-full" : "w-full h-full object-cover rounded-xl"}
+      className={classNames ? classNames : rounded ? "w-full h-full object-contain rounded-full" : "w-full h-full object-contain rounded-xl"}
       width={width}
       height={height}
+      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
       onError={() => {
         setHasError(true);
         if (onErrorRefresh) onErrorRefresh();

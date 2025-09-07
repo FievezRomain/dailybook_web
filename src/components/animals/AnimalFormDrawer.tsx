@@ -106,7 +106,7 @@ export function AnimalFormDrawer({ open, onClose, onSubmit, isSubmitting = false
                     // Suppression S3 à l'enregistrement
                     if (removeS3Image && initialAnimal?.image) {
                         try {
-                            await deleteFromStorage(initialAnimal.image);
+                            await deleteFromStorage(initialAnimal.image, 'animal', initialAnimal.id!);
                             vals.image = undefined;
                         } catch (e) {
                             toast.error("Erreur lors de la suppression de l'image sur le serveur.");

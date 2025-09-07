@@ -22,14 +22,14 @@ export function AnimalHealthCard({ isLoading, events }: AnimalHealthCardProps) {
   );
 
   return (
-    <div className="bg-card rounded-xl shadow-sm dark:shadow-lg dark:shadow-black/30 p-6 h-full overflow-hidden flex flex-col max-h-[120dvh]">
+    <div className="bg-card rounded-xl shadow-sm dark:shadow-lg dark:shadow-black/30 p-6 h-full overflow-hidden flex flex-col max-h-[140dvh]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Carnet de santé</h2>
         <div className="flex gap-2">
           {FILTERS.map(f => (
             <button
               key={f.value}
-              className={`px-3 py-1 rounded text-sm transition ${
+              className={`px-3 py-1 rounded text-sm transition cursor-pointer ${
                 filter === f.value
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground"

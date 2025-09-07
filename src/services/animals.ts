@@ -7,7 +7,17 @@ export const getAnimals = async () : Promise<Animal[]> => {
 };
 
 export const getBodyPicturesAnimal = async (id: number) : Promise<AnimalBodyPicture[]> => {
-    const res = await apiClient.get(`/animals/${id}`);
+    const res = await apiClient.get(`/animals/${id}/body`);
+    return res.data.rows;
+};
+
+export const addBodyPicturesAnimal = async (id: number, filename: string) : Promise<AnimalBodyPicture[]> => {
+    const res = await apiClient.post(`/animals/${id}/body`, { idanimal: id, filename });
+    return res.data.rows;
+};
+
+export const deleteBodyPicturesAnimal = async (id: number) : Promise<AnimalBodyPicture[]> => {
+    const res = await apiClient.delete(`/animals/${id}/body`);
     return res.data.rows;
 };
 

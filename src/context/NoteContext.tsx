@@ -1,35 +1,29 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { Note } from "@/types/note";
+import { useNotesData } from "@/hooks/useNotesData";
 import * as noteService from "@/services/notes";
 import * as Sentry from "@sentry/react";
+import { Note } from "@/types/note";
 
 type NoteContextType = {
   notes: Note[] | undefined;
   isLoading: boolean;
   isError: any;
   addNote: (note: Partial<Note>) => Promise<void>;
-  updateNote: (id: string, note: Partial<Note>) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
+  updateNote: (id: number, note: Partial<Note>) => Promise<void>;
+  deleteNote: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  return await noteService.getNotes();
-};
-
 export function NoteProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/notes", fetcher);
-
-  const notes: Note[] | undefined = data;
+  const { notes, isLoading, isError, mutate } = useNotesData();
 
   const addNote = async (note: Partial<Note>) => {
     try {
-      await noteService.addNote(note as any);
+      await noteService.addNote(note);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -37,7 +31,7 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateNote = async (id: string, note: Partial<Note>) => {
+  const updateNote = async (id: number, note: Partial<Note>) => {
     try {
       await noteService.updateNote(id, note);
       await mutate();
@@ -47,7 +41,7 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteNote = async (id: string) => {
+  const deleteNote = async (id: number) => {
     try {
       await noteService.deleteNote(id);
       await mutate();
@@ -64,7 +58,7 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
       value={{
         notes,
         isLoading,
-        isError: error,
+        isError,
         addNote,
         updateNote,
         deleteNote,

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import useSWR from "swr";
+import { useAnimalsData } from "@/hooks/useAnimalsData";
 import { Animal, AnimalBodyPicture } from "@/types/animal";
 import { useUserContext } from "./UserContext";
 import { enrichAnimals } from "@/utils/animalsUtils";
@@ -20,21 +20,16 @@ type AnimalContextType = {
   updateAnimalImage: (id: number, imageObj: ImageSigned) => void;
   updateBodyPictureImage: (animalId: number, bodyPictureId: number, imageObj: ImageSigned) => void;
   getBodyPicturesAnimal: (id: number) => Promise<AnimalBodyPicture[]>;
+  addBodyPicturesAnimal: (id: number, filename: string) => Promise<void>;
+  deleteBodyPicturesAnimal: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const AnimalContext = createContext<AnimalContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  const data = await animalService.getAnimals();
-  return data;
-};
-
 export function AnimalProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/animals", fetcher);
-
+  const { animals: data, isError: error, isLoading, mutate } = useAnimalsData();
   const { user, isLoading: isUserLoading } = useUserContext();
-
   const [animals, setAnimals] = useState<Animal[] | undefined>(undefined);
 
   useEffect(() => {
@@ -87,6 +82,26 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteBodyPicturesAnimal = async (id: number) => {
+    try {
+      await animalService.deleteBodyPicturesAnimal(id);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la suppression de l'image de l'évolution du physique de l'animal");
+    }
+  };
+
+  const addBodyPicturesAnimal = async (id: number, filename: string) => {
+    try {
+      await animalService.addBodyPicturesAnimal(id, filename);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de l'ajout de l'image de l'évolution du physique de l'animal");
+    }
+  };
+
   const addAnimal = async (animal: Partial<Animal>) => {
     try {
       await animalService.createAnimal(animal);
@@ -131,6 +146,8 @@ export function AnimalProvider({ children }: { children: React.ReactNode }) {
         updateAnimalImage,
         updateBodyPictureImage,
         getBodyPicturesAnimal,
+        addBodyPicturesAnimal,
+        deleteBodyPicturesAnimal,
         refresh,
       }}
     >

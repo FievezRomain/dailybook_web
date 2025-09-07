@@ -6,16 +6,16 @@ export const getContacts = async (): Promise<Contact[]> => {
     return res.data;
 };
 
-export const addContact = async (contact: Contact) => {
+export const addContact = async (contact: Partial<Contact>) => {
     const res = await apiClient.post('/contacts', contact);
     return res.data;
 };
 
-export const updateContact = async (id: string, contact: Partial<Contact>) => {
+export const updateContact = async (id: number, contact: Partial<Contact>) => {
     const res = await apiClient.put(`/contacts/${id}`, contact);
     return res.data;
 };
 
-export const deleteContact = async (id: string) => {
+export const deleteContact = async (id: number) => {
     await apiClient.delete(`/contacts/${id}`);
 };

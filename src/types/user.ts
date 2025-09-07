@@ -1,3 +1,5 @@
+import { ImageSigned } from "./image";
+
 export type User = {
   name: string;
   email: string;
@@ -5,4 +7,7 @@ export type User = {
   expotoken: string;
   timezone: string;
   isPremium: boolean;
+  image?: string;
+
+  imageSigned?: ImageSigned;
 };

@@ -1,35 +1,29 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { Wish } from "@/types/wish";
+import { useWishsData } from "@/hooks/useWishsData";
 import * as wishService from "@/services/wishs";
 import * as Sentry from "@sentry/react";
+import { Wish } from "@/types/wish";
 
 type WishContextType = {
-  wishes: Wish[] | undefined;
+  wishs: Wish[] | undefined;
   isLoading: boolean;
   isError: any;
   addWish: (wish: Partial<Wish>) => Promise<void>;
-  updateWish: (id: string, wish: Partial<Wish>) => Promise<void>;
-  deleteWish: (id: string) => Promise<void>;
+  updateWish: (id: number, wish: Partial<Wish>) => Promise<void>;
+  deleteWish: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const WishContext = createContext<WishContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  return await wishService.getWishs();
-};
-
 export function WishProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/wishes", fetcher);
-
-  const wishes: Wish[] | undefined = data;
+  const { wishs, isLoading, isError, mutate } = useWishsData();
 
   const addWish = async (wish: Partial<Wish>) => {
     try {
-      await wishService.addWish(wish as any);
+      await wishService.addWish(wish);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -37,7 +31,7 @@ export function WishProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateWish = async (id: string, wish: Partial<Wish>) => {
+  const updateWish = async (id: number, wish: Partial<Wish>) => {
     try {
       await wishService.updateWish(id, wish);
       await mutate();
@@ -47,7 +41,7 @@ export function WishProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteWish = async (id: string) => {
+  const deleteWish = async (id: number) => {
     try {
       await wishService.deleteWish(id);
       await mutate();
@@ -62,9 +56,9 @@ export function WishProvider({ children }: { children: React.ReactNode }) {
   return (
     <WishContext.Provider
       value={{
-        wishes,
+        wishs,
         isLoading,
-        isError: error,
+        isError,
         addWish,
         updateWish,
         deleteWish,
@@ -76,8 +70,8 @@ export function WishProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useWishes() {
+export function useWishs() {
   const ctx = useContext(WishContext);
-  if (!ctx) throw new Error("useWishes must be used within WishProvider");
+  if (!ctx) throw new Error("useWishs must be used within WishProvider");
   return ctx;
 }

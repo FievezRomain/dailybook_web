@@ -1,35 +1,29 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { Group } from "@/types/group";
+import { useGroupsData } from "@/hooks/useGroupsData";
 import * as groupService from "@/services/groups";
 import * as Sentry from "@sentry/react";
+import { Group } from "@/types/group";
 
 type GroupContextType = {
   groups: Group[] | undefined;
   isLoading: boolean;
   isError: any;
   addGroup: (group: Partial<Group>) => Promise<void>;
-  updateGroup: (id: string, group: Partial<Group>) => Promise<void>;
-  deleteGroup: (id: string) => Promise<void>;
+  updateGroup: (id: number, group: Partial<Group>) => Promise<void>;
+  deleteGroup: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  return await groupService.getGroups();
-};
-
 export function GroupProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/groups", fetcher);
-
-  const groups: Group[] | undefined = data;
+  const { groups, isLoading, isError, mutate } = useGroupsData();
 
   const addGroup = async (group: Partial<Group>) => {
     try {
-      await groupService.addGroup(group as any);
+      await groupService.addGroup(group);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -37,7 +31,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateGroup = async (id: string, group: Partial<Group>) => {
+  const updateGroup = async (id: number, group: Partial<Group>) => {
     try {
       await groupService.updateGroup(id, group);
       await mutate();
@@ -47,7 +41,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteGroup = async (id: string) => {
+  const deleteGroup = async (id: number) => {
     try {
       await groupService.deleteGroup(id);
       await mutate();
@@ -64,7 +58,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
       value={{
         groups,
         isLoading,
-        isError: error,
+        isError,
         addGroup,
         updateGroup,
         deleteGroup,

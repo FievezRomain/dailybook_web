@@ -6,16 +6,16 @@ export const getNotes = async (): Promise<Note[]> => {
     return res.data;
 };
 
-export const addNote = async (note: Note) => {
+export const addNote = async (note: Partial<Note>) => {
     const res = await apiClient.post('/notes', note);
     return res.data;
 };
 
-export const updateNote = async (id: string, note: Partial<Note>) => {
+export const updateNote = async (id: number, note: Partial<Note>) => {
     const res = await apiClient.put(`/notes/${id}`, note);
     return res.data;
 };
 
-export const deleteNote = async (id: string) => {
+export const deleteNote = async (id: number) => {
     await apiClient.delete(`/notes/${id}`);
 };

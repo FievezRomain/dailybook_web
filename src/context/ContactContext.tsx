@@ -1,35 +1,29 @@
 'use client';
 
 import { createContext, useContext } from "react";
-import useSWR from "swr";
-import { Contact } from "@/types/contact";
+import { useContactsData } from "@/hooks/useContactsData";
 import * as contactService from "@/services/contacts";
 import * as Sentry from "@sentry/react";
+import { Contact } from "@/types/contact";
 
 type ContactContextType = {
   contacts: Contact[] | undefined;
   isLoading: boolean;
   isError: any;
   addContact: (contact: Partial<Contact>) => Promise<void>;
-  updateContact: (id: string, contact: Partial<Contact>) => Promise<void>;
-  deleteContact: (id: string) => Promise<void>;
+  updateContact: (id: number, contact: Partial<Contact>) => Promise<void>;
+  deleteContact: (id: number) => Promise<void>;
   refresh: () => void;
 };
 
 const ContactContext = createContext<ContactContextType | undefined>(undefined);
 
-const fetcher = async () => {
-  return await contactService.getContacts();
-};
-
 export function ContactProvider({ children }: { children: React.ReactNode }) {
-  const { data, error, isLoading, mutate } = useSWR("/api/contacts", fetcher);
-
-  const contacts: Contact[] | undefined = data;
+  const { contacts, isLoading, isError, mutate } = useContactsData();
 
   const addContact = async (contact: Partial<Contact>) => {
     try {
-      await contactService.addContact(contact as any);
+      await contactService.addContact(contact);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -37,7 +31,7 @@ export function ContactProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateContact = async (id: string, contact: Partial<Contact>) => {
+  const updateContact = async (id: number, contact: Partial<Contact>) => {
     try {
       await contactService.updateContact(id, contact);
       await mutate();
@@ -47,7 +41,7 @@ export function ContactProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteContact = async (id: string) => {
+  const deleteContact = async (id: number) => {
     try {
       await contactService.deleteContact(id);
       await mutate();
@@ -64,7 +58,7 @@ export function ContactProvider({ children }: { children: React.ReactNode }) {
       value={{
         contacts,
         isLoading,
-        isError: error,
+        isError,
         addContact,
         updateContact,
         deleteContact,

@@ -6,16 +6,16 @@ export const getWishs = async (): Promise<Wish[]> => {
     return res.data;
 };
 
-export const addWish = async (wish: Wish) => {
+export const addWish = async (wish: Partial<Wish>) => {
     const res = await apiClient.post('/wishes', wish);
     return res.data;
 };
 
-export const updateWish = async (id: string, wish: Partial<Wish>) => {
+export const updateWish = async (id: number, wish: Partial<Wish>) => {
     const res = await apiClient.put(`/wishes/${id}`, wish);
     return res.data;
 };
 
-export const deleteWish = async (id: string) => {
+export const deleteWish = async (id: number) => {
     await apiClient.delete(`/wishes/${id}`);
 };
