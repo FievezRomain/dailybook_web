@@ -2,6 +2,7 @@ import { Animal } from "@/types/animal";
 import { MappedEvent } from "@/types/event";
 import { getPresignedGetUrl } from "@/services/storage";
 import { ImageSigned } from "@/types/image";
+import { Objective } from "@/types/objective";
 
 // Cache local pour les URLs signées
 const signedUrlCache: { [key: string]: { url: string; expiresAt: number } } = {};
@@ -28,9 +29,9 @@ export async function enrichAnimals(animals: Animal[], userUid: string): Promise
   return Promise.all(animals.map(animal => enrichAnimal(animal, userUid)));
 }
 
-// Pour enrichir les animaux liés à un event
-export function filterAnimals(event: MappedEvent, animals: Animal[]): Animal[] {
-  const animalIds = new Set(event.animaux);
+// Pour enrichir les animaux liés à un event ou un objectif
+export function filterAnimals(obj: MappedEvent | Objective, animals: Animal[]): Animal[] {
+  const animalIds = new Set(obj.animaux);
   const linked = Array.isArray(animals)
     ? animals.filter(a => animalIds.has(a.id))
     : [];

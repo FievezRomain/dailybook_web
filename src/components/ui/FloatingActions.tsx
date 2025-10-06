@@ -10,6 +10,7 @@ import { useEventFormDrawer } from "@/context/EventFormDrawerContext";
 import React from "react";
 import { getLocalDateString } from "@/utils/datesUtils";
 import { useAnimalFormDrawer } from "@/context/AnimalFormDrawerContext";
+import { useObjectiveFormDrawer } from "@/context/ObjectiveFormDrawerContext";
 
 type FloatingAction = {
   label: string;
@@ -37,6 +38,7 @@ export function FloatingActions({
   // Utilise le context pour ouvrir le formulaire
   const { openDrawer } = useEventFormDrawer();
   const { openDrawer: openAnimalDrawer } = useAnimalFormDrawer();
+  const { openDrawer: openObjectiveDrawer } = useObjectiveFormDrawer();
 
   // Fonctions de création
   function onCreateEvent(type: string) {
@@ -55,7 +57,7 @@ export function FloatingActions({
     alert("Créer une note");
   }
   function onCreateObjective() {
-    alert("Créer un objectif");
+    openObjectiveDrawer({ initialObjective: { datedebut: getLocalDateString(), datefin: getLocalDateString() } });
   }
   function onCreateGroup() {
     alert("Créer un groupe");

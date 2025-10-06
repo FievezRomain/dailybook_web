@@ -11,7 +11,8 @@ type ObjectiveContextType = {
   isLoading: boolean;
   isError: any;
   addObjective: (objective: Partial<Objective>) => Promise<void>;
-  updateObjective: (id: number, objective: Partial<Objective>) => Promise<void>;
+  updateObjective: (id: number, objective: Objective) => Promise<void>;
+  updateSousEtapesObjectifs: (id: number, objective: Objective) => Promise<void>;
   deleteObjective: (id: number) => Promise<void>;
   refresh: () => void;
 };
@@ -31,9 +32,19 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateObjective = async (id: number, objective: Partial<Objective>) => {
+  const updateObjective = async (id: number, objective: Objective) => {
     try {
       await objectiveService.updateObjectifs(id, objective);
+      await mutate();
+    } catch (err: any) {
+      Sentry.captureException(err);
+      throw new Error(err?.message || "Erreur lors de la modification de l'objectif");
+    }
+  };
+
+  const updateSousEtapesObjectifs = async (id: number, objective: Objective) => {
+    try {
+      await objectiveService.updateSousEtapesObjectifs(id, objective);
       await mutate();
     } catch (err: any) {
       Sentry.captureException(err);
@@ -61,6 +72,7 @@ export function ObjectiveProvider({ children }: { children: React.ReactNode }) {
         isError,
         addObjective,
         updateObjective,
+        updateSousEtapesObjectifs,
         deleteObjective,
         refresh,
       }}

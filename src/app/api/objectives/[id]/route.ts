@@ -1,9 +1,10 @@
-import { apiBack } from '@/lib/apiBack';
-import { getStatusFromError } from '@/utils/apiUtils';
+import { apiBack } from "@/lib/apiBack";
+import { getStatusFromError } from "@/utils/apiUtils";
 
-export async function GET() {
+export async function PUT(req: Request) {
+  const body = await req.json();
   try {
-    const data = await apiBack('objectifsByUser', 'GET');
+    const data = await apiBack('updateObjectif', 'PUT', body);
     return Response.json(data);
   } catch (error: any) {
     const status = getStatusFromError(error);
@@ -11,10 +12,10 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function DELETE(req: Request) {
   const body = await req.json();
   try {
-    const data = await apiBack('objectivesByUser', 'POST', body);
+    const data = await apiBack('deleteObjectif', 'DELETE', body);
     return Response.json(data);
   } catch (error: any) {
     const status = getStatusFromError(error);

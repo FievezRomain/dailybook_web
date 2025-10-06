@@ -1,16 +1,16 @@
 export type SousEtape = {
-  id: string;
+  id: number | undefined;
   etape: string;
-  state: string;
+  state: boolean;
   order: number;
 };
 
 export type Objective = {
-  id: string;
+  id: number;
   animaux: number[];
   title: string;
   temporalityobjectif: string;
-  datedebut: Date;
-  datefin: Date;
-  sousEtapes: SousEtape[];
+  datedebut: string;
+  datefin: string;
+  sousetapes: SousEtape[];
 };

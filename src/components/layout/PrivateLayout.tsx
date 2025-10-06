@@ -11,6 +11,9 @@ import { EventDeleteProvider } from "@/context/EventDeleteContext";
 import { AnimalFormDrawerProvider } from "@/context/AnimalFormDrawerContext";
 import { AnimalFormDrawerWrapper } from "../animals/AnimalFormDrawerWrapper";
 import { AnimalDeleteProvider } from "@/context/AnimalDeleteContext";
+import { ObjectiveFormDrawerWrapper } from "../objectives/ObjectiveFormDrawerWrapper";
+import { ObjectiveFormDrawerProvider } from "@/context/ObjectiveFormDrawerContext";
+import { ObjectiveDeleteProvider } from "@/context/ObjectiveDeleteContext";
 
 export function PrivateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -24,18 +27,23 @@ export function PrivateLayout({ children }: { children: React.ReactNode }) {
         <EventFormDrawerProvider>
           <EventDeleteProvider>
             <EventDrawerProvider>
-              <ResponsiveAppBar />
-              {children}
-              <EventFormDrawerWrapper />
-              <EventDrawerWrapper />
-              <AnimalFormDrawerWrapper />
-              {/* Affiche le FAB sauf sur certaines pages */}
-              {!hideFabOnPaths.some((path) => pathname.startsWith(path)) && (
-                <FloatingActions
-                  currentPath={pathname}
-                  hideOnPaths={hideFabOnPaths}
-                />
-              )}
+              <ObjectiveFormDrawerProvider>
+                <ObjectiveDeleteProvider>
+                  <ResponsiveAppBar />
+                  {children}
+                  <EventFormDrawerWrapper />
+                  <EventDrawerWrapper />
+                  <AnimalFormDrawerWrapper />
+                  <ObjectiveFormDrawerWrapper />
+                  {/* Affiche le FAB sauf sur certaines pages */}
+                  {!hideFabOnPaths.some((path) => pathname.startsWith(path)) && (
+                    <FloatingActions
+                      currentPath={pathname}
+                      hideOnPaths={hideFabOnPaths}
+                    />
+                  )}
+                </ObjectiveDeleteProvider>
+              </ObjectiveFormDrawerProvider>
             </EventDrawerProvider>
           </EventDeleteProvider>
         </EventFormDrawerProvider>

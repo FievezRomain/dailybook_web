@@ -2,9 +2,7 @@
 
 import { Event, MappedEvent } from "@/types/event";
 import { mapEvents } from "@/utils/eventsUtils";
-import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
-import { useUserContext } from "@/context/UserContext";
 import { useEventFormDrawer } from "@/context/EventFormDrawerContext";
 import { useEventDrawer } from "@/context/EventDrawerContext";
 import { useEventDelete } from "@/context/EventDeleteContext";

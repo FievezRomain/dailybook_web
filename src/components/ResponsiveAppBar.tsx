@@ -77,7 +77,7 @@ export default function ResponsiveAppBar() {
                                                         <NavigationMenuContent className="z-50">
                                                                 <ul className="grid gap-2 w-48">
                                                                         <Link
-                                                                                href="/performances/objectifs"
+                                                                                href="/performances/objectives"
                                                                                 className={`text-sm rounded-sm px-2 py-1.5 hover:bg-accent hover:text-primary ${pathname === '/performances/objectifs' && 'bg-accent text-primary'
                                                                                         }`}
                                                                         >

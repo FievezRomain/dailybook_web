@@ -11,8 +11,13 @@ export const addObjectifs = async (objectif: Partial<Objective>) => {
     return res.data;
 };
 
-export const updateObjectifs = async (id: number, objectif: Partial<Objective>) => {
+export const updateObjectifs = async (id: number, objectif: Objective) => {
     const res = await apiClient.put(`/objectives/${id}`, objectif);
+    return res.data;
+};
+
+export const updateSousEtapesObjectifs = async (id: number, objectif: Objective) => {
+    const res = await apiClient.put(`/objectives/${id}/sousetapes`, objectif);
     return res.data;
 };
 

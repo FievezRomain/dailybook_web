@@ -1,22 +1,20 @@
 import { filterAnimals } from "@/utils/animalsUtils";
 import { Skeleton } from "../ui/skeleton";
-import { EventCard } from "./EventCard";
-import { MappedEvent } from "@/types/event";
 import { Animal } from "@/types/animal";
+import { Objective } from "@/types/objective";
+import { ObjectiveCard } from "./ObjectiveCard";
 
-type EventCardWrapperProps = {
-  event: MappedEvent;
+type ObjectiveCardWrapperProps = {
+  objective: Objective;
   animals: Animal[] | undefined;
   onEdit: () => void;
   onDelete: () => void;
-  onComplete: () => void;
-  onOpenDrawer: () => void;
-  onDuplicate: () => void;
+  onComplete: (objectiveId: number, etapeId: number, objective: Objective) => void;
   onUpdateAnimalImage: (id: number, imageObj: any) => void;
 };
 
-export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, onUpdateAnimalImage }: EventCardWrapperProps) {
-  const enrichedAnimals = animals ? filterAnimals(event, animals) : undefined;
+export function ObjectiveCardWrapper({ objective, animals, onEdit, onDelete, onComplete, onUpdateAnimalImage }: ObjectiveCardWrapperProps) {
+  const enrichedAnimals = animals ? filterAnimals(objective, animals) : undefined;
 
   if (!enrichedAnimals) {
     return (
@@ -28,14 +26,12 @@ export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete,
   }
 
   return (
-    <EventCard
+    <ObjectiveCard
       onEdit={onEdit}
       onDelete={onDelete}
       onComplete={onComplete}
-      onOpenDrawer={onOpenDrawer}
-      onDuplicate={onDuplicate}
       onUpdateAnimalImage={onUpdateAnimalImage}
-      event={event}
+      objective={objective}
       animals={enrichedAnimals}
     />
   );
