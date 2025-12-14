@@ -1,8 +1,8 @@
 import { apiBack } from "@/lib/apiBack";
 import { getStatusFromError } from "@/utils/apiUtils";
 
-export async function GET(req: Request, context: { params: { id: string } }) {
-  const { id } = await context.params;
+export async function GET(req: Request, context: { params: any }) {
+  const { id } = context.params;
   try {
     const data = await apiBack('bodyPictures', 'GET', { idanimal: Number(id) });
     return Response.json(data);
@@ -23,8 +23,8 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
-  const { id } = await context.params;
+export async function DELETE(req: Request, context: { params: any }) {
+  const { id } = context.params;
   try {
     const data = await apiBack('deleteBodyPicture', 'DELETE', { id: Number(id) });
     return Response.json(data);
