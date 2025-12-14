@@ -41,11 +41,13 @@ const {
     setValues,
   } = useObjectiveForm(initialObjective);
 
+  const isEdit = !!initialObjective?.id;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col rounded-2xl overflow-hidden">
         <DialogHeader className="px-6 py-4 flex flex-row items-center justify-between">
-          <DialogTitle>{initialObjective ? "Modifier l'objectif" : "Créer un objectif"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Modifier l'objectif" : "Créer un objectif"}</DialogTitle>
           <Button
             onClick={onClose}
             className="p-2 rounded hover:bg-white/20 text-white"
@@ -60,7 +62,7 @@ const {
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           <div>
             <label className="block text-sm font-medium mb-1">Titre *</label>
-            <Input value={values.title} onChange={handleChange} required />
+            <Input value={values.title} name="title" onChange={handleChange} required />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Animaux concernés *</label>
@@ -75,13 +77,13 @@ const {
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium mb-1">Date de début *</label>
-              <Input type="date" value={values.datedebut
+              <Input type="date" name="datedebut" value={values.datedebut
                                   ? values.datedebut.slice(0, 10)
                                   : getLocalDateString()} onChange={handleChange} required />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium mb-1">Date de fin *</label>
-              <Input type="date" value={values.datefin
+              <Input type="date" name="datefin" value={values.datefin
                                   ? values.datefin.slice(0, 10)
                                   : getLocalDateString()} onChange={handleChange} required />
             </div>
@@ -112,7 +114,7 @@ const {
               Annuler
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {initialObjective ? "Enregistrer" : "Créer"}
+              {isEdit ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>
         </form>

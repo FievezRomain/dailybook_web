@@ -1,7 +1,7 @@
 import { filterAnimals } from "@/utils/animalsUtils";
 import { Skeleton } from "../ui/skeleton";
 import { EventCard } from "./EventCard";
-import { MappedEvent } from "@/types/event";
+import { Event, MappedEvent } from "@/types/event";
 import { Animal } from "@/types/animal";
 
 type EventCardWrapperProps = {
@@ -9,7 +9,7 @@ type EventCardWrapperProps = {
   animals: Animal[] | undefined;
   onEdit: () => void;
   onDelete: () => void;
-  onComplete: () => void;
+  onComplete: (id: number, event: Event) => void;
   onOpenDrawer: () => void;
   onDuplicate: () => void;
   onUpdateAnimalImage: (id: number, imageObj: any) => void;

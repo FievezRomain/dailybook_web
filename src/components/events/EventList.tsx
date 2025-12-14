@@ -8,6 +8,8 @@ import { useEventDrawer } from "@/context/EventDrawerContext";
 import { useEventDelete } from "@/context/EventDeleteContext";
 import { EventCardWrapper } from "./EventCardWrapper";
 import { useAnimals } from "@/context/AnimalContext";
+import { useEvents } from "@/context/EventContext";
+import { toast } from "sonner";
 
 export const EventList = ({ events }: { events: Event[] }) => {
   // Si la liste des événements est vide, affiche un message
@@ -17,6 +19,9 @@ export const EventList = ({ events }: { events: Event[] }) => {
 
   // Récupération des animaux
   const { animals, isLoading: isLoadingAnimals, updateAnimalImage } = useAnimals();
+
+  // Récupération des fonctions du context
+  const { updateEvent } = useEvents();
 
   // Gestion de l'ouverture du drawer de visualisation d'event
   const { openDrawer: openDrawerDetail } = useEventDrawer();
@@ -40,6 +45,11 @@ export const EventList = ({ events }: { events: Event[] }) => {
     openDrawerForm({ initialEvent: event, isDuplicate: true });
   };
 
+  const handleStateChange = (id: number, event: Event) => {
+    updateEvent(id, event);
+    toast.success("Événement mis à jour avec succès.");
+  };
+
   return (
     <div>
       {/* Liste des cards */}
@@ -48,7 +58,7 @@ export const EventList = ({ events }: { events: Event[] }) => {
           <EventCardWrapper
             event={event}
             animals={animals}
-            onComplete={() => console.log("tâche effectuée")}
+            onComplete={handleStateChange}
             onDelete={() => openDelete(event)}
             onEdit={() => handleEdit(event)}
             onDuplicate={() => handleDuplicate(event)}

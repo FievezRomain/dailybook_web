@@ -1,5 +1,5 @@
 import { Animal } from "@/types/animal";
-import { MappedEvent } from "@/types/event";
+import { Event, MappedEvent } from "@/types/event";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui";
 import { MoreVertical } from "lucide-react";
@@ -14,7 +14,7 @@ interface EventCardProps {
     animals: Animal[] | undefined; // undefined = en cours de chargement
     onEdit: () => void;
     onDelete: () => void;
-    onComplete: () => void;
+    onComplete: (id: number, event: Event) => void;
     onOpenDrawer: (event:MappedEvent) => void;
     onDuplicate: () => void;
     onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
@@ -26,7 +26,7 @@ export const EventCard = ({ event, animals, onEdit, onDelete, onComplete, onOpen
     const handleComplete = () => {
         const newStatus = !completed;
         setCompleted(newStatus);
-        onComplete();
+        onComplete(event.id, { ...event, state: newStatus ? "Terminé" : "En cours" });
     };
 
     const Icon = event.icon;

@@ -1,19 +1,17 @@
 "use client";
 
-import { getObjectifs } from "@/services/objectifs";
 import { ObjectiveList } from "@/components/objectives/ObjectiveList";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Objectifs } from "@/types/objectifs";
 import { filterInProgress } from "@/utils/goalsUtils";
-import useSWR from "swr";
+import { useObjectives } from "@/context/ObjectiveContext";
 
 type Props = {
     height?: number;
 };
 
 const GoalsCard = ({ height = 4 }: Props) => {
-    const { data: goals, isLoading: isLoadingGoals } = useSWR(['objectifs'], () => getObjectifs());
+    const { objectives: goals, isLoading: isLoadingGoals } = useObjectives()
     const rowHeightPx = 30;
     const computedMaxHeight = height * rowHeightPx;
 

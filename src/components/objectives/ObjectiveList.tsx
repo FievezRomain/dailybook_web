@@ -35,9 +35,7 @@ export const ObjectiveList = ({ objectives }: { objectives: Objective[] }) => {
   };
 
   return (
-    <div>
-      {/* Liste des cards */}
-      {objectives.map((objective) => (
+      objectives.map((objective) => (
         <div key={objective.id} className="py-2">
           <ObjectiveCardWrapper
             objective={objective}
@@ -45,11 +43,10 @@ export const ObjectiveList = ({ objectives }: { objectives: Objective[] }) => {
             onComplete={handleComplete}
             onDelete={() => openDelete(objective)}
             onEdit={() => handleEdit(objective)}
-            onUpdateAnimalImage={updateAnimalImage}
+            onUpdateAnimalImage={updateAnimalImage} 
           />
         </div>
-      ))}
-    </div>
-  );
+        ))
+      );
 };
 

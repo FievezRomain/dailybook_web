@@ -34,7 +34,7 @@ export function ObjectiveCard({
     const progressValue = totalEtapes === 0 ? 0 : Math.round((doneEtapes / totalEtapes) * 100);
 
     return (
-        <div className="bg-card rounded-xl shadow-sm p-5 flex flex-col gap-2 relative">
+        <div className="bg-card rounded-xl shadow-sm p-5 border flex flex-col gap-2 relative">
             {/* Bouton d'options en haut à droite */}
             <div className="absolute top-3 right-3 z-10">
                 <DropdownMenu>

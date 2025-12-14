@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Button } from '../../ui';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 type Props = {
@@ -59,7 +58,7 @@ const WelcomeCard = ({ height = 4 }: Props) => {
                 <div className="flex justify-between gap-6 flex-col md:flex-row">
                 {/* Texte de bienvenue */}
                     <div>
-                        <h2 className="text-xl font-bold mb-2">Bienvenue {!isLoading && !isError && user.name} !</h2>
+                        <h2 className="text-xl font-bold mb-2">Bienvenue {!isLoading && !isError && user && user.name} !</h2>
                         <p className="text-muted-foreground mb-4">{formattedToday}</p>
                     </div>
 
