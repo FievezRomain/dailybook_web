@@ -1,10 +1,13 @@
+import { ComponentType } from "react";
+
 export type Event = {
     // Obligatoires
-    id: string;
+    id: number;
     nom: string;
     dateevent: string;
-    animaux: string[];
+    animaux: number[];
     eventtype: string;
+    state: string;
 
     // Facultatifs
     heuredebutevent?: string;
@@ -28,7 +31,15 @@ export type Event = {
     frequencetype?: string;
     frequencevalue?: string;
     idparent?: string;
-    documents?: string[];
+    documents?: {name: string}[];
     issharedevent?: string;
-  };
+    todisplay?: boolean;
+};
+
+export type MappedEvent = Event & {
+  icon: React.ComponentType;
+  color: string;
+  titleType: string;
+  delay?: number;
+};
   

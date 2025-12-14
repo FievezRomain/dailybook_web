@@ -1,0 +1,39 @@
+name: Build Frontend Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate version
+        id: vars
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build frontend image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }} ./frontend
+          docker tag ghcr.io/${{ github.repository }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }} \
+                     ghcr.io/${{ github.repository }}/web-frontend-vasco-service:latest
+
+      - name: Push images
+        run: |
+          docker push ghcr.io/${{ github.repository }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }}
+          docker push ghcr.io/${{ github.repository }}/web-frontend-vasco-service:latest

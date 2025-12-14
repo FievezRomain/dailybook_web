@@ -6,13 +6,31 @@
     --color-secondary: 244, 237, 235;
     --color-text: 30, 30, 30;
     --color-background: 255, 255, 255;
+    --color-background-transparent: 255, 255, 255, 0.9;
     --color-background-paper: 244, 244, 244;
     --color-success: 206, 152, 113;
     --color-info: 186, 168, 155;
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
+    --color-rouan: 211, 204, 201;
+    --color-rouan-transparent: 211, 204, 201, 0.5;
+    --color-isabelle: 201, 182, 159;
+    --color-isabelle-transparent: 201, 182, 159, 0.5;
+    --color-baie: 149, 101, 64;
+    --color-baie-transparent: 149, 101, 64, 0.5;
+    --color-baie-transparent-fond: 149, 101, 64, 0.25;
+    --color-aubere: 186, 168, 155;
+    --color-aubere-transparent: 186, 168, 155, 0.5;
+    --color-alezan: 206, 152, 113;
+    --color-alezan-transparent: 206, 152, 113, 0.5;
+    --color-baie-brun: 105, 66, 51;
+    --color-baie-brun-transparent: 105, 66, 51, 0.5;
+    --color-gris: 248, 235, 232;
+    --color-palomino: 246, 230, 206;
+    --color-baie-cerise: 176, 113, 97;
+    --color-baie-cerise-transparent: 176, 113, 97, 0.5;
 }
-  
+
 [data-theme='dark'] {
     --color-primary: 206,152,113;
     --color-secondary: 244, 237, 235;
@@ -24,7 +42,7 @@
     --color-warning: 246, 230, 206;
     --color-error: 176, 113, 101;
 }
-  
+
 
 // Espacements
 $spacing-sm: 0.5rem;

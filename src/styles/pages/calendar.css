@@ -1,0 +1,37 @@
+.fc-col-header {
+  border-radius: 8px !important;
+}
+
+.fc-scrollgrid-section > td {
+  border-radius: 0px 0px 8px 8px !important;
+}
+
+.fc-scrollgrid-section > th {
+  border-radius: 0px 8px 0px 0px !important;
+}
+
+.fc-scrollgrid {
+  border-radius: 8px !important;
+}
+
+/* État actif (aujourd'hui) */
+.fc-daygrid-day.fc-day-today {
+  background: rgba(var(--color-primary), 0.2) !important;
+  border-radius: 0px !important;
+}
+
+/* Boutons Aujourd'hui et flèches */
+.fc-button, 
+.fc-button-primary {
+  background: var(--primary) !important;
+}
+/* Boutons Aujourd'hui et flèches au survol et focus */
+.fc-button:not([disabled]):hover,
+.fc-button:not([disabled]):focus {
+  background: rgba(var(--color-primary), 0.8) !important;
+}
+
+/* Affichage d'un indicateur de sélection */
+.fc-event {
+  cursor: pointer !important;
+}

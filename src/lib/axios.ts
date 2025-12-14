@@ -18,7 +18,7 @@ function getTokenFromCookie(): string | null {
 
 // Intercepteur pour ajouter automatiquement le token
 api.interceptors.request.use(
-  async (config) => {
+  (config) => {
     // On lit le cookie côté client
     const token = getTokenFromCookie();
     if (token) {

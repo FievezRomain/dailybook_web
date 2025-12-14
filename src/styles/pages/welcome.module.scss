@@ -1,0 +1,107 @@
+@use '../base/mixins' as *;
+
+.welcome_page {
+    height: 100vh;
+    background-color: rgb(var(--color-background-paper));
+    display: flex;
+    flex-direction: column;
+}
+.welcome_upper_page {
+    position: relative;
+    height: 80vh; // ajuste selon ton design
+    background-image: url("/photo_dos_poney.webp");
+    background-size: cover;
+    background-position-y: 56%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+
+    @include respond-from(mobile) {
+        width: 84px;
+        height: 84px;
+    }
+
+    @include respond-from(tablet) {
+        width: 84px;
+        height: 84px;
+    }
+
+    @include respond-from(desktop) {
+        width: 104px;
+        height: 104px;
+    }
+
+    @include respond-from(large) {
+        width: 184px;
+        height: 184px;
+    }
+}
+
+.wave_wrapper {
+    position: relative;
+    z-index: 0;
+
+    @include respond-from(mobile) {
+        margin-top: -10vh; // fait "monter" la vague dans l'image
+    }
+
+    @include respond-from(tablet) {
+        margin-top: -15vh; // fait "monter" la vague dans l'image
+    }
+
+    @include respond-from(desktop) {
+        margin-top: -20vh; // fait "monter" la vague dans l'image
+    }
+
+    @include respond-from(large) {
+        margin-top: -30vh; // fait "monter" la vague dans l'image
+    }
+
+    svg {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+}
+  
+.welcome_bottom_page {
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    background-color: rgb(var(--color-background-paper));
+    z-index: 1;
+
+    @include respond-from(mobile) {
+        margin-top: -5vh;
+    }
+
+    @include respond-from(tablet) {
+        margin-top: -5vh;
+    }
+
+    @include respond-from(desktop) {
+        margin-top: -10vh;
+    }
+
+    @include respond-from(large) {
+        margin-top: -17vh;
+    }
+}
+
+.text {
+    font-weight: 500;
+    font-size: 18px;
+    max-width: 325px;
+    text-align: center;
+    line-height: 23px;
+    margin-bottom: 3vh;
+}
+  
