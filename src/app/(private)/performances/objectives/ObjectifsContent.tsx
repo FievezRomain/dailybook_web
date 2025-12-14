@@ -2,14 +2,10 @@
 
 import { AnimalSelector } from '@/components/ui/AnimalSelector';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Circle, MoreVertical } from "lucide-react";
 import { useEffect, useMemo, useState } from 'react';
 import { useAnimals } from '@/context/AnimalContext';
 import { useObjectives } from "@/context/ObjectiveContext";
 import { Objective } from "@/types/objective";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, Button } from "@/components/ui";
-import { CustomCheckbox } from "@/components/ui/CustomCheckbox";
-import { ObjectiveCardWrapper } from '@/components/objectives/ObjectiveCardWrapper';
 import { ObjectiveList } from '@/components/objectives/ObjectiveList';
 
 export default function ObjectifsContent() {
