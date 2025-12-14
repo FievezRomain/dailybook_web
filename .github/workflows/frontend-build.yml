@@ -33,7 +33,7 @@ jobs:
 
       - name: Build frontend image
         run: |
-          docker build -t ghcr.io/${{ steps.repo.outputs.repo }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }} ./frontend
+          docker build -t ghcr.io/${{ steps.repo.outputs.repo }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }} .
           docker tag ghcr.io/${{ steps.repo.outputs.repo }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }} \
                      ghcr.io/${{ steps.repo.outputs.repo }}/web-frontend-vasco-service:latest
 
