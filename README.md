@@ -79,8 +79,6 @@ cd vasco_env
 docker compose up -d
 ```
 
-> Le dump SQL d'initialisation (`db/dump.sql`) est chargé automatiquement au premier lancement.
-
 Pour arrêter la base :
 
 ```bash
@@ -184,8 +182,8 @@ La documentation détaillée se trouve dans le dossier [`docs/`](./docs/) :
 
 ### Conventions
 
-- **Branches** : `feature/xxx`, `fix/xxx`, `refactor/xxx`
-- **Commits** : format [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `docs:`, etc.)
+- **Branches** : `feature/xxx`, `fix/xxx`
+- **Commits** : format [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`)
 - **Code** : TypeScript strict, ESLint activé, Tailwind + shadcn/ui pour le style
 
 ---
