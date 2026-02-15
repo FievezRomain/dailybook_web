@@ -180,8 +180,8 @@ export default function LoginForm() {
                                                         </div>
                                                 </form>
 
-                                                {/* Lien vers register visible uniquement sur mobile */}
-                                                <div className="mt-6 text-center text-sm md:hidden">
+                                                {/* Lien vers register visible uniquement quand le panel gauche est caché (< 900px) */}
+                                                <div className="mt-6 text-center text-sm max-[900px]:block hidden">
                                                         <span className="text-[var(--muted-foreground)]">
                                                                 Pas encore de compte ?{' '}
                                                         </span>
