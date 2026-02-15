@@ -169,6 +169,9 @@ La documentation détaillée se trouve dans le dossier [`docs/`](./docs/) :
 | [Stack technique](./docs/stack.md) | Technologies, librairies, choix techniques |
 | [Authentification](./docs/authentication.md) | Flux Firebase Auth, middleware, session cookie |
 | [API & Services](./docs/api-services.md) | Communication front/back, couche API, services |
+| [Tailwind & Couleurs](./docs/tailwind-colors.md) | Système de couleurs, variables CSS, dark mode, palette complète |
+| [Contextes React](./docs/contexts.md) | State management, types de contextes, flux CRUD, providers |
+| [Composants & Next.js](./docs/components-nextjs.md) | Server/Client Components, composants génériques, patterns, flux de rendu |
 
 ---
 
