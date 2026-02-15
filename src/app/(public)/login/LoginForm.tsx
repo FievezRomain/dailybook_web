@@ -179,6 +179,19 @@ export default function LoginForm() {
                                                                 </Button>
                                                         </div>
                                                 </form>
+
+                                                {/* Lien vers register visible uniquement quand le panel gauche est caché (< 900px) */}
+                                                <div className="mt-6 text-center text-sm hidden max-[900px]:block">
+                                                        <span className="text-[var(--muted-foreground)]">
+                                                                Pas encore de compte ?{' '}
+                                                        </span>
+                                                        <Link
+                                                                href="/register"
+                                                                className="font-medium text-[var(--primary)] hover:underline"
+                                                        >
+                                                                Créer mon compte
+                                                        </Link>
+                                                </div>
                                         </div>
                                 </section>
                         </div>
