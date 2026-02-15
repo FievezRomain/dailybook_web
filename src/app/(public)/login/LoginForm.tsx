@@ -181,7 +181,7 @@ export default function LoginForm() {
                                                 </form>
 
                                                 {/* Lien vers register visible uniquement quand le panel gauche est caché (< 900px) */}
-                                                <div className="mt-6 text-center text-sm max-[900px]:block hidden">
+                                                <div className="mt-6 text-center text-sm hidden max-[900px]:block">
                                                         <span className="text-[var(--muted-foreground)]">
                                                                 Pas encore de compte ?{' '}
                                                         </span>
