@@ -179,6 +179,19 @@ export default function LoginForm() {
                                                                 </Button>
                                                         </div>
                                                 </form>
+
+                                                {/* Lien vers register visible uniquement sur mobile */}
+                                                <div className="mt-6 text-center text-sm md:hidden">
+                                                        <span className="text-[var(--muted-foreground)]">
+                                                                Pas encore de compte ?{' '}
+                                                        </span>
+                                                        <Link
+                                                                href="/register"
+                                                                className="font-medium text-[var(--primary)] hover:underline"
+                                                        >
+                                                                Créer mon compte
+                                                        </Link>
+                                                </div>
                                         </div>
                                 </section>
                         </div>
