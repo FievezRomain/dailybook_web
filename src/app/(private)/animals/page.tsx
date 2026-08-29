@@ -1,8 +1,8 @@
 import { withAuthPage } from '@/lib/auth/server/withAuthPage';
-import AnimalsContent from './AnimalsContent';
+import AnimalsContent from '@/features/animals/components/AnimalsContent';
 
 export default async function AnimalsPage() {
-        return withAuthPage(async (user) => {
+        return withAuthPage(async () => {
                 return <AnimalsContent />;
         });
 }

@@ -1,13 +1,16 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { getIdToken } from 'firebase/auth';
-import styles from '@/styles/pages/login.module.scss';
 import { signInUser, isEmailVerified } from '@/lib/firebaseService';
-import { Button } from '@/components/ui';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader } from '@/shared/components/ui/card';
+import { Input } from '@/shared/components/ui/input';
 import Link from 'next/link';
+import { establishAuthenticatedSession } from '@/features/user/api/user-api';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
+        const router = useRouter();
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
         const [error, setError] = useState<string | null>(null);
@@ -26,26 +29,15 @@ export default function LoginForm() {
                         // Vérification si l'utilisateur a son email validée
                         const verified = await isEmailVerified();
                         if (!verified) {
-                                window.location.href = '/verify-email';
+                                router.replace('/verify-email');
                                 return;
                         }
 
-                        // 2. Récupérer le idToken
-                        const idToken = await getIdToken(user, true);
+                        // Crée le cookie web puis ouvre la session métier FastAPI.
+                        await establishAuthenticatedSession(user);
 
-                        // 3. Envoyer ce token à l’API pour créer le cookie
-                        const res = await fetch('/api/session/login', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ idToken: idToken }),
-                        });
-
-                        if (!res.ok) {
-                                throw new Error('Erreur lors de la création du cookie de session');
-                        }
-
-                        // 4. Rediriger
-                        window.location.href = '/dashboard';
+                        // Rediriger uniquement lorsque les deux sessions sont prêtes.
+                        router.replace('/dashboard');
                 } catch (err) {
                         console.error(err);
                         if (err instanceof Error) {
@@ -58,49 +50,50 @@ export default function LoginForm() {
         };
 
         return (
-                <div className={styles.form_page}>
-                        <h1 className={styles.title}>Connexion</h1>
-                        <div className={styles.container}>
-                                <form onSubmit={handleSubmit}>
-                                        <div className={styles.inputs_container}>
-                                                <label>
-                                                        Identifiant :
-                                                        <input
-                                                                type="email"
-                                                                value={email}
-                                                                onChange={e => setEmail(e.target.value)}
-                                                                required
-                                                                placeholder="Email"
-                                                        />
-                                                </label>
-
-
-                                                <label>
-                                                        Mot de passe :
-                                                        <input
-                                                                type="password"
-                                                                value={password}
-                                                                onChange={e => setPassword(e.target.value)}
-                                                                required
-                                                                placeholder="Mot de passe"
-                                                        />
-                                                </label>
-                                                {error && <p className={styles.error}>{error}</p>}
-                                        </div>
-                                        <div className={styles.button_container}>
-                                                <Button type="submit" size={"lg"} disabled={loading}>
-                                                        {loading ? 'Connexion...' : 'Je me connecte'}
-                                                </Button>
-                                        </div>
-                                        
-                                </form>
-                                <a className={styles.link}>Mot de passe oublié ?</a>
-                                <Button asChild size={"lg"}>
-                                        <Link href="/register">
-                                                Pas de compte ? S'inscrire
-                                        </Link>
-                                </Button>
-                        </div>
-                </div>
+          <main className="grid min-h-[calc(100dvh-5rem)] place-items-center px-page-gutter pb-page-gutter">
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center">
+                <h1 className="text-page-title font-semibold leading-none">Connexion</h1>
+                <CardDescription>Retrouvez votre espace Vasco.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-section">
+                <form onSubmit={handleSubmit} className="space-y-section" aria-busy={loading}>
+                  <div className="space-y-control">
+                    <label htmlFor="login-email" className="text-sm font-medium">Adresse e-mail</label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      inputMode="email"
+                    />
+                  </div>
+                  <div className="space-y-control">
+                    <label htmlFor="login-password" className="text-sm font-medium">Mot de passe</label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+                  <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                    {loading ? 'Connexion en cours…' : 'Se connecter'}
+                  </Button>
+                </form>
+                <p className="text-center text-sm text-muted-foreground">
+                  Pas encore de compte ?{' '}
+                  <Link href="/register" className="font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    S’inscrire
+                  </Link>
+                </p>
+              </CardContent>
+            </Card>
+          </main>
         );
 }

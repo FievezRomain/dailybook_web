@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { sendVerificationEmail } from '@/lib/firebaseService';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { establishAuthenticatedSession } from '@/features/user/api/user-api';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader } from '@/shared/components/ui/card';
 
 export default function VerifyEmailClient() {
   const router = useRouter();
@@ -19,7 +22,7 @@ export default function VerifyEmailClient() {
       await sendVerificationEmail();
       setEmailSent(true);
       setCooldown(60);
-    } catch (err) {
+    } catch {
       setError("Erreur lors de l'envoi de l'e-mail. Réessaie plus tard.");
     }
   };
@@ -39,19 +42,10 @@ export default function VerifyEmailClient() {
         setRedirecting(true);
 
         try {
-          const idToken = await auth.currentUser.getIdToken(true);
-          const res = await fetch('/api/session/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken }),
-          });
-
-          if (!res.ok) {
-            throw new Error('Erreur lors de la création du cookie de session');
-          }
+          await establishAuthenticatedSession(auth.currentUser);
 
           setTimeout(() => router.push('/dashboard'), 1500);
-        } catch (err) {
+        } catch {
           setError("Erreur lors de la connexion après validation. Réessaie.");
           setRedirecting(false);
         }
@@ -63,35 +57,28 @@ export default function VerifyEmailClient() {
   }, [router]);
 
   return (
-    <main style={{ padding: '2rem', maxWidth: 500, margin: 'auto', textAlign: 'center' }}>
-      <h1>Confirme ton adresse e-mail</h1>
-      <p>
-        Nous avons envoyé un e-mail de confirmation à <strong>{auth.currentUser?.email}</strong>.
-        Clique sur le lien dans cet e-mail pour activer ton compte.
-      </p>
-
-      {verified && <p style={{ color: 'green' }}>✅ Adresse confirmée, redirection en cours...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {!verified && (
-        <>
-          {emailSent && <p style={{ color: 'green' }}>E-mail de confirmation renvoyé.</p>}
-          <button
-            onClick={handleSendEmail}
-            disabled={cooldown > 0 || redirecting}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              fontWeight: 'bold',
-              cursor: cooldown > 0 ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {cooldown > 0
-              ? `Réessaie dans ${cooldown}s`
-              : `Renvoyer l'e-mail de confirmation`}
-          </button>
-        </>
-      )}
+    <main className="grid min-h-[calc(100dvh-5rem)] place-items-center px-page-gutter pb-page-gutter">
+      <Card className="w-full max-w-lg text-center">
+        <CardHeader>
+          <h1 className="text-page-title font-semibold leading-none">Confirmez votre adresse e-mail</h1>
+          <CardDescription>
+            Un lien de confirmation a été envoyé{auth.currentUser?.email ? <> à <strong className="text-foreground">{auth.currentUser.email}</strong></> : ''}.
+            Ouvrez-le pour activer votre compte.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-section">
+          <div aria-live="polite" aria-atomic="true">
+            {verified && <p className="text-sm font-medium text-success">Adresse confirmée. Redirection en cours…</p>}
+            {emailSent && !verified && <p className="text-sm font-medium text-success">E-mail de confirmation renvoyé.</p>}
+            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          </div>
+          {!verified && (
+            <Button type="button" size="lg" className="w-full sm:w-auto" onClick={handleSendEmail} disabled={cooldown > 0 || redirecting}>
+              {cooldown > 0 ? `Réessayer dans ${cooldown} s` : "Renvoyer l’e-mail de confirmation"}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

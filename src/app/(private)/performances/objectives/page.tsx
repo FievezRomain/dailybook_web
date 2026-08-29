@@ -1,8 +1,8 @@
 import { withAuthPage } from '@/lib/auth/server/withAuthPage';
-import ObjectifsContent from './ObjectifsContent';
+import ObjectivesContent from '@/features/objectives/components/ObjectivesContent';
 
 export default async function ObjectifsPage() {
-        return withAuthPage(async (user) => {
-                return <ObjectifsContent />;
+        return withAuthPage(async () => {
+                return <ObjectivesContent />;
         });
 }
