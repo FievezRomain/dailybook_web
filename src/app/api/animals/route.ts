@@ -1,34 +1,23 @@
-import { apiBack } from '@/lib/apiBack';
-import { getStatusFromError } from '@/utils/apiUtils';
+import { backendApiClient } from '@/shared/api/backend-api-client';
+import { parseJson, validateMutationRequest } from '@/shared/api/bff-request';
+import { bffError, bffSuccess } from '@/shared/api/bff-response';
+import { animalListSchema, animalSchema, createAnimalSchema } from '@/features/animals/schemas/animal';
 
 export async function GET() {
   try {
-    const data = await apiBack('equideByUser', 'GET');
-    return Response.json(data);
-  } catch (error: any) {
-    const status = getStatusFromError(error);
-    return new Response(JSON.stringify({ error: error.message }), { status });
+    return bffSuccess(animalListSchema.parse(await backendApiClient('api/v1/animals')));
+  } catch (error) {
+    return bffError(error);
   }
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
+export async function POST(request: Request) {
+  const csrfError = validateMutationRequest(request);
+  if (csrfError) return csrfError;
   try {
-    const data = await apiBack('createEquide', 'POST', body);
-    return Response.json(data);
-  } catch (error: any) {
-    const status = getStatusFromError(error);
-    return new Response(JSON.stringify({ error: error.message }), { status });
-  }
-}
-
-export async function PUT(req: Request) {
-  const body = await req.json();
-  try {
-    const data = await apiBack('modifyEquide', 'PUT', body);
-    return Response.json(data);
-  } catch (error: any) {
-    const status = getStatusFromError(error);
-    return new Response(JSON.stringify({ error: error.message }), { status });
+    const body = await parseJson(request, createAnimalSchema);
+    return bffSuccess(animalSchema.parse(await backendApiClient('api/v1/animals', 'POST', body)), { status: 201 });
+  } catch (error) {
+    return bffError(error);
   }
 }

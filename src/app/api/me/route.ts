@@ -1,32 +1,42 @@
-import { cookies } from 'next/headers';
-import admin from '@/lib/firebase-admin';
-import { SESSION_COOKIE_NAME } from '@/constants/cookies';
+import { backendApiClient } from '@/shared/api/backend-api-client';
+import { parseJson, validateMutationRequest } from '@/shared/api/bff-request';
+import { bffError, bffSuccess } from '@/shared/api/bff-response';
+import { backendUserSchema, updateCurrentUserSchema } from '@/features/user/schemas/user';
+import type { z } from 'zod';
+
+type BackendUser = z.infer<typeof backendUserSchema>;
+
+function toCurrentUser(user: BackendUser) {
+  return {
+    id: user.id,
+    name: user.prenom ?? '',
+    email: user.email,
+    picture: user.filename ?? null,
+    expotoken: user.expotoken ?? null,
+    timezone: user.timezone ?? null,
+    dailyReminderEnabled: user.daily_reminder_enabled,
+    subscription: user.subscription,
+  };
+}
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  if (!session) {
-    return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401 });
-  }
-
   try {
-    const decodedToken = await admin.auth().verifySessionCookie(session, true);
-
-    if (!decodedToken.email_verified) {
-      return new Response(JSON.stringify({ error: 'Email not verified' }), { status: 403 });
-    }
-
-    return new Response(
-      JSON.stringify({
-        name: decodedToken.name || decodedToken.email,
-        email: decodedToken.email,
-        uid: decodedToken.uid,
-        picture: decodedToken.picture || null,
-      }),
-      { status: 200 }
-    );
+    const user = backendUserSchema.parse(await backendApiClient('api/v1/users/me'));
+    return bffSuccess(toCurrentUser(user));
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Invalid session' }), { status: 401 });
+    return bffError(error);
+  }
+}
+
+export async function PATCH(request: Request) {
+  const csrfError = validateMutationRequest(request);
+  if (csrfError) return csrfError;
+  try {
+    const body = await parseJson(request, updateCurrentUserSchema);
+    await backendApiClient('api/v1/users/me', 'PATCH', body);
+    const user = backendUserSchema.parse(await backendApiClient('api/v1/users/me'));
+    return bffSuccess(toCurrentUser(user));
+  } catch (error) {
+    return bffError(error);
   }
 }

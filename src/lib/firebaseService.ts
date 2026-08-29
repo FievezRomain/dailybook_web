@@ -1,13 +1,21 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  AuthError,
+} from 'firebase/auth';
 import { auth } from './firebase';
 
 export const signInUser = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-export const registerUser = async (email: string, password: string) => {
+export const registerUser = async (email: string, password: string, firstName: string) => {
     try {
-      return await createUserWithEmailAndPassword(auth, email, password);
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(credential.user, { displayName: firstName.trim() });
+      return credential;
     } catch (err) {
       const error = err as AuthError;
       switch (error.code) {
