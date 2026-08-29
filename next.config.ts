@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
+import { SECURITY_HEADERS } from './src/shared/security/headers';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  
-  eslint: {
-    ignoreDuringBuilds: true,
+  serverExternalPackages: ['firebase-admin'],
+  poweredByHeader: false,
+
+  async headers() {
+    return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
   
   images: {
