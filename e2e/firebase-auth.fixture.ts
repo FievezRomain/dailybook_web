@@ -4,7 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 const PROJECT_ID = 'vasco-e2e';
 const AUTH_EMULATOR_ORIGIN = 'http://127.0.0.1:9099';
-const WEB_ORIGIN = 'http://localhost:3000';
+const WEB_ORIGIN = 'http://localhost:3100';
 
 process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 

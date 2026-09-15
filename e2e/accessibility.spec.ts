@@ -11,3 +11,20 @@ for (const route of ['/', '/login', '/register']) {
     expect(blockingViolations).toEqual([]);
   });
 }
+
+test('Login conserve un parcours clavier et le reflow avec forced colors', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/login');
+
+  const email = page.getByRole('textbox', { name: 'Adresse e-mail' });
+  const password = page.getByRole('textbox', { name: 'Mot de passe' });
+  const submit = page.getByRole('button', { name: 'Se connecter' });
+  await email.focus();
+  await expect(email).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(password).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(submit).toBeFocused();
+  await expect.poll(() => page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
