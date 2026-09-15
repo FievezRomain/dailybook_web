@@ -58,9 +58,9 @@ export const ObjectiveList = ({ objectives }: { objectives: Objective[] }) => {
   };
 
   return (
-    <>
+    <div className="grid items-stretch gap-4 lg:grid-cols-2" role="list" aria-label="Liste des objectifs">
       {objectives.map((objective) => (
-        <div key={objective.id} className="py-2">
+        <div key={objective.id} role="listitem" className="h-full">
           <ObjectiveCardWrapper
             objective={objective}
             animals={animals}
@@ -80,6 +80,6 @@ export const ObjectiveList = ({ objectives }: { objectives: Objective[] }) => {
         onConfirm={() => void handleConfirmDelete()}
         confirmLabel="Supprimer"
       />
-    </>
+    </div>
       );
 };

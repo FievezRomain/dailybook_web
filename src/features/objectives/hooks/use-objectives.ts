@@ -51,6 +51,7 @@ export function useObjectivesQuery() {
     updateSubtaskState: (objectiveId: number, subtaskId: number, state: boolean) =>
       updateSubtask.mutateAsync({ objectiveId, subtaskId, state }),
     deleteObjective: (id: number) => remove.mutateAsync(id),
+    refetch: query.refetch,
     isMutating: create.isPending || update.isPending || updateSubtask.isPending || remove.isPending,
   };
 }

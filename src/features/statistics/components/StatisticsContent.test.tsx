@@ -26,9 +26,19 @@ describe('StatisticsContent', () => {
   it('calcule puis accompagne le résultat Premium de valeurs textuelles', () => {
     mocks.currentUser.mockReturnValue({ isPremium: true, isLoading: false });
     render(<StatisticsContent />);
-    fireEvent.click(screen.getByRole('checkbox', { name: /Vasco/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Afficher les statistiques' }));
-    expect(screen.getByText('01/08/2026')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Vasco' }));
+    expect(screen.getByText('1 août 2026')).toBeVisible();
     expect(screen.getByRole('table')).toHaveTextContent('2');
+    expect(screen.getByLabelText('Résumé des résultats')).toHaveTextContent('Dernière valeur');
+  });
+
+  it('sélectionne tous les animaux sans rendre le graphique indispensable', () => {
+    mocks.currentUser.mockReturnValue({ isPremium: true, isLoading: false });
+    mocks.animals.mockReturnValue({ animals: [{ id: 4, nom: 'Vasco', provenance: 'owner' }, { id: 5, nom: 'Moka', provenance: 'shared' }], isLoading: false, isError: false, refetch: vi.fn() });
+    render(<StatisticsContent />);
+    fireEvent.click(screen.getByRole('button', { name: 'Tous les animaux' }));
+    expect(screen.getByRole('button', { name: 'Vasco' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Moka/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: 'Analyser la période' })).not.toBeInTheDocument();
   });
 });
