@@ -2,14 +2,16 @@ import 'server-only';
 
 import type { z } from 'zod';
 import { WebApiError } from '@/shared/api/api-error';
-import { metNorwayForecastSchema, weatherForecastSchema } from '../schemas/weather';
-import type { WeatherForecast, WeatherQuery } from '../types/weather';
+import { metNorwayForecastSchema, nominatimReverseSchema, nominatimSearchSchema, weatherForecastSchema, weatherLocationListSchema } from '../schemas/weather';
+import type { WeatherForecast, WeatherLocation, WeatherQuery } from '../types/weather';
 
 const PROVIDER_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/compact';
+const DEFAULT_GEOCODING_BASE_URL = 'https://nominatim.openstreetmap.org';
+const DEFAULT_USER_AGENT = 'VascoWeb/1.0 https://github.com/FievezRomain/dailybook_web';
 
 export async function getWeatherForecast(query: WeatherQuery): Promise<WeatherForecast> {
-  const userAgent = process.env.WEATHER_USER_AGENT?.trim();
-  if (!userAgent || userAgent.length > 255 || /[\r\n]/.test(userAgent)) {
+  const userAgent = process.env.WEATHER_USER_AGENT?.trim() || DEFAULT_USER_AGENT;
+  if (userAgent.length > 255 || /[\r\n]/.test(userAgent)) {
     throw new WebApiError({ code: 'WEATHER_NOT_CONFIGURED', message: 'Le service météo n’est pas encore configuré.', status: 503 });
   }
   const latitude = roundCoordinate(query.latitude);
@@ -37,7 +39,78 @@ export async function getWeatherForecast(query: WeatherQuery): Promise<WeatherFo
   catch { throw new WebApiError({ code: 'WEATHER_PROVIDER_INVALID', message: 'La réponse météo est invalide.', status: 502 }); }
   const parsed = metNorwayForecastSchema.safeParse(raw);
   if (!parsed.success) throw new WebApiError({ code: 'WEATHER_PROVIDER_INVALID', message: 'La réponse météo est invalide.', status: 502 });
-  return weatherForecastSchema.parse(toWeatherForecast(parsed.data.properties.timeseries, query.timezone));
+  const location = await getLocation(latitude, longitude, userAgent);
+  return weatherForecastSchema.parse({
+    ...toWeatherForecast(parsed.data.properties.timeseries, query.timezone),
+    location,
+  });
+}
+
+async function getLocation(latitude: number, longitude: number, userAgent: string): Promise<WeatherForecast['location']> {
+  const url = geocodingUrl('/reverse');
+  if (!url) return null;
+  url.search = new URLSearchParams({
+    format: 'geocodejson',
+    lat: latitude.toFixed(2),
+    lon: longitude.toFixed(2),
+    zoom: '10',
+    layer: 'address',
+  }).toString();
+
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json', 'Accept-Language': 'fr', 'User-Agent': userAgent },
+      signal: AbortSignal.timeout(4_000),
+      next: { revalidate: 24 * 60 * 60 },
+    });
+    if (!response.ok) return null;
+    const parsed = nominatimReverseSchema.safeParse(await response.json());
+    if (!parsed.success) return null;
+    const place = parsed.data.features[0]?.properties.geocoding;
+    if (!place) return null;
+    const locality = place.name ?? place.city ?? place.district ?? place.county ?? place.state;
+    const label = [locality, place.country].filter((part, index, all) => part && all.indexOf(part) === index).join(', ') || place.label;
+    if (!label) return null;
+    return {
+      label,
+      attribution: { label: '© OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright' },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function searchWeatherLocations(query: string): Promise<WeatherLocation[]> {
+  const userAgent = process.env.WEATHER_USER_AGENT?.trim() || DEFAULT_USER_AGENT;
+  if (userAgent.length > 255 || /[\r\n]/.test(userAgent)) return [];
+  const url = geocodingUrl('/search');
+  if (!url) return [];
+  url.search = new URLSearchParams({ format: 'geocodejson', q: query, limit: '5' }).toString();
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json', 'Accept-Language': 'fr', 'User-Agent': userAgent },
+      signal: AbortSignal.timeout(5_000),
+      next: { revalidate: 24 * 60 * 60 },
+    });
+    if (!response.ok) return [];
+    const parsed = nominatimSearchSchema.safeParse(await response.json());
+    if (!parsed.success) return [];
+    return weatherLocationListSchema.parse(parsed.data.features.map((feature) => ({
+      label: feature.properties.geocoding.label,
+      longitude: feature.geometry.coordinates[0],
+      latitude: feature.geometry.coordinates[1],
+    })));
+  } catch {
+    return [];
+  }
+}
+
+function geocodingUrl(pathname: '/reverse' | '/search') {
+  try {
+    return new URL(pathname, process.env.GEOCODING_BASE_URL?.trim() || DEFAULT_GEOCODING_BASE_URL);
+  } catch {
+    return null;
+  }
 }
 
 function roundCoordinate(value: number) {
@@ -46,7 +119,7 @@ function roundCoordinate(value: number) {
 
 type TimeSeries = z.infer<typeof metNorwayForecastSchema>['properties']['timeseries'];
 
-function toWeatherForecast(timeseries: TimeSeries, timezone: string): WeatherForecast {
+function toWeatherForecast(timeseries: TimeSeries, timezone: string): Omit<WeatherForecast, 'location'> {
   const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' });
   const byDate = new Map<string, TimeSeries>();
   for (const entry of timeseries) {

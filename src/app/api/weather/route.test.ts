@@ -6,6 +6,7 @@ vi.mock('@/lib/auth/server/getCurrentUser', () => ({ getCurrentUser: mocks.curre
 vi.mock('@/features/weather/server/weather-provider', () => ({ getWeatherForecast: mocks.forecast }));
 
 const forecast = {
+  location: { label: 'Paris, France', attribution: { label: '© OpenStreetMap contributors' as const, url: 'https://www.openstreetmap.org/copyright' as const } },
   current: { observedAt: '2026-08-25T12:00:00Z', symbolCode: 'partlycloudy_day', temperature: 22, humidity: 61, windSpeed: 4.2, precipitationNextHour: 0 },
   days: [{ date: '2026-08-25', symbolCode: 'partlycloudy_day', temperatureMin: 14, temperatureMax: 23, precipitation: 0.4, windSpeedMax: 7 }],
   attribution: { label: 'Données MET Norway' as const, url: 'https://api.met.no/' as const },

@@ -1,5 +1,5 @@
 import { webApiClient } from '@/shared/api/web-api-client';
-import { weatherForecastSchema } from '../schemas/weather';
+import { weatherForecastSchema, weatherLocationListSchema } from '../schemas/weather';
 import type { WeatherQuery } from '../types/weather';
 
 export async function getWeather(query: WeatherQuery) {
@@ -9,4 +9,9 @@ export async function getWeather(query: WeatherQuery) {
     timezone: query.timezone,
   });
   return weatherForecastSchema.parse((await webApiClient.get(`/weather?${parameters}`)).data);
+}
+
+export async function searchWeatherLocations(query: string) {
+  const parameters = new URLSearchParams({ query });
+  return weatherLocationListSchema.parse((await webApiClient.get(`/weather/locations?${parameters}`)).data);
 }
