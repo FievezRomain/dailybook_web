@@ -12,12 +12,17 @@ describe('NotesContent', () => {
   });
 
   it('affiche l’état vide puis crée une note Markdown', async () => {
-    render(<NotesContent />);
-    expect(screen.getByText('Aucune note')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Nouvelle note' }));
+    render(<NotesContent startCreating />);
     fireEvent.change(screen.getByLabelText('Titre'), { target: { value: 'Préparer le concours' } });
     fireEvent.change(screen.getByLabelText('Contenu'), { target: { value: '- Vérifier le matériel' } });
     fireEvent.click(screen.getByRole('button', { name: 'Créer la note' }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ titre: 'Préparer le concours', note: '- Vérifier le matériel', is_pinned: false }));
+  });
+
+  it('ouvre le détail texte sûr d’une note', () => {
+    mocks.query.mockReturnValue({ notes: [{ id: 7, titre: 'À retenir', note: '<script>inactif</script>', is_pinned: true, created_at: '2026-09-06' }], isLoading: false, isError: false, isMutating: false, createNote: mocks.create, updateNote: vi.fn(), deleteNote: vi.fn(), refetch: vi.fn() });
+    render(<NotesContent />);
+    fireEvent.click(screen.getByRole('button', { name: 'À retenir' }));
+    expect(screen.getByRole('main')).toHaveTextContent('<script>inactif</script>');
   });
 });

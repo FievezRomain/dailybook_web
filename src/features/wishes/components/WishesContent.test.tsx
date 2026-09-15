@@ -14,12 +14,19 @@ describe('WishesContent', () => {
 
   it('crée un souhait avec ses métadonnées validées', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(<QueryClientProvider client={client}><WishesContent /></QueryClientProvider>);
-    fireEvent.click(screen.getByRole('button', { name: 'Nouveau souhait' }));
+    render(<QueryClientProvider client={client}><WishesContent startCreating /></QueryClientProvider>);
     fireEvent.change(screen.getByLabelText('Nom'), { target: { value: 'Selle' } });
     fireEvent.change(screen.getByLabelText('Lien'), { target: { value: 'https://example.com/selle' } });
     fireEvent.change(screen.getByLabelText('Prix estimé'), { target: { value: '200' } });
     fireEvent.click(screen.getByRole('button', { name: 'Créer le souhait' }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ nom: 'Selle', url: 'https://example.com/selle', prix: '200', destinataire: null, image: null }));
+  });
+
+  it('ouvre le détail avec le lien marchand sécurisé', () => {
+    mocks.query.mockReturnValue({ wishes: [{ id: 8, nom: 'Selle', url: 'https://example.com/selle', prix: '200', destinataire: 'Nina', acquis: false, image: null }], isLoading: false, isError: false, isMutating: false, createWish: mocks.create, updateWish: vi.fn(), deleteWish: vi.fn(), refetch: vi.fn() });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><WishesContent /></QueryClientProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Selle' }));
+    expect(screen.getByRole('link', { name: /Voir le lien marchand/ })).toHaveAttribute('rel', 'noopener noreferrer');
   });
 });
