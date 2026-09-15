@@ -1,7 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const nodeExecutable = `"${process.execPath}"`;
-const nextCommand = `${nodeExecutable} node_modules/next/dist/bin/next`;
 const firebaseCommand = `${nodeExecutable} node_modules/firebase-tools/lib/bin/firebase.js`;
 
 export default defineConfig({
@@ -11,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3100',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -19,15 +18,23 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
-    command: `${firebaseCommand} emulators:exec --project vasco-e2e --only auth "${nextCommand} build && ${nextCommand} start"`,
-    env: {
-      ...process.env,
-      FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
-      FIREBASE_ADMIN_PROJECT_ID: 'vasco-e2e',
+  webServer: [
+    {
+      command: `${firebaseCommand} emulators:start --project vasco-e2e --only auth`,
+      url: 'http://127.0.0.1:9099/',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
     },
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+    {
+      command: `${nodeExecutable} scripts/start-e2e-server.mjs`,
+      env: {
+        ...process.env,
+        FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
+        FIREBASE_ADMIN_PROJECT_ID: 'vasco-e2e',
+      },
+      url: 'http://localhost:3100',
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+  ],
 });
