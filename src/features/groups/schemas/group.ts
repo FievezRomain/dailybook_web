@@ -24,6 +24,7 @@ export const groupSchema = z.object({
   id: positiveId,
   name: z.string(),
   informations: optionalText,
+  active: z.boolean().default(true),
   created_at: z.string().regex(/^\d{4}-\d{2}-\d{2}[T ][0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/).nullable().optional(),
   nb_members: z.number().int().nonnegative(),
   nb_animaux: z.number().int().nonnegative().optional().default(0),

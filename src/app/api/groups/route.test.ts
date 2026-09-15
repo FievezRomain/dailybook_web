@@ -8,6 +8,7 @@ import { GET, POST } from './route';
 const group = {
   id: 1,
   name: 'Écurie Vasco',
+  active: false,
   informations: null,
   created_at: '2026-08-24T10:00:00+00:00',
   nb_members: 1,
@@ -36,9 +37,11 @@ function mutation(body: unknown, csrf = true) {
 describe('/api/groups', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('lit exclusivement la liste REST courante', async () => {
+  it('lit exclusivement la liste REST courante et conserve le statut d’activité calculé par FastAPI', async () => {
     backendApiClient.mockResolvedValue([group]);
-    expect((await GET()).status).toBe(200);
+    const response = await GET();
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual([expect.objectContaining({ id: 1, active: false })]);
     expect(backendApiClient).toHaveBeenCalledWith('api/v1/groups');
   });
 

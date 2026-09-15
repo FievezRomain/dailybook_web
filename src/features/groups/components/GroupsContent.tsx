@@ -1,119 +1,56 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Plus, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { ConfirmDialog } from '@/shared/components/feedback/ConfirmDialog';
-import { usePremiumGate } from '@/shared/components/feedback/PremiumGate';
-import { PageHeader, PageShell, PageTitle } from '@/shared/components/layout/PageShell';
-import { useCurrentUser } from '@/features/user/hooks/use-current-user';
-import { useGroupInvitationsQuery, useGroupsQuery } from '../hooks/use-groups';
-import type { Group, GroupInvitation } from '../types/group';
-import { getCurrentGroupRole } from '../utils/group-access';
-import { GroupDetail } from './GroupDetail';
+import { useState } from 'react'
+import { Check, ChevronRight, PawPrint, ShieldCheck, UserRoundPlus, Users } from 'lucide-react'
+import { toast } from 'sonner'
 
-function GroupForm({ group, busy, onClose, onSubmit }: {
-  group: Group | null;
-  busy: boolean;
-  onClose: () => void;
-  onSubmit: (values: { name: string; informations: string | null }) => Promise<void>;
-}) {
-  const [name, setName] = useState(group?.name ?? '');
-  const [informations, setInformations] = useState(group?.informations ?? '');
+import { useCurrentUser } from '@/features/user/hooks/use-current-user'
+import { ConfirmDialog } from '@/shared/components/feedback/ConfirmDialog'
+import { usePremiumGate } from '@/shared/components/feedback/PremiumGate'
+import { FormSection } from '@/shared/components/forms/SteppedFormSheet'
+import { PageHeader, PageShell } from '@/shared/components/layout/PageShell'
+import { Button } from '@/shared/components/ui/button'
+import { Card } from '@/shared/components/ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
+import { Input } from '@/shared/components/ui/input'
+import { Textarea } from '@/shared/components/ui/textarea'
+import { cn } from '@/lib/utils'
+import { useGroupInvitationsQuery, useGroupsQuery } from '../hooks/use-groups'
+import type { Group, GroupInvitation } from '../types/group'
+import { getGroupPermissions } from '../utils/group-access'
+import { GroupDetail } from './GroupDetail'
 
-  return (
-    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
-      <DialogContent>
-        <DialogHeader><DialogTitle>{group ? 'Modifier le groupe' : 'Créer un groupe'}</DialogTitle></DialogHeader>
-        <div className="space-y-4">
-          <label className="grid gap-2"><span className="text-sm font-medium">Nom</span><Input value={name} maxLength={255} onChange={(event) => setName(event.target.value)} /></label>
-          <label className="grid gap-2"><span className="text-sm font-medium">Informations</span><Textarea value={informations} maxLength={2000} onChange={(event) => setInformations(event.target.value)} /></label>
-        </div>
-        <DialogFooter><Button variant="ghost" onClick={onClose}>Annuler</Button><Button disabled={!name.trim() || busy} onClick={() => void onSubmit({ name: name.trim(), informations: informations.trim() || null })}>{group ? 'Enregistrer' : 'Créer le groupe'}</Button></DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+function initials(name: string) { return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toLocaleUpperCase('fr') }
+
+function GroupForm({ group, busy, onClose, onSubmit }: { group: Group | null; busy: boolean; onClose: () => void; onSubmit: (values: { name: string; informations: string | null }) => Promise<void> }) {
+  const [name, setName] = useState(group?.name ?? '')
+  const [informations, setInformations] = useState(group?.informations ?? '')
+  return <Dialog open onOpenChange={(next) => { if (!next) onClose() }}><DialogContent className="max-w-[620px] gap-0 overflow-hidden rounded-[24px] p-0"><DialogHeader className="border-b bg-muted/20 px-6 py-5"><div className="flex items-start gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-[15px] bg-primary/10 text-primary"><Users className="size-5" /></span><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Groupes · Étape unique</p><DialogTitle className="mt-1 text-2xl">{group ? 'Modifier le groupe' : 'Créer un groupe'}</DialogTitle><p className="mt-1 text-sm text-muted-foreground">Nommez l’espace partagé et précisez son usage pour les futurs membres.</p></div></div></DialogHeader><div className="p-6"><FormSection title="Identité du groupe" description="Les invitations et animaux seront gérés après la création."><div className="space-y-4"><label className="grid gap-2"><span className="text-sm font-medium">Nom</span><Input value={name} maxLength={255} onChange={(event) => setName(event.target.value)} /></label><label className="grid gap-2"><span className="text-sm font-medium">Informations</span><Textarea value={informations} maxLength={2000} onChange={(event) => setInformations(event.target.value)} /></label></div></FormSection></div><DialogFooter className="border-t bg-muted/10 px-6 py-4"><Button variant="ghost" onClick={onClose}>Annuler</Button><Button disabled={!name.trim() || busy} onClick={() => void onSubmit({ name: name.trim(), informations: informations.trim() || null })}>{group ? 'Enregistrer les modifications' : 'Créer le groupe'}</Button></DialogFooter></DialogContent></Dialog>
 }
 
-export default function GroupsContent() {
-  const { user, isPremium, isLoading: isUserLoading } = useCurrentUser();
-  const groupsQuery = useGroupsQuery();
-  const invitationsQuery = useGroupInvitationsQuery();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [formGroup, setFormGroup] = useState<Group | null | undefined>(undefined);
-  const [invitationToDecline, setInvitationToDecline] = useState<GroupInvitation | null>(null);
-  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
-  const { openPremiumDialog, handlePremiumError } = usePremiumGate();
+export default function GroupsContent({ startCreating = false }: { startCreating?: boolean }) {
+  const { user, isPremium, isLoading: isUserLoading } = useCurrentUser()
+  const groupsQuery = useGroupsQuery()
+  const invitationsQuery = useGroupInvitationsQuery()
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [formGroup, setFormGroup] = useState<Group | null | undefined>(startCreating ? null : undefined)
+  const [invitationToDecline, setInvitationToDecline] = useState<GroupInvitation | null>(null)
+  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null)
+  const { openPremiumDialog, handlePremiumError } = usePremiumGate()
+  const groups = groupsQuery.groups ?? []
+  const selectedGroup = groups.find((group) => group.id === selectedId) ?? groups[0] ?? null
+  const selectedPermissions = selectedGroup ? getGroupPermissions(selectedGroup, user, isPremium) : null
 
-  const groups = groupsQuery.groups ?? [];
-  const selectedGroup = groups.find((group) => group.id === selectedId) ?? groups[0] ?? null;
+  async function saveGroup(values: { name: string; informations: string | null }) { try { if (formGroup) await groupsQuery.updateGroup(formGroup.id, values); else { const created = await groupsQuery.createGroup(values); setSelectedId(created.id) } setFormGroup(undefined); toast.success(formGroup ? 'Groupe mis à jour.' : 'Groupe créé.') } catch (error) { if (!await handlePremiumError(error, 'groupManagement')) toast.error("Le groupe n'a pas pu être enregistré.") } }
+  async function respondInvitation(invitation: GroupInvitation, status: 'accepted' | 'declined') { try { const joined = await invitationsQuery.respondInvitation(invitation.id, { status }); if (joined) setSelectedId(joined.id); toast.success(status === 'accepted' ? 'Invitation acceptée.' : 'Invitation refusée.') } catch { toast.error("L'invitation n'a pas pu être traitée.") } finally { setInvitationToDecline(null) } }
+  async function removeGroup() { if (!groupToDelete) return; try { await groupsQuery.deleteGroup(groupToDelete.id); toast.success('Groupe supprimé.') } catch (error) { if (!await handlePremiumError(error, 'groupManagement')) toast.error("Le groupe n'a pas pu être supprimé.") } finally { setGroupToDelete(null) } }
 
-  async function saveGroup(values: { name: string; informations: string | null }) {
-    try {
-      if (formGroup) await groupsQuery.updateGroup(formGroup.id, values);
-      else {
-        const created = await groupsQuery.createGroup(values);
-        setSelectedId(created.id);
-      }
-      setFormGroup(undefined);
-      toast.success(formGroup ? 'Groupe mis à jour.' : 'Groupe créé.');
-    } catch (error) {
-      if (!await handlePremiumError(error, 'groupManagement')) toast.error("Le groupe n'a pas pu être enregistré.");
-    }
-  }
+  if (isUserLoading || groupsQuery.isLoading || invitationsQuery.isLoading) return <PageShell><div className="h-64 animate-pulse rounded-[24px] bg-muted" /></PageShell>
 
-  async function respondInvitation(invitation: GroupInvitation, status: 'accepted' | 'declined') {
-    try {
-      const joined = await invitationsQuery.respondInvitation(invitation.id, { status });
-      if (joined) setSelectedId(joined.id);
-      toast.success(status === 'accepted' ? 'Invitation acceptée.' : 'Invitation refusée.');
-    } catch { toast.error("L'invitation n'a pas pu être traitée."); }
-    finally { setInvitationToDecline(null); }
-  }
-
-  async function removeGroup() {
-    if (!groupToDelete) return;
-    try { await groupsQuery.deleteGroup(groupToDelete.id); toast.success('Groupe supprimé.'); }
-    catch (error) {
-      if (!await handlePremiumError(error, 'groupManagement')) toast.error("Le groupe n'a pas pu être supprimé.");
-    }
-    finally { setGroupToDelete(null); }
-  }
-
-  if (isUserLoading || groupsQuery.isLoading || invitationsQuery.isLoading) return <PageShell><p>Chargement des groupes…</p></PageShell>;
-
-  return (
-    <PageShell className="pb-24">
-      <PageHeader className="items-center">
-        <div><PageTitle>Groupes</PageTitle><p className="text-muted-foreground">Partagez le suivi de vos animaux avec les personnes de confiance.</p></div>
-        <Button onClick={() => isPremium ? setFormGroup(null) : openPremiumDialog('groupManagement')}><Plus className="size-4" /> Créer un groupe {!isPremium && '· Premium'}</Button>
-      </PageHeader>
-
-      {(groupsQuery.isError || invitationsQuery.isError) && <div role="alert" className="rounded-lg border border-destructive/40 p-4"><p>Une partie des groupes est indisponible.</p><Button className="mt-2" variant="outline" onClick={() => { void groupsQuery.refetch(); void invitationsQuery.refetch(); }}>Réessayer</Button></div>}
-
-      {!!invitationsQuery.invitations?.length && <Card>
-        <CardHeader><CardTitle>Invitations en attente</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {invitationsQuery.invitations.map((invitation) => <div key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{invitation.group_name}</p><p className="text-sm text-muted-foreground">Invitation de {invitation.proposed_by_name || 'un gestionnaire'}</p></div><div className="flex gap-2"><Button size="sm" disabled={invitationsQuery.isMutating} onClick={() => void respondInvitation(invitation, 'accepted')}>Accepter</Button><Button size="sm" variant="outline" disabled={invitationsQuery.isMutating} onClick={() => setInvitationToDecline(invitation)}>Refuser</Button></div></div>)}
-        </CardContent>
-      </Card>}
-
-      {!groups.length ? <Card><CardContent className="flex flex-col items-center gap-3 py-12 text-center"><Users className="size-10 text-muted-foreground" /><div><p className="font-medium">Aucun groupe actif</p><p className="text-sm text-muted-foreground">Vous pouvez accepter une invitation quel que soit votre abonnement.</p></div></CardContent></Card> : <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-        <aside className="space-y-2" aria-label="Groupes actifs">
-          <p className="text-sm font-medium text-muted-foreground">Groupes actifs</p>
-          {groups.map((group) => <Button key={group.id} variant={selectedGroup?.id === group.id ? 'secondary' : 'ghost'} className="h-auto w-full justify-start py-3 text-left" onClick={() => setSelectedId(group.id)}><span><span className="block font-medium">{group.name}</span><span className="block text-xs text-muted-foreground">{group.nb_members} membre{group.nb_members > 1 ? 's' : ''} · {group.nb_animaux} animal{group.nb_animaux > 1 ? 'aux' : ''}</span></span></Button>)}
-        </aside>
-        {selectedGroup && <div className="space-y-4"><GroupDetail key={selectedGroup.id} group={selectedGroup} onEdit={() => setFormGroup(selectedGroup)} />{getCurrentGroupRole(selectedGroup, user) === 'manager' && <Button variant="destructive" onClick={() => isPremium ? setGroupToDelete(selectedGroup) : openPremiumDialog('groupManagement')}>Supprimer le groupe {!isPremium && '· Premium'}</Button>}</div>}
-      </div>}
-
-      {formGroup !== undefined && <GroupForm key={formGroup?.id ?? 'create'} group={formGroup} busy={groupsQuery.isMutating} onClose={() => setFormGroup(undefined)} onSubmit={saveGroup} />}
-      <ConfirmDialog open={Boolean(invitationToDecline)} title="Refuser cette invitation ?" description={invitationToDecline ? `Vous ne rejoindrez pas le groupe ${invitationToDecline.group_name}.` : undefined} confirmLabel="Refuser" onCancel={() => setInvitationToDecline(null)} onConfirm={() => invitationToDecline && void respondInvitation(invitationToDecline, 'declined')} />
-      <ConfirmDialog open={Boolean(groupToDelete)} title="Supprimer ce groupe ?" description="Les liens de partage du groupe seront supprimés. Les animaux et leurs données d’origine seront conservés." confirmLabel="Supprimer" onCancel={() => setGroupToDelete(null)} onConfirm={() => void removeGroup()} />
-    </PageShell>
-  );
+  return <PageShell className="space-y-6 pb-24"><PageHeader className="items-center"><div><p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">Espaces partagés</p><h2 className="mt-1 text-3xl font-semibold tracking-[-0.03em]">Prendre soin, ensemble</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Un espace clair pour coordonner les personnes de confiance et les animaux que vous partagez.</p></div><span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold"><ShieldCheck className="size-4 text-primary" />{groups.length} groupe{groups.length > 1 ? 's' : ''} · {groups.filter((group) => group.active).length} actif{groups.filter((group) => group.active).length > 1 ? 's' : ''}</span></PageHeader>
+    {(groupsQuery.isError || invitationsQuery.isError) && <div role="alert" className="rounded-[18px] border border-destructive/30 p-4"><p>Une partie des groupes est indisponible.</p><Button className="mt-2" variant="outline" onClick={() => { void groupsQuery.refetch(); void invitationsQuery.refetch() }}>Réessayer</Button></div>}
+    {!!invitationsQuery.invitations?.length && <section className="relative overflow-hidden rounded-[22px] border border-primary/20 bg-primary/[0.035] p-5" aria-labelledby="pending-invitations"><div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-primary" /><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-[14px] bg-primary/10 text-primary"><UserRoundPlus className="size-5" /></span><div><h3 id="pending-invitations" className="font-semibold">{invitationsQuery.invitations.length} invitation{invitationsQuery.invitations.length > 1 ? 's' : ''} en attente</h3><p className="text-xs text-muted-foreground">Rejoindre un groupe reste possible quel que soit votre abonnement.</p></div></div><div className="mt-4 grid gap-3 md:grid-cols-2">{invitationsQuery.invitations.map((invitation) => <div key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border bg-card p-3"><div><p className="font-semibold">{invitation.group_name}</p><p className="text-xs text-muted-foreground">Proposé par {invitation.proposed_by_name || 'un gestionnaire'}</p></div><div className="flex gap-2"><Button size="sm" disabled={invitationsQuery.isMutating} onClick={() => void respondInvitation(invitation, 'accepted')}>Accepter</Button><Button size="sm" variant="ghost" disabled={invitationsQuery.isMutating} onClick={() => setInvitationToDecline(invitation)}>Refuser</Button></div></div>)}</div></section>}
+    {!groups.length ? <Card className="min-h-64 items-center justify-center rounded-[24px] border-dashed bg-muted/15 text-center shadow-none"><Users className="size-10 text-muted-foreground" /><h3 className="text-lg font-semibold">Votre premier cercle est à créer</h3><p className="max-w-md text-sm text-muted-foreground">Utilisez Créer dans le menu principal ou acceptez une invitation pour commencer.</p></Card> : <div className="grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]"><aside className={cn('overflow-hidden rounded-[22px] border bg-card shadow-sm lg:sticky lg:top-4 lg:block', selectedId !== null && 'hidden')} aria-label="Vos groupes"><div className="border-b bg-muted/20 px-4 py-3"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">Vos groupes</p><p className="mt-1 text-xs text-muted-foreground">Choisissez un espace à explorer.</p></div><div className="p-2">{groups.map((group) => { const active = selectedGroup?.id === group.id; const permissions = getGroupPermissions(group, user, isPremium); return <button key={group.id} type="button" aria-current={active ? 'true' : undefined} className={cn('flex w-full items-center gap-3 rounded-[16px] p-3 text-left transition-colors hover:bg-muted/50', active && 'bg-primary/[0.07]')} onClick={() => setSelectedId(group.id)}><span className={cn('grid size-11 shrink-0 place-items-center rounded-[14px] text-sm font-bold', active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{initials(group.name)}</span><span className="min-w-0 flex-1"><span className="flex items-center gap-2"><span className="truncate text-sm font-semibold">{group.name}</span>{active && <Check className="size-3.5 text-primary" />}</span><span className="mt-1 block truncate text-[11px] text-muted-foreground">{permissions.role === 'manager' ? 'Gestionnaire' : 'Membre'} · {group.nb_members} membre{group.nb_members > 1 ? 's' : ''}</span><span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground"><PawPrint className="size-3" />{group.nb_animaux} animal{group.nb_animaux > 1 ? 'aux' : ''}{!group.active && ' · Inactif'}</span></span><ChevronRight className="size-4 shrink-0 text-muted-foreground" /></button>})}</div></aside>{selectedGroup && <div className={cn('min-w-0 space-y-4 lg:block', selectedId === null && 'hidden')}><Button variant="ghost" className="lg:hidden" onClick={() => setSelectedId(null)}>← Retour aux groupes</Button><GroupDetail key={selectedGroup.id} group={selectedGroup} onEdit={() => setFormGroup(selectedGroup)} />{selectedPermissions?.role === 'manager' && <div className="flex justify-end"><Button variant="destructive" onClick={() => selectedPermissions.canManage ? setGroupToDelete(selectedGroup) : openPremiumDialog('groupManagement')}>Supprimer le groupe {!selectedPermissions.canManage && '· Premium'}</Button></div>}</div>}</div>}
+    {formGroup !== undefined && <GroupForm key={formGroup?.id ?? 'create'} group={formGroup} busy={groupsQuery.isMutating} onClose={() => setFormGroup(undefined)} onSubmit={saveGroup} />}<ConfirmDialog open={Boolean(invitationToDecline)} title="Refuser cette invitation ?" description={invitationToDecline ? `Vous ne rejoindrez pas le groupe ${invitationToDecline.group_name}.` : undefined} confirmLabel="Refuser" onCancel={() => setInvitationToDecline(null)} onConfirm={() => invitationToDecline && void respondInvitation(invitationToDecline, 'declined')} /><ConfirmDialog open={Boolean(groupToDelete)} title="Supprimer ce groupe ?" description="Les liens de partage du groupe seront supprimés. Les animaux et leurs données d’origine seront conservés." confirmLabel="Supprimer" onCancel={() => setGroupToDelete(null)} onConfirm={() => void removeGroup()} />
+  </PageShell>
 }

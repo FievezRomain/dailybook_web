@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Group } from '../types/group';
-import { getAcceptedGroupMembers, getCurrentGroupRole, getGroupAnimals, getPendingGroupMembers } from './group-access';
+import { getAcceptedGroupMembers, getCurrentGroupRole, getGroupAnimals, getGroupPermissions, getPendingGroupMembers } from './group-access';
 
 const group: Group = {
   id: 7,
   name: 'Écurie Vasco',
+  active: true,
   informations: null,
   nb_members: 2,
   nb_animaux: 2,
@@ -35,5 +36,16 @@ describe('group access helpers', () => {
     expect(getCurrentGroupRole(group, { id: 1, email: 'other@example.com' })).toBe('manager');
     expect(getCurrentGroupRole(group, { id: 99, email: 'MEMBER@example.com' })).toBe('member');
     expect(getCurrentGroupRole(group, { id: 99, email: 'outside@example.com' })).toBeNull();
+  });
+
+  it('ne propose aucune mutation quand le backend signale un groupe inactif', () => {
+    const inactiveGroup = { ...group, active: false };
+
+    expect(getGroupPermissions(inactiveGroup, { id: 1, email: 'manager@example.com' }, true)).toEqual({
+      active: false,
+      role: 'manager',
+      canManage: false,
+      canProposeOwnAnimals: false,
+    });
   });
 });

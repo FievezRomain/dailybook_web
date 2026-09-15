@@ -19,3 +19,15 @@ export function getCurrentGroupRole(group: Group, user: { id: number; email: str
   );
   return member?.role ?? null;
 }
+
+export function getGroupPermissions(group: Group, user: { id: number; email: string } | undefined, isPremium: boolean) {
+  const role = getCurrentGroupRole(group, user);
+  const active = group.active;
+
+  return {
+    active,
+    role,
+    canManage: active && role === 'manager' && isPremium,
+    canProposeOwnAnimals: active && role !== null,
+  };
+}

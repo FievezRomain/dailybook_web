@@ -12,7 +12,7 @@ import { useAnimalsQuery } from '@/features/animals/hooks/use-animals';
 import { useCurrentUser } from '@/features/user/hooks/use-current-user';
 import { useGroupManagement, usePendingAnimalSharesQuery } from '../hooks/use-groups';
 import type { Group } from '../types/group';
-import { getAcceptedGroupMembers, getCurrentGroupRole, getGroupAnimals, getPendingGroupMembers } from '../utils/group-access';
+import { getAcceptedGroupMembers, getGroupAnimals, getGroupPermissions, getPendingGroupMembers } from '../utils/group-access';
 
 type Confirmation =
   | { kind: 'member'; email: string; own: boolean }
@@ -66,9 +66,8 @@ export function GroupDetail({ group, onEdit }: { group: Group; onEdit: () => voi
   const { openPremiumDialog, handlePremiumError } = usePremiumGate();
   const { animals } = useAnimalsQuery();
   const management = useGroupManagement(group.id);
-  const role = getCurrentGroupRole(group, user);
+  const { active: isActive, role, canManage, canProposeOwnAnimals } = getGroupPermissions(group, user, isPremium);
   const isManager = role === 'manager';
-  const canManage = isManager && isPremium;
   const acceptedMembers = getAcceptedGroupMembers(group);
   const pendingMembers = getPendingGroupMembers(group);
   const acceptedAnimals = getGroupAnimals(group, 'accepted');
@@ -109,38 +108,40 @@ export function GroupDetail({ group, onEdit }: { group: Group; onEdit: () => voi
 
   return (
     <section className="space-y-5" aria-labelledby="group-title">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><h2 id="group-title" className="text-2xl font-semibold">{group.name}</h2>{group.informations && <p className="mt-1 text-muted-foreground">{group.informations}</p>}</div>
+      <div className="relative flex flex-wrap items-start justify-between gap-4 overflow-hidden rounded-[24px] border bg-card p-5 shadow-surface sm:p-6">
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-[#b07165] to-[#ce9871]" />
+        <div className="min-w-0"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">{isManager ? 'Gestionnaire' : 'Membre'}</span><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${isActive ? 'bg-emerald-500/10 text-emerald-700' : 'bg-warning/10 text-warning'}`}>{isActive ? 'Actif' : 'Inactif'}</span></div><h2 id="group-title" className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{group.name}</h2>{group.informations && <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{group.informations}</p>}<div className="mt-4 flex gap-4 text-xs text-muted-foreground"><span><strong className="text-foreground">{acceptedMembers.length}</strong> membre{acceptedMembers.length > 1 ? 's' : ''}</span><span><strong className="text-foreground">{acceptedAnimals.length}</strong> animal{acceptedAnimals.length > 1 ? 'aux' : ''} partagé{acceptedAnimals.length > 1 ? 's' : ''}</span></div></div>
         <div className="flex gap-2">
           {isManager && <Button variant="outline" onClick={() => canManage ? onEdit() : openPremiumDialog('groupManagement')}>Modifier {!canManage && '· Premium'}</Button>}
-          {role === 'member' && user && <Button variant="outline" onClick={() => setConfirmation({ kind: 'member', email: user.email, own: true })}>Quitter le groupe</Button>}
+          {role === 'member' && user && isActive && <Button variant="outline" onClick={() => setConfirmation({ kind: 'member', email: user.email, own: true })}>Quitter le groupe</Button>}
         </div>
       </div>
 
       {isManager && !isPremium && <PremiumNotice feature="groupManagement" />}
+      {!isActive && <Card role="status" className="border-warning/40 bg-warning/10"><CardContent className="p-4 text-sm"><p className="font-medium">Ce groupe est inactif</p><p className="mt-1 text-muted-foreground">Le Premium du gestionnaire n’est plus actif. Les données restent visibles, mais les invitations et partages sont suspendus.</p>{isManager && <div className="mt-3"><PremiumNotice feature="groupManagement" compact /></div>}</CardContent></Card>}
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <Card>
+        <Card className="rounded-[22px] border-border/70 shadow-sm">
           <CardHeader><CardTitle className="flex items-center gap-2"><Users className="size-5" /> Membres</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {acceptedMembers.map((member) => <div key={member.user_id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{member.prenom || member.email}</p><p className="text-sm text-muted-foreground">{member.role === 'manager' ? 'Gestionnaire' : member.email}</p></div>{canManage && member.role === 'member' && <Button size="sm" variant="ghost" aria-label={`Retirer ${member.prenom || member.email}`} onClick={() => setConfirmation({ kind: 'member', email: member.email, own: false })}><UserMinus className="size-4" /></Button>}</div>)}
+            {acceptedMembers.map((member) => <div key={member.user_id} className="flex items-center justify-between gap-3 rounded-[16px] bg-muted/35 p-3"><div className="flex min-w-0 items-center gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">{(member.prenom || member.email).slice(0, 2).toLocaleUpperCase('fr')}</span><div className="min-w-0"><p className="truncate font-medium">{member.prenom || member.email}</p><p className="truncate text-xs text-muted-foreground">{member.role === 'manager' ? 'Gestionnaire' : member.email}</p></div></div>{canManage && member.role === 'member' && <Button size="sm" variant="ghost" aria-label={`Retirer ${member.prenom || member.email}`} onClick={() => setConfirmation({ kind: 'member', email: member.email, own: false })}><UserMinus className="size-4" /></Button>}</div>)}
             {pendingMembers.length > 0 && <div><p className="mb-2 text-sm font-medium">Invitations en attente</p>{pendingMembers.map((member) => <p key={member.email} className="text-sm text-muted-foreground">{member.email}</p>)}</div>}
             {canManage && <div className="flex gap-2 pt-2"><Input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="membre@exemple.fr" aria-label="Adresse email à inviter" /><Button disabled={!inviteEmail.trim() || management.isMutating} onClick={() => void invite()}>Inviter</Button></div>}
-            {isManager && !canManage && <Button size="sm" variant="outline" onClick={() => openPremiumDialog('groupManagement')}>Inviter un membre · Premium</Button>}
+            {isManager && isActive && !canManage && <Button size="sm" variant="outline" onClick={() => openPremiumDialog('groupManagement')}>Inviter un membre · Premium</Button>}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-[22px] border-border/70 shadow-sm">
           <CardHeader><CardTitle className="flex items-center gap-2"><PawPrint className="size-5" /> Animaux partagés</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {!acceptedAnimals.length && <p className="text-sm text-muted-foreground">Aucun animal accepté.</p>}
-            {acceptedAnimals.map((animal) => <div key={animal.id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="font-medium">{animal.nom || 'Animal sans nom'}</p><p className="text-sm text-muted-foreground">{animal.espece || 'Espèce non renseignée'}</p></div>{(canManage || ownedIds.has(animal.id)) && <Button size="sm" variant="ghost" onClick={() => setConfirmation({ kind: 'animal', id: animal.id, name: animal.nom || 'cet animal' })}>Retirer</Button>}</div>)}
+            {acceptedAnimals.map((animal) => <div key={animal.id} className="flex items-center justify-between gap-3 rounded-[16px] bg-muted/35 p-3"><div className="flex min-w-0 items-center gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-bold text-primary">{(animal.nom || 'A').slice(0, 1).toLocaleUpperCase('fr')}</span><div className="min-w-0"><p className="truncate font-medium">{animal.nom || 'Animal sans nom'}</p><p className="truncate text-xs text-muted-foreground">{animal.espece || 'Espèce non renseignée'}</p></div></div>{(canManage || ownedIds.has(animal.id)) && <Button size="sm" variant="ghost" onClick={() => setConfirmation({ kind: 'animal', id: animal.id, name: animal.nom || 'cet animal' })}>Retirer</Button>}</div>)}
             {pendingAnimals.length > 0 && <div><p className="mb-2 text-sm font-medium">En attente de validation</p>{pendingAnimals.map((animal) => <p key={animal.id} className="text-sm text-muted-foreground">{animal.nom || `Animal ${animal.id}`}</p>)}</div>}
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      {canProposeOwnAnimals && <Card>
         <CardHeader><CardTitle>Proposer mes animaux</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">Seuls les animaux dont vous êtes directement propriétaire peuvent être proposés.</p>
@@ -148,7 +149,7 @@ export function GroupDetail({ group, onEdit }: { group: Group; onEdit: () => voi
           {ownedCandidates.map((animal) => <label key={animal.id} className="flex cursor-pointer items-center gap-3 rounded-lg border p-3"><input type="checkbox" checked={selectedAnimals.includes(animal.id)} onChange={(event) => setSelectedAnimals((current) => event.target.checked ? [...current, animal.id] : current.filter((id) => id !== animal.id))} /><span>{animal.nom || 'Animal sans nom'}</span></label>)}
           <Button disabled={!selectedAnimals.length || management.isMutating} onClick={() => void propose()}>Proposer la sélection</Button>
         </CardContent>
-      </Card>
+      </Card>}
 
       {canManage && <ManagerRequests group={group} />}
       <ConfirmDialog open={confirmation?.kind === 'member' || confirmation?.kind === 'animal'} title={confirmation?.kind === 'member' ? (confirmation.own ? 'Quitter ce groupe ?' : 'Retirer ce membre ?') : 'Retirer cet animal ?'} description={confirmation?.kind === 'member' && confirmation.own ? 'Vos partages et leurs liens aux événements de ce groupe seront retirés, sans supprimer vos données d’origine.' : confirmation?.kind === 'animal' ? `Le partage de ${confirmation.name} et ses liens aux événements du groupe seront retirés. L’animal et son historique seront conservés.` : 'Le membre perdra son accès au groupe.'} confirmLabel={confirmation?.kind === 'member' && confirmation.own ? 'Quitter' : 'Retirer'} onCancel={() => setConfirmation(null)} onConfirm={() => void confirmRemoval()} />

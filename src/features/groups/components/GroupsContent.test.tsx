@@ -19,7 +19,7 @@ vi.mock('../hooks/use-groups', () => ({
 vi.mock('./GroupDetail', () => ({ GroupDetail: ({ group }: { group: { name: string } }) => { mocks.detail(group); return <div>Détail {group.name}</div>; } }));
 
 const group = {
-  id: 7, name: 'Écurie Vasco', informations: null, nb_members: 1, nb_animaux: 0,
+  id: 7, name: 'Écurie Vasco', active: true, informations: null, nb_members: 1, nb_animaux: 0,
   data: {
     animals: [{ type: 'pending' as const, items: [] }, { type: 'accepted' as const, items: [] }],
     members: [{ type: 'pending' as const, items: [] }, { type: 'accepted' as const, items: [{ user_id: 2, email: 'free@example.com', prenom: null, role: 'member' as const }] }],
@@ -41,13 +41,14 @@ describe('GroupsContent', () => {
     await waitFor(() => expect(mocks.respondInvitation).toHaveBeenCalledWith(4, { status: 'accepted' }));
   });
 
-  it('explique le verrou Premium au lieu de masquer la création', () => {
+  it('ne duplique pas la création globale dans l’en-tête', () => {
     render(<PremiumDialogProvider><GroupsContent /></PremiumDialogProvider>);
-    fireEvent.click(screen.getByRole('button', { name: /Créer un groupe/ }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Gestion des groupes · Premium');
-    expect(screen.getByRole('dialog')).toHaveTextContent('Un compte Gratuit peut toujours accepter une invitation');
-    fireEvent.click(screen.getByRole('button', { name: 'Comparer les offres' }));
-    expect(screen.getByLabelText('Comparatif des abonnements')).toHaveTextContent('Gratuit');
-    expect(screen.getByLabelText('Comparatif des abonnements')).toHaveTextContent('Premium');
+    expect(screen.queryByRole('button', { name: /Créer un groupe/ })).not.toBeInTheDocument();
+  });
+
+  it('ouvre directement le formulaire après une création globale Premium', () => {
+    mocks.currentUser.mockReturnValue({ user: { id: 2, email: 'premium@example.com' }, isPremium: true, isLoading: false });
+    render(<PremiumDialogProvider><GroupsContent startCreating /></PremiumDialogProvider>);
+    expect(screen.getByRole('dialog')).toHaveTextContent('Créer un groupe');
   });
 });
