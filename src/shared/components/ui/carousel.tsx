@@ -49,6 +49,7 @@ function Carousel({
   plugins,
   className,
   children,
+  "aria-label": ariaLabel = "Carrousel",
   ...props
 }: React.ComponentProps<"div"> & CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
@@ -77,15 +78,18 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "ArrowLeft") {
+      const previousKey = orientation === "horizontal" ? "ArrowLeft" : "ArrowUp"
+      const nextKey = orientation === "horizontal" ? "ArrowRight" : "ArrowDown"
+
+      if (event.key === previousKey) {
         event.preventDefault()
         scrollPrev()
-      } else if (event.key === "ArrowRight") {
+      } else if (event.key === nextKey) {
         event.preventDefault()
         scrollNext()
       }
     },
-    [scrollPrev, scrollNext]
+    [orientation, scrollPrev, scrollNext]
   )
 
   React.useEffect(() => {
@@ -128,6 +132,7 @@ function Carousel({
         className={cn("relative", className)}
         role="region"
         aria-roledescription="carousel"
+        aria-label={ariaLabel}
         data-slot="carousel"
         {...props}
       >
@@ -190,7 +195,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-11 rounded-full",
         orientation === "horizontal"
           ? "top-1/2 -left-12 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -201,7 +206,7 @@ function CarouselPrevious({
       {...props}
     >
       <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">Diapositive précédente</span>
     </Button>
   )
 }
@@ -220,7 +225,7 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-11 rounded-full",
         orientation === "horizontal"
           ? "top-1/2 -right-12 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -231,7 +236,7 @@ function CarouselNext({
       {...props}
     >
       <ArrowRight />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">Diapositive suivante</span>
     </Button>
   )
 }

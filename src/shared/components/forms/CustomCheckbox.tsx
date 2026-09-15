@@ -4,23 +4,27 @@ import { cn } from "@/lib/utils";
 interface CustomCheckboxProps {
   checked: boolean;
   onChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  label?: string;
 }
 
-export function CustomCheckbox({ checked, onChange }: CustomCheckboxProps) {
+export function CustomCheckbox({ checked, onChange, disabled = false, label = 'Marquer comme complété' }: CustomCheckboxProps) {
   return (
     <button
       type="button"
       onClick={onChange}
-      className={cn(
-        "w-6 h-6 flex items-center justify-center rounded-sm border transition-all duration-200 cursor-pointer",
-        checked
-          ? "bg-foreground border-foreground hover:bg-foreground/90"
-          : "bg-background border-muted-foreground hover:border-foreground"
-      )}
-      aria-pressed={checked}
-      aria-label="Marquer comme complété"
+      disabled={disabled}
+      className="grid size-11 shrink-0 place-items-center rounded-control bg-transparent p-0 outline-none transition-transform duration-[var(--motion-fast)] focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={label}
     >
-      {checked && <Check className="w-4 h-4 text-background transition-transform duration-200 scale-100" />}
+      <span className={cn(
+        "flex size-6 items-center justify-center rounded-md border-2 transition-[background-color,border-color] duration-[var(--motion-fast)]",
+        checked ? "border-foreground bg-foreground" : "border-muted-foreground bg-card hover:border-foreground",
+      )}>
+        {checked && <Check aria-hidden="true" className="size-4 text-background" />}
+      </span>
     </button>
   );
 }

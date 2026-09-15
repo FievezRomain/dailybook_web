@@ -2,12 +2,18 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils"
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+type TextareaProps = React.ComponentProps<"textarea"> & {
+  size?: "compact" | "default" | "large"
+}
+
+function Textarea({ className, size = "compact", ...props }: TextareaProps) {
   return (
     <textarea
       data-slot="textarea"
+      data-size={size}
       className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-control border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full resize-y rounded-control border bg-card p-3 transition-[color,background-color,border-color,box-shadow] duration-[var(--motion-fast)] outline-none hover:border-foreground/60 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:border-border disabled:bg-muted disabled:text-muted-foreground read-only:border-border read-only:bg-muted [@media(pointer:coarse)]:resize-none",
+        "data-[size=compact]:h-24 data-[size=compact]:text-[13px] data-[size=default]:h-[120px] data-[size=default]:text-sm data-[size=large]:h-40 data-[size=large]:px-4 data-[size=large]:text-sm",
         className
       )}
       {...props}
@@ -15,4 +21,4 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   )
 }
 
-export { Textarea }
+export { Textarea, type TextareaProps }

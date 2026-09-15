@@ -7,7 +7,3 @@ export function PageShell({ className, ...props }: React.ComponentProps<'main'>)
 export function PageHeader({ className, ...props }: React.ComponentProps<'header'>) {
   return <header className={cn('flex flex-wrap items-start justify-between gap-surface', className)} {...props} />;
 }
-
-export function PageTitle({ className, ...props }: React.ComponentProps<'h1'>) {
-  return <h1 className={cn('text-page-title font-bold tracking-tight', className)} {...props} />;
-}

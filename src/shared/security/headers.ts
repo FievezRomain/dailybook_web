@@ -36,7 +36,9 @@ export function buildContentSecurityPolicy(nonce: string, isDevelopment: boolean
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ''}`,
     `style-src-elem 'self' 'nonce-${nonce}' `
       + "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' "
-      + "'sha256-CIxDM5jnsGiKqXs2v7NKCY5MzdR9gu6TtiMJrDw29AY='",
+      + "'sha256-CIxDM5jnsGiKqXs2v7NKCY5MzdR9gu6TtiMJrDw29AY=' "
+      // Sonner 2.0.8 injects this immutable stylesheet at runtime.
+      + "'sha256-StEaX+se6YS7pqjzrzMIA0KaX9zF/8zAhvQXZAe5epY='",
     "style-src-attr 'unsafe-inline'",
     `img-src ${imageSources.join(' ')}`,
     "font-src 'self' data:",

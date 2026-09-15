@@ -34,10 +34,11 @@ describe('compatibilité des lectures backend', () => {
     expect(groupSchema.parse({
       id: 1,
       name: 'Écurie',
+      active: false,
       nb_members: 1,
       created_at: '2026-08-25T10:30:00.123456',
       data: { animals: [], members: [] },
-    }).created_at).toBe('2026-08-25T10:30:00.123456');
+    }).active).toBe(false);
   });
 
   it.each(['../secret.pdf', 'folder/file.pdf', 'folder\\file.pdf', '\u0000payload.jpg'])

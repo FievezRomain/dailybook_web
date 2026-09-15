@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { WebApiError, type WebApiErrorPayload } from './api-error';
+import { sessionExpiryEvent } from '@/shared/security/session-expiry';
 
 const MUTATION_METHODS = new Set(['post', 'put', 'patch', 'delete']);
 const CSRF_COOKIE_NAME = 'vasco-csrf';
@@ -25,6 +26,10 @@ webApiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<WebApiErrorPayload>) => {
     const payload = error.response?.data;
+    if (typeof window !== 'undefined' && error.response?.status === 401 && !error.config?.url?.startsWith('/session/')) {
+      const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.dispatchEvent(new CustomEvent(sessionExpiryEvent, { detail: { returnTo } }));
+    }
     throw new WebApiError({
       code: payload?.code ?? 'NETWORK_ERROR',
       message: payload?.message ?? 'Le service Vasco est temporairement indisponible.',
