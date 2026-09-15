@@ -15,7 +15,7 @@ vi.mock('@/lib/firebaseService', () => ({
   isEmailVerified: mocks.verified,
 }));
 vi.mock('@/features/user/api/user-api', () => ({ establishAuthenticatedSession: mocks.establishSession }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: mocks.replace }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: mocks.replace }), useSearchParams: () => new URLSearchParams() }));
 
 describe('LoginForm', () => {
   beforeEach(() => {
@@ -28,10 +28,13 @@ describe('LoginForm', () => {
   it('expose un formulaire libellé et une navigation d’inscription', () => {
     render(<LoginForm />);
 
-    expect(screen.getByRole('heading', { name: 'Connexion' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Ravi de vous retrouver.' })).toBeVisible();
     expect(screen.getByLabelText('Adresse e-mail')).toHaveAttribute('autocomplete', 'email');
     expect(screen.getByLabelText('Mot de passe')).toHaveAttribute('autocomplete', 'current-password');
-    expect(screen.getByRole('link', { name: 'S’inscrire' })).toHaveAttribute('href', '/register');
+    expect(screen.getByRole('link', { name: 'Créer un compte' })).toHaveAttribute('href', '/register');
+    fireEvent.click(screen.getByRole('button', { name: 'Afficher le mot de passe' }));
+    expect(screen.getByLabelText('Mot de passe')).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Masquer le mot de passe' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('ouvre la session complète avant de rediriger', async () => {

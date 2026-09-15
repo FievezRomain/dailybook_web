@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { establishAuthenticatedSession } from '@/features/user/api/user-api';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/shared/components/ui/card';
+import { AuthStatusShell } from '@/shared/components/layout/AuthShell';
+import { AtSign } from 'lucide-react';
+import Link from 'next/link';
 
 export default function VerifyEmailClient() {
   const router = useRouter();
@@ -57,9 +60,10 @@ export default function VerifyEmailClient() {
   }, [router]);
 
   return (
-    <main className="grid min-h-[calc(100dvh-5rem)] place-items-center px-page-gutter pb-page-gutter">
-      <Card className="w-full max-w-lg text-center">
+    <AuthStatusShell>
+      <Card className="w-full max-w-[400px] rounded-[20px] p-2 text-center shadow-surface sm:p-3">
         <CardHeader>
+          <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-accent text-primary"><AtSign aria-hidden="true" className="size-6" /></span>
           <h1 className="text-page-title font-semibold leading-none">Confirmez votre adresse e-mail</h1>
           <CardDescription>
             Un lien de confirmation a été envoyé{auth.currentUser?.email ? <> à <strong className="text-foreground">{auth.currentUser.email}</strong></> : ''}.
@@ -73,12 +77,17 @@ export default function VerifyEmailClient() {
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           </div>
           {!verified && (
-            <Button type="button" size="lg" className="w-full sm:w-auto" onClick={handleSendEmail} disabled={cooldown > 0 || redirecting}>
-              {cooldown > 0 ? `Réessayer dans ${cooldown} s` : "Renvoyer l’e-mail de confirmation"}
-            </Button>
+            <div className="grid justify-items-center gap-4">
+              <Button type="button" size="lg" className="w-full" onClick={handleSendEmail} disabled={cooldown > 0 || redirecting}>
+                {cooldown > 0 ? `Réessayer dans ${cooldown} s` : "Renvoyer l’e-mail"}
+              </Button>
+              <Link href="/register" className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Changer d’adresse
+              </Link>
+            </div>
           )}
         </CardContent>
       </Card>
-    </main>
+    </AuthStatusShell>
   );
 }
