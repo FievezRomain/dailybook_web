@@ -14,7 +14,7 @@ Bienvenue ! Ce projet contient l'application web **Vasco**, développée avec **
 
 ### ✅ Prérequis
 
-- [Node.js](https://nodejs.org/) (v18 recommandé)
+- [Node.js](https://nodejs.org/) 22.13 minimum
 - [npm](https://www.npmjs.com/)
 - [Docker](https://www.docker.com/) + [Docker Compose](https://docs.docker.com/compose/)
 - Git
@@ -45,10 +45,11 @@ cp .env.local.example .env
 ```
 
 Vérifie notamment :
-- `NEXT_PUBLIC_API_URL` (URL de l’API back)
+- `VASCO_API_URL` (URL interne de FastAPI, disponible uniquement côté serveur)
 - `NEXT_PUBLIC_FIREBASE_*` (config Firebase)
-- `NEXT_PUBLIC_BUCKET_HOSTNAME` (S3)
-- `SENTRY_DSN` (Sentry)
+  - `NEXT_PUBLIC_BUCKET_HOSTNAME` (S3)
+  - `SENTRY_DSN` (Sentry)
+  - `WEATHER_USER_AGENT` (surcharge optionnelle de l’identification serveur Vasco envoyée à MET Norway)
 
 ---
 
@@ -153,9 +154,13 @@ dailybook_front_next/
 
 - **TypeScript** : Typage strict sur tout le projet.
 - **TailwindCSS** : Utilisé pour le style.
-- **SWR/React Query** (optionnel) : Pour la gestion du cache et des requêtes API.
-- **Context API** : Pour la gestion des états globaux (auth, objectifs, animaux, etc.).
-- **ESLint/Prettier** : Linting et formatage automatique.
+- **TanStack Query v5** : cible unique pour l’état serveur ; les hooks SWR legacy seront supprimés pendant la migration des domaines.
+- **Vitest et Testing Library** : tests unitaires et composants.
+- **Playwright et axe** : parcours navigateur et accessibilité automatisée.
+- **Playwright** : budgets reproductibles de performance réseau en plus des parcours E2E.
+- **ESLint** : analyse statique du code TypeScript et React.
+
+Commandes qualité : `npm test`, `npm run test:coverage`, `npm run test:a11y`, `npm run test:performance` et `npm run test:e2e`. Les résultats initiaux sont consignés dans `docs/quality-baseline.md`.
 
 ---
 
