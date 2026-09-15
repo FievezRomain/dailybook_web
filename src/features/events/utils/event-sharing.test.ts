@@ -5,7 +5,7 @@ import { getAnimalsAcceptedInEveryGroup, getEligibleEventGroups } from './event-
 
 function group(id: number, animalIds: number[]): Group {
   return {
-    id, name: `Groupe ${id}`, nb_members: 1, nb_animaux: animalIds.length,
+    id, name: `Groupe ${id}`, active: true, nb_members: 1, nb_animaux: animalIds.length,
     data: {
       animals: [
         { type: 'pending', items: [] },

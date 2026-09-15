@@ -54,10 +54,9 @@ export const EventList = ({ events }: { events: Event[] }) => {
   };
 
   return (
-    <div>
-      {/* Liste des cards */}
+    <div className="space-y-2.5" role="list" aria-label="Liste des événements">
       {enrichedEvents.map((event) => (
-        <div key={event.id} className="py-2">
+        <div key={event.id} role="listitem">
           <EventCardWrapper
             event={event}
             animals={animals}

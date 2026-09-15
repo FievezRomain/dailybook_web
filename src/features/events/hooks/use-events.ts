@@ -30,6 +30,7 @@ export function useEventsQuery() {
     events: query.data,
     isLoading: query.isPending,
     isError: query.isError,
+    isRefetchError: query.isRefetchError,
     error: query.error,
     createEvent: (input: CreateEventInput) => create.mutateAsync(input),
     updateEvent: (id: number, input: UpdateEventInput) => update.mutateAsync({ id, input }),

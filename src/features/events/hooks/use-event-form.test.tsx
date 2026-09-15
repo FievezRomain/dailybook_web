@@ -41,6 +41,19 @@ describe('useEventForm', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it('soumet une dépense lorsque sa catégorie est fournie', () => {
+    const onSubmit = vi.fn();
+    const event = {
+      nom: 'Croquettes', eventtype: 'depense', dateevent: '2026-08-24', animaux: [7], categoriedepense: 'Alimentation',
+    };
+    const { result } = renderHook(() => useEventForm(event));
+
+    act(() => result.current.handleSubmit(onSubmit)(submitEvent()));
+
+    expect(onSubmit).toHaveBeenCalledWith(event);
+    expect(result.current.errors).toEqual({});
+  });
+
   it('soumet un événement valide', () => {
     const onSubmit = vi.fn();
     const event = {
@@ -49,6 +62,17 @@ describe('useEventForm', () => {
       dateevent: '2026-08-24',
       animaux: [7],
     };
+    const { result } = renderHook(() => useEventForm(event));
+
+    act(() => result.current.handleSubmit(onSubmit)(submitEvent()));
+
+    expect(onSubmit).toHaveBeenCalledWith(event);
+    expect(result.current.errors).toEqual({});
+  });
+
+  it.each(['balade', 'soins', 'concours', 'entrainement', 'autre', 'rdv'])('accepte la famille %s avec les champs communs', (eventtype) => {
+    const onSubmit = vi.fn();
+    const event = { nom: 'Événement', eventtype, dateevent: '2026-08-24', animaux: [7] };
     const { result } = renderHook(() => useEventForm(event));
 
     act(() => result.current.handleSubmit(onSubmit)(submitEvent()));

@@ -1,39 +1,85 @@
 import * as Sentry from "@sentry/react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/index";
-import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { useEventForm } from "@/features/events/hooks/use-event-form";
-import type { Event } from "@/features/events/types/event";
-import { colorsMap, titleMap } from "@/features/events/utils/events";
-import { X } from "lucide-react";
-import { StarRating } from "@/shared/components/forms/StarRating";
+import { useEffect, useRef, useState } from "react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  FileText,
+  ListChecks,
+  PawPrint,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import { AnimalSelector } from "@/features/animals/components/AnimalSelector";
 import type { Animal } from "@/features/animals/types/animal";
-import { useEffect, useRef, useState } from "react";
+import {
+  deleteOrphanEventFile,
+  uploadEventFile,
+} from "@/features/events/api/event-files";
+import { useEventForm } from "@/features/events/hooks/use-event-form";
+import type { Event, RecurrenceScope } from "@/features/events/types/event";
+import {
+  eventToneClasses,
+  iconsMap,
+  titleMap,
+} from "@/features/events/utils/events";
+import type { Group } from "@/features/groups/types/group";
+import { ConfirmDialog } from "@/shared/components/feedback/ConfirmDialog";
+import { PremiumNotice } from "@/shared/components/feedback/PremiumGate";
+import {
+  FormSection,
+  SteppedFormSheet,
+} from "@/shared/components/forms/SteppedFormSheet";
+import { StarRating } from "@/shared/components/forms/StarRating";
+import { Button } from "@/shared/components/ui/button";
+import { DateInput, TimeInput } from "@/shared/components/ui/form-feedback";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { getLocalDateString } from "@/shared/utils/dates";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { deleteOrphanEventFile, uploadEventFile } from "@/features/events/api/event-files";
-import { toast } from "sonner";
 import type { ImageSigned } from "@/types/image";
-import type { Group } from '@/features/groups/types/group';
-import type { RecurrenceScope } from '../types/event';
-import { getAnimalsAcceptedInEveryGroup, getEligibleEventGroups } from '../utils/event-sharing';
-import { ConfirmDialog } from '@/shared/components/feedback/ConfirmDialog';
-import { PremiumNotice } from '@/shared/components/feedback/PremiumGate';
+import {
+  getAnimalsAcceptedInEveryGroup,
+  getEligibleEventGroups,
+} from "../utils/event-sharing";
+import { RecurrenceScopeSelector } from "./RecurrenceScopeSelector";
 
 type EventFormDrawerProps = {
   open: boolean;
-  animals: Animal[] | undefined; // undefined = en cours de chargement
+  animals: Animal[] | undefined;
   groups: Group[] | undefined;
   onClose: () => void;
-  onSubmit: (data: Partial<Event>, removedDocuments: string[], updateScope: RecurrenceScope) => Promise<void>;
+  onSubmit: (
+    data: Partial<Event>,
+    removedDocuments: string[],
+    updateScope: RecurrenceScope,
+  ) => Promise<void>;
   initialEvent?: Partial<Event>;
   isSubmitting?: boolean;
   isDuplicate?: boolean;
   onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
   isPremium: boolean;
 };
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-sm font-medium">{label}</span>
+      {children}
+    </label>
+  );
+}
 
 export const EventFormDrawer = ({
   open,
@@ -57,291 +103,456 @@ export const EventFormDrawer = ({
   } = useEventForm(initialEvent);
   const eventtype = values.eventtype as keyof typeof titleMap;
   const eventTitle = titleMap[eventtype] || "Événement";
-  const isEdit = !!initialEvent?.id;
-  const isRecurring = Boolean(initialEvent?.idparent || initialEvent?.frequencevalue);
-  const [updateScope, setUpdateScope] = useState<RecurrenceScope>('occurrence');
-
+  const EventTypeIcon = iconsMap[eventtype] || CalendarDays;
+  const isEdit = Boolean(initialEvent?.id);
+  const isRecurring = Boolean(
+    initialEvent?.idparent || initialEvent?.frequencevalue,
+  );
+  const [updateScope, setUpdateScope] = useState<RecurrenceScope>("occurrence");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [removedLinkedFiles, setRemovedLinkedFiles] = useState<string[]>([]);
   const [filePendingRemoval, setFilePendingRemoval] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const lastStateDateRef = useRef<string | undefined>(initialEvent?.dateevent);
+  const lastStateDateRef = useRef(initialEvent?.dateevent);
 
-  const visibleLinkedFiles = (isDuplicate ? [] : initialEvent?.documents || []).filter(
-    (document) => !removedLinkedFiles.includes(document.name),
-  );
+  const visibleLinkedFiles = (
+    isDuplicate ? [] : initialEvent?.documents || []
+  ).filter((document) => !removedLinkedFiles.includes(document.name));
   const allFiles = [
-    ...visibleLinkedFiles.map(doc => ({ name: doc.name, fromS3: true })),
-    ...selectedFiles.map(file => ({ name: file.name, file, fromS3: false }))
+    ...visibleLinkedFiles.map((document) => ({
+      name: document.name,
+      fromS3: true,
+    })),
+    ...selectedFiles.map((file) => ({ name: file.name, fromS3: false })),
   ];
-
-  const maxFiles = 3;
-  const filesCount = allFiles.length;
-  const filesLeft = maxFiles - filesCount;
+  const filesLeft = 3 - allFiles.length;
   const sharedGroupIds = (values.shared_groups ?? []).map((group) => group.id);
-  const eligibleGroups = getEligibleEventGroups(groups ?? [], values.animaux ?? []);
-  const selectableAnimals = groups && animals
-    ? getAnimalsAcceptedInEveryGroup(animals, groups, sharedGroupIds)
-    : animals;
-  const canChangeAnimals = !isRecurring || updateScope === 'series';
-  const canChangeSharing = !isRecurring || updateScope === 'series';
-  const recurrenceValue = ({ tlj: 'daily', tls: 'weekly', tl2s: 'biweekly', tlm: 'monthly' } as Record<string, string>)[values.frequencevalue ?? '']
-    ?? values.frequencevalue
-    ?? 'none';
+  const eligibleGroups = getEligibleEventGroups(
+    groups ?? [],
+    values.animaux ?? [],
+  );
+  const selectableAnimals =
+    groups && animals
+      ? getAnimalsAcceptedInEveryGroup(animals, groups, sharedGroupIds)
+      : animals;
+  const canChangeAnimals = !isRecurring || updateScope === "series";
+  const canChangeSharing = !isRecurring || updateScope === "series";
+  const recurrenceValue =
+    (
+      {
+        tlj: "daily",
+        tls: "weekly",
+        tl2s: "biweekly",
+        tlm: "monthly",
+      } as Record<string, string>
+    )[values.frequencevalue ?? ""] ??
+    values.frequencevalue ??
+    "none";
+  const toneClass = eventToneClasses[eventtype] ?? eventToneClasses.autre;
 
-  // Détermine le titre et le bouton selon le mode
-  const getTitle = () => {
-    if (isDuplicate) return `Dupliquer l'événement ${eventTitle.toLocaleLowerCase()}`;
-    if (isEdit) return `Modifier l'événement ${eventTitle.toLocaleLowerCase()}`;
-    return `Créer un événement ${eventTitle.toLocaleLowerCase()}`;
-  };
-  const getButtonLabel = () => {
-    if (isSubmitting) {
-      if (isDuplicate) return "Duplication...";
-      if (isEdit) return "Enregistrement...";
-      return "Création...";
-    }
-    if (isDuplicate) return "Dupliquer";
-    if (isEdit) return "Enregistrer";
-    return "Créer";
-  };
-
-  // Récupère la couleur selon le type d'event
-  const colorVar = colorsMap[values.eventtype as keyof typeof colorsMap];
-  const headerBg = colorVar ? `rgba(var(${colorVar}), 1)` : "#A3A3A3";
-
-  // Met à jour l'état selon la date
   useEffect(() => {
-    if (!values.dateevent || lastStateDateRef.current === values.dateevent) return;
+    if (!values.dateevent || lastStateDateRef.current === values.dateevent)
+      return;
     lastStateDateRef.current = values.dateevent;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const eventDate = new Date(values.dateevent);
-    eventDate.setHours(0, 0, 0, 0);
-
-    const proposedState = eventDate < today ? "Terminé" : "À faire";
-    setValues((previous) => previous.state === proposedState ? previous : { ...previous, state: proposedState });
+    const selectedDate = new Date(values.dateevent);
+    selectedDate.setHours(0, 0, 0, 0);
+    const proposedState = selectedDate < today ? "Terminé" : "À faire";
+    setValues((previous) =>
+      previous.state === proposedState
+        ? previous
+        : { ...previous, state: proposedState },
+    );
   }, [setValues, values.dateevent]);
 
-
-  // Ajout de fichiers
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const allowedTypes = new Set(["application/pdf", "image/jpeg", "image/png"]);
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files || []);
     const validFiles = files.filter(
       (file) =>
-        allowedTypes.has(file.type) &&
-        file.size <= 3 * 1024 * 1024
+        ["application/pdf", "image/jpeg", "image/png"].includes(file.type) &&
+        file.size <= 3 * 1024 * 1024,
     );
-    if (validFiles.length !== files.length) {
-      toast.error("Seuls les fichiers PDF, JPEG ou PNG de 3 Mo maximum sont acceptés.");
-    }
-    if (filesCount + validFiles.length > maxFiles) {
-      toast.error("Vous pouvez sélectionner jusqu'à 3 fichiers maximum.");
+    if (validFiles.length !== files.length)
+      toast.error(
+        "Seuls les fichiers PDF, JPEG ou PNG de 3 Mo maximum sont acceptés.",
+      );
+    if (allFiles.length + validFiles.length > 3) {
+      toast.error("Vous pouvez sélectionner jusqu’à 3 fichiers.");
       return;
     }
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
-    // Reset input pour pouvoir re-sélectionner le même fichier si besoin
+    setSelectedFiles((previous) => [...previous, ...validFiles]);
     if (inputRef.current) inputRef.current.value = "";
-  };
+  }
 
-  // À l’enregistrement
-  const handleSave = async (data: Partial<Event>) => {
+  async function handleSave(data: Partial<Event>) {
     const alreadyUploaded = isDuplicate ? [] : initialEvent?.documents || [];
-    const uploadedNames: { name: string }[] = [...alreadyUploaded];
-    const filesToUpload: File[] = selectedFiles.filter(
-      file => !alreadyUploaded.some(doc => doc.name.endsWith(file.name))
-    );
+    const uploadedNames = [...alreadyUploaded];
     const uploadedThisSession: string[] = [];
-
     try {
-      // Upload uniquement les nouveaux fichiers
-      for (const file of filesToUpload) {
-        const fileName = await uploadEventFile(file, isDuplicate ? undefined : initialEvent?.id);
+      for (const file of selectedFiles) {
+        const fileName = await uploadEventFile(
+          file,
+          isDuplicate ? undefined : initialEvent?.id,
+        );
         uploadedNames.push({ name: fileName });
         uploadedThisSession.push(fileName);
       }
-
-      data.documents = uploadedNames;
-
+      data.documents = uploadedNames.filter(
+        (document) => !removedLinkedFiles.includes(document.name),
+      );
       if (isDuplicate && data.id) {
         const duplicate = { ...data };
         delete duplicate.id;
-        await onSubmit(duplicate, [], 'occurrence');
-      } else {
-        await onSubmit(data, removedLinkedFiles, updateScope);
-      }
+        await onSubmit(duplicate, [], "occurrence");
+      } else await onSubmit(data, removedLinkedFiles, updateScope);
     } catch (error) {
-      // Rollback : supprime les fichiers uploadés lors de cette session
       await Promise.all(
         uploadedThisSession.map(async (fileName) => {
           try {
-            await deleteOrphanEventFile(fileName, isDuplicate ? undefined : initialEvent?.id);
-          } catch (e) {
-            toast.error("Une erreur est survenue lors du rollback de l'enregistrement des fichiers suite à une erreur du serveur.");
-            Sentry.captureException(e);
+            await deleteOrphanEventFile(
+              fileName,
+              isDuplicate ? undefined : initialEvent?.id,
+            );
+          } catch (rollbackError) {
+            Sentry.captureException(rollbackError);
           }
-        })
+        }),
       );
-      toast.error("Une erreur est survenue lors de l'enregistrement ou de l'upload des fichiers.");
+      toast.error(
+        "Une erreur est survenue lors de l’enregistrement ou de l’envoi des fichiers.",
+      );
       Sentry.captureException(error);
     }
-  };
+  }
+
+  const title = isDuplicate
+    ? `Dupliquer ${eventTitle.toLocaleLowerCase("fr-FR")}`
+    : isEdit
+      ? `Modifier ${eventTitle.toLocaleLowerCase("fr-FR")}`
+      : "Créer un événement";
+  const submitLabel = isDuplicate
+    ? "Dupliquer l’événement"
+    : isEdit
+      ? "Enregistrer les modifications"
+      : "Créer l’événement";
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] p-0 flex flex-col rounded-2xl overflow-hidden">
-        <DialogHeader
-          className="px-6 py-4 flex flex-row items-center justify-between"
-          style={{ backgroundColor: headerBg }}
-        >
-          <DialogTitle className="text-white text-lg">{getTitle()}</DialogTitle>
-          <Button
-            onClick={onClose}
-            className="p-2 rounded hover:bg-white/20 text-white"
-            variant="ghost"
-            type="button"
-            tabIndex={0}
-            aria-label="Fermer"
-          >
-            <X size={20} />
-          </Button>
-        </DialogHeader>
-        <form
-          className="flex-1 overflow-y-auto p-6 flex flex-col gap-6"
-          onSubmit={handleSubmit(handleSave)}
-        >
-            {isRecurring && (
-              <fieldset className="rounded-xl border p-4">
-                <legend className="px-2 text-sm font-semibold">Portée de la modification</legend>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {([
-                    ['occurrence', 'Cette occurrence'],
-                    ['following', 'Cette occurrence et les suivantes'],
-                    ['series', 'Toute la série'],
-                  ] as const).map(([scope, label]) => (
-                    <label key={scope} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2">
-                      <input type="radio" name="update-scope" value={scope} checked={updateScope === scope}
-                        onChange={() => setUpdateScope(scope)} />
-                      <span>{label}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium mb-1">État</label>
-                    <div className="flex w-fit overflow-hidden border border-muted rounded-xl">
-                        <button
+    <>
+      <SteppedFormSheet
+        open={open}
+        onClose={onClose}
+        onSubmit={handleSubmit(handleSave)}
+        title={title}
+        eyebrow="Agenda"
+        description="Planifiez l’essentiel, choisissez les animaux puis complétez uniquement les informations utiles à ce type d’événement."
+        submitLabel={submitLabel}
+        submitting={isSubmitting}
+        toneClassName={toneClass}
+        steps={[
+          ...(!isEdit
+            ? [
+                {
+                  title: "Type",
+                  description:
+                    "Choisissez l’événement que vous souhaitez ajouter.",
+                  icon: CalendarDays,
+                  validate: () => Boolean(values.eventtype),
+                  validationMessage:
+                    "Choisissez un type d’événement pour continuer.",
+                  content: ({ advance }: { advance: () => void }) => (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {Object.entries(titleMap).map(([value, label]) => {
+                        const TypeIcon = iconsMap[value] || CalendarDays;
+                        const selected = values.eventtype === value;
+                        return (
+                          <button
+                            key={value}
                             type="button"
-                            className={`px-4 py-1 font-semibold transition-colors
-                                ${values.state !== "Terminé"
-                                ? "text-white"
-                                : "text-muted-foreground bg-muted"}
-                                rounded-l-xl
-                                `}
-                            style={
-                                values.state !== "Terminé" && colorVar
-                                ? { backgroundColor: `rgba(var(${colorVar}), 1)` }
-                                : undefined
-                            }
-                            onClick={() => setValues((prev) => ({ ...prev, state: "À faire" }))}
-                            aria-pressed={values.state !== "Terminé"}
-                        >
-                            À faire
-                        </button>
-                        <button
-                            type="button"
-                            className={`px-4 py-1 font-semibold transition-colors
-                                ${values.state === "Terminé"
-                                ? "text-white"
-                                : "text-muted-foreground bg-muted"}
-                                rounded-r-xl
-                                `}
-                            style={
-                                values.state === "Terminé" && colorVar
-                                ? { backgroundColor: `rgba(var(${colorVar}), 1)` }
-                                : undefined
-                            }
-                            onClick={() => setValues((prev) => ({ ...prev, state: "Terminé" }))}
-                            aria-pressed={values.state === "Terminé"}
-                        >
-                            Terminé
-                        </button>
+                            disabled={isSubmitting}
+                            aria-pressed={selected}
+                            className={`${eventToneClasses[value]} group relative flex min-h-24 items-center gap-4 overflow-hidden rounded-[20px] border bg-card p-4 text-left shadow-sm transition-[border-color,background-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-[var(--event-color)] hover:shadow-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-[var(--event-color)] bg-[color-mix(in_oklab,var(--event-color)_8%,var(--card))]" : "border-border/70"}`}
+                            onClick={() => {
+                              setValues((previous) => ({
+                                ...previous,
+                                eventtype: value,
+                              }));
+                              advance();
+                            }}
+                          >
+                            <span className="event-detail-type-icon grid size-12 shrink-0 place-items-center rounded-[16px]">
+                              <TypeIcon className="size-5" aria-hidden="true" />
+                            </span>
+                            <span>
+                              <span className="block font-semibold">
+                                {label}
+                              </span>
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                Sélectionner et continuer
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">Nom *</label>
-                    <Input
+                  ),
+                },
+              ]
+            : []),
+          {
+            title: "Essentiel",
+            description: "Intitulé, état et moment de l’événement.",
+            icon: CalendarDays,
+            content: (
+              <div className="space-y-4">
+                <FormSection title="Nature de l’événement">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {isEdit ? (
+                      <Field label="Type d’événement *">
+                        <Select
+                          value={values.eventtype || ""}
+                          onValueChange={(value) =>
+                            setValues((previous) => ({
+                              ...previous,
+                              eventtype: value,
+                            }))
+                          }
+                          required
+                        >
+                          <SelectTrigger
+                            className="w-full"
+                            aria-invalid={Boolean(errors.eventtype)}
+                          >
+                            <SelectValue placeholder="Choisir un type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(titleMap).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.eventtype && (
+                          <span className="text-xs text-destructive">
+                            {errors.eventtype}
+                          </span>
+                        )}
+                      </Field>
+                    ) : (
+                      <div className="grid gap-1.5">
+                        <span className="text-sm font-medium">
+                          Type d’événement *
+                        </span>
+                        <div
+                          data-slot="event-type-summary"
+                          aria-label={`Type d’événement sélectionné : ${eventTitle}`}
+                          className={`${toneClass} flex h-10 items-center gap-2 rounded-surface border border-foreground/60 bg-card px-3.5 text-[13px] font-medium`}
+                        >
+                          <EventTypeIcon
+                            className="size-4 text-[var(--event-color)]"
+                            aria-hidden="true"
+                          />
+                          <span>{eventTitle}</span>
+                        </div>
+                      </div>
+                    )}
+                    <Field label="État">
+                      <div className="grid grid-cols-2 rounded-control border bg-muted/30 p-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setValues((previous) => ({
+                              ...previous,
+                              state: "À faire",
+                            }))
+                          }
+                          aria-pressed={values.state !== "Terminé"}
+                          className={`min-h-9 rounded-[10px] text-sm font-semibold transition-colors ${values.state !== "Terminé" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                        >
+                          À faire
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setValues((previous) => ({
+                              ...previous,
+                              state: "Terminé",
+                            }))
+                          }
+                          aria-pressed={values.state === "Terminé"}
+                          className={`min-h-9 rounded-[10px] text-sm font-semibold transition-colors ${values.state === "Terminé" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                        >
+                          Terminé
+                        </button>
+                      </div>
+                    </Field>
+                  </div>
+                </FormSection>
+                <FormSection title="Quand et où">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Nom *">
+                      <Input
                         name="nom"
                         value={values.nom || ""}
                         onChange={handleChange}
                         required
-                        autoFocus
-                        placeholder="Nom de l'événement"
-                    />
-                    {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">Date *</label>
-                    <Input
-                        type="date"
+                        placeholder="Ex. Vaccin annuel"
+                        aria-invalid={Boolean(errors.nom)}
+                      />
+                      {errors.nom && (
+                        <span className="text-xs text-destructive">
+                          {errors.nom}
+                        </span>
+                      )}
+                    </Field>
+                    <Field label="Date *">
+                      <DateInput
                         name="dateevent"
                         value={values.dateevent || getLocalDateString()}
                         onChange={handleChange}
                         required
-                    />
-                    {errors.dateevent && <p className="text-xs text-red-500">{errors.dateevent}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">Heure de début</label>
-                    <Input
-                        type="time"
+                        aria-invalid={Boolean(errors.dateevent)}
+                      />
+                      {errors.dateevent && (
+                        <span className="text-xs text-destructive">
+                          {errors.dateevent}
+                        </span>
+                      )}
+                    </Field>
+                    <Field label="Heure de début">
+                      <TimeInput
                         name="heuredebutevent"
                         value={values.heuredebutevent || ""}
                         onChange={handleChange}
-                    />
-                </div>
-                {/* Sélection des animaux */}
-                {selectableAnimals && canChangeAnimals && (
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium mb-1">Animaux liés</label>
-                        <AnimalSelector
-                            animals={selectableAnimals}
-                            selectedIds={values.animaux || []}
-                            onChange={(ids) => setValues((prev) => {
-                              const compatibleGroupIds = new Set(getEligibleEventGroups(groups ?? [], ids).map((group) => group.id));
-                              return {
-                                ...prev,
-                                animaux: ids,
-                                shared_groups: (prev.shared_groups ?? []).filter((group) => compatibleGroupIds.has(group.id)),
-                              };
-                            })}
-                            showSelectAll={true}
-                            onUpdateAnimalImage={onUpdateAnimalImage}
-                        />
-                        {errors.animaux && (
-                            <p className="text-xs text-red-500">{errors.animaux}</p>
-                        )}
-                    </div>
-                )}
-                {isRecurring && !canChangeAnimals ? (
-                  <p className="md:col-span-2 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-                    Les animaux restent inchangés pour cette portée. Choisissez « Toute la série » pour modifier leur association.
-                  </p>
-                ) : null}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Lieu</label>
-                    <Input
+                      />
+                    </Field>
+                    <Field label="Lieu">
+                      <Input
                         name="lieu"
                         value={values.lieu || ""}
                         onChange={handleChange}
+                        placeholder="Adresse ou lieu"
+                      />
+                    </Field>
+                  </div>
+                </FormSection>
+              </div>
+            ),
+          },
+          {
+            title: "Animaux",
+            description:
+              "Associez les animaux et, si nécessaire, partagez avec vos groupes.",
+            icon: PawPrint,
+            validate: () => Boolean(values.animaux?.length),
+            validationMessage:
+              "Sélectionnez au moins un animal pour continuer.",
+            content: (
+              <div className="space-y-4">
+                {isRecurring && (
+                  <RecurrenceScopeSelector
+                    value={updateScope}
+                    onChange={setUpdateScope}
+                  />
+                )}
+                <FormSection
+                  title="Animaux concernés"
+                  description="Le sélecteur reste local à cet événement."
+                >
+                  {selectableAnimals && canChangeAnimals ? (
+                    <AnimalSelector
+                      animals={selectableAnimals}
+                      selectedIds={values.animaux || []}
+                      onChange={(ids) =>
+                        setValues((previous) => {
+                          const compatibleGroupIds = new Set(
+                            getEligibleEventGroups(groups ?? [], ids).map(
+                              (group) => group.id,
+                            ),
+                          );
+                          return {
+                            ...previous,
+                            animaux: ids,
+                            shared_groups: (
+                              previous.shared_groups ?? []
+                            ).filter((group) =>
+                              compatibleGroupIds.has(group.id),
+                            ),
+                          };
+                        })
+                      }
+                      showSelectAll
+                      onUpdateAnimalImage={onUpdateAnimalImage}
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">Dépense</label>
-                    <Input
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Les animaux restent inchangés pour cette portée.
+                      Choisissez toute la série pour les modifier.
+                    </p>
+                  )}
+                  {errors.animaux && (
+                    <p className="mt-2 text-xs text-destructive">
+                      {errors.animaux}
+                    </p>
+                  )}
+                </FormSection>
+                {canChangeSharing && groups && (
+                  <FormSection
+                    title="Partage"
+                    description="Seuls les groupes acceptant tous les animaux sélectionnés sont proposés."
+                  >
+                    {eligibleGroups.length ? (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {eligibleGroups.map((group) => (
+                          <label
+                            key={group.id}
+                            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-control border px-3"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={sharedGroupIds.includes(group.id)}
+                              onChange={(changeEvent) =>
+                                setValues((previous) => ({
+                                  ...previous,
+                                  shared_groups: changeEvent.target.checked
+                                    ? [
+                                        ...(previous.shared_groups ?? []),
+                                        { id: group.id, name: group.name },
+                                      ]
+                                    : (previous.shared_groups ?? []).filter(
+                                        (candidate) =>
+                                          candidate.id !== group.id,
+                                      ),
+                                }))
+                              }
+                            />
+                            <span className="text-sm font-medium">
+                              {group.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Aucun groupe compatible pour cette sélection.
+                      </p>
+                    )}
+                  </FormSection>
+                )}
+              </div>
+            ),
+          },
+          {
+            title: "Détails",
+            description: `Complétez les informations propres au type ${eventTitle.toLocaleLowerCase("fr-FR")}.`,
+            icon: ListChecks,
+            content: (
+              <div className="space-y-4">
+                <FormSection title="Informations complémentaires">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Dépense">
+                      <Input
                         type="number"
                         name="depense"
                         value={values.depense || ""}
@@ -349,237 +560,326 @@ export const EventFormDrawer = ({
                         step="0.01"
                         min="0"
                         inputMode="decimal"
-                        pattern="[0-9]*[.,]?[0-9]*"
-                    />
-                </div>
-                {(eventtype === "soins" || eventtype === "rdv") && <div className="flex items-center gap-2 mt-2">
-                    <input
-                        type="checkbox"
-                        id="todisplay"
-                        name="todisplay"
-                        checked={values.todisplay ?? true}
-                        onChange={e => setValues(prev => ({ ...prev, todisplay: e.target.checked }))}
-                        className="accent-primary w-4 h-4"
-                    />
-                    <label htmlFor="todisplay" className="text-sm select-none cursor-pointer">
-                        Afficher dans le dossier médical
-                    </label>
-                </div>}
-                {/* Champs conditionnels */}
-                {(eventtype === "soins" || eventtype === "rdv") && (
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Spécialiste</label>
-                        <Input name="specialiste" value={values.specialiste || ""} onChange={handleChange} />
-                    </div>
-                )}
-                {eventtype === "depense" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Catégorie de dépense</label>
-                    <Select
-                      name="categoriedepense"
-                      value={values.categoriedepense || ""}
-                      onValueChange={value => setValues(prev => ({ ...prev, categoriedepense: value }))}
-                      required
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Sélectionner une catégorie" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="alimentation">Alimentation</SelectItem>
-                        <SelectItem value="equipement">Équipement</SelectItem>
-                        <SelectItem value="accessoire">Accessoire</SelectItem>
-                        <SelectItem value="garde">Service de garde / Pension</SelectItem>
-                        <SelectItem value="formation">Formation</SelectItem>
-                        <SelectItem value="assurance">Assurance</SelectItem>
-                        <SelectItem value="balade">Balade</SelectItem>
-                        <SelectItem value="entrainement">Entraînement</SelectItem>
-                        <SelectItem value="concours">Concours</SelectItem>
-                        <SelectItem value="rdv">Rendez-vous</SelectItem>
-                        <SelectItem value="soins">Soin</SelectItem>
-                        <SelectItem value="autre">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.categoriedepense && (
-                      <p className="text-xs text-red-500">{errors.categoriedepense}</p>
-                    )}
-                  </div>
-                )}
-                {eventtype === "balade" && (
-                <>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Heure début balade</label>
-                        <Input name="heuredebutbalade" value={values.heuredebutbalade || ""} onChange={handleChange} />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Date fin balade</label>
-                        <Input type="date" name="datefinbalade" value={values.datefinbalade || ""} onChange={handleChange} />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Heure fin balade</label>
-                        <Input type="time" name="heurefinbalade" value={values.heurefinbalade || ""} onChange={handleChange} />
-                    </div>
-                </>
-                )}
-                {eventtype === "entrainement" && (
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Discipline</label>
-                        <Input name="discipline" value={values.discipline || ""} onChange={handleChange} />
-                    </div>
-                )}
-                {eventtype !== "depense" && (
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Note</label>
-                        <StarRating
-                            value={Number(values.note) || 0}
-                            onChange={(v) => setValues((prev) => ({ ...prev, note: v }))}
-                            color={colorVar ? `rgba(var(${colorVar}), 1)` : undefined}
+                      />
+                    </Field>
+                    {(eventtype === "soins" || eventtype === "rdv") && (
+                      <Field label="Spécialiste">
+                        <Input
+                          name="specialiste"
+                          value={values.specialiste || ""}
+                          onChange={handleChange}
                         />
-                    </div>
-                )}
-                {eventtype === "concours" && (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Épreuve</label>
-                            <Input name="epreuve" value={values.epreuve || ""} onChange={handleChange} />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Dossart</label>
-                            <Input name="dossart" value={values.dossart || ""} onChange={handleChange} />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Placement</label>
-                            <Input name="placement" value={values.placement || ""} onChange={handleChange} />
-                        </div>
-                    </>
-                )}
-                {eventtype === "soins" && (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Traitement</label>
-                            <Input name="traitement" value={values.traitement || ""} onChange={handleChange} />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Date fin soins</label>
-                            <Input type="date" name="datefinsoins" value={values.datefinsoins || ""} onChange={handleChange} />
-                        </div>
-                    </>
-                )}
-                {(eventtype === "soins" || eventtype === "balade") && (!isRecurring || updateScope !== 'occurrence') && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Répétition</label>
-                    <Select name="frequencevalue" value={recurrenceValue}
-                      onValueChange={(value) => setValues((prev) => ({
-                        ...prev,
-                        frequencevalue: value === 'none' ? undefined : value,
-                        frequencetype: value === 'none' ? undefined : 'recurring',
-                      }))}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {!isRecurring && <SelectItem value="none">Ne pas répéter</SelectItem>}
-                        <SelectItem value="daily">Tous les jours</SelectItem>
-                        <SelectItem value="weekly">Toutes les semaines</SelectItem>
-                        <SelectItem value="biweekly">Toutes les 2 semaines</SelectItem>
-                        <SelectItem value="monthly">Tous les mois</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.frequencevalue && <p className="text-xs text-red-500">{errors.frequencevalue}</p>}
+                      </Field>
+                    )}
+                    {eventtype === "depense" && (
+                      <Field label="Catégorie de dépense *">
+                        <Select
+                          value={values.categoriedepense || ""}
+                          onValueChange={(value) =>
+                            setValues((previous) => ({
+                              ...previous,
+                              categoriedepense: value,
+                            }))
+                          }
+                          required
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Choisir une catégorie" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "alimentation",
+                              "equipement",
+                              "accessoire",
+                              "garde",
+                              "formation",
+                              "assurance",
+                              "balade",
+                              "entrainement",
+                              "concours",
+                              "rdv",
+                              "soins",
+                              "autre",
+                            ].map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {value.charAt(0).toUpperCase() + value.slice(1)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                    {eventtype === "balade" && (
+                      <>
+                        <Field label="Heure de début de balade">
+                          <TimeInput
+                            name="heuredebutbalade"
+                            value={values.heuredebutbalade || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                        <Field label="Date de fin">
+                          <DateInput
+                            name="datefinbalade"
+                            value={values.datefinbalade || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                        <Field label="Heure de fin">
+                          <TimeInput
+                            name="heurefinbalade"
+                            value={values.heurefinbalade || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                      </>
+                    )}
+                    {eventtype === "entrainement" && (
+                      <Field label="Discipline">
+                        <Input
+                          name="discipline"
+                          value={values.discipline || ""}
+                          onChange={handleChange}
+                        />
+                      </Field>
+                    )}
+                    {eventtype === "concours" && (
+                      <>
+                        <Field label="Épreuve">
+                          <Input
+                            name="epreuve"
+                            value={values.epreuve || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                        <Field label="Dossard">
+                          <Input
+                            name="dossart"
+                            value={values.dossart || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                        <Field label="Classement">
+                          <Input
+                            name="placement"
+                            value={values.placement || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                      </>
+                    )}
+                    {eventtype === "soins" && (
+                      <>
+                        <Field label="Traitement">
+                          <Input
+                            name="traitement"
+                            value={values.traitement || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                        <Field label="Fin des soins">
+                          <DateInput
+                            name="datefinsoins"
+                            value={values.datefinsoins || ""}
+                            onChange={handleChange}
+                          />
+                        </Field>
+                      </>
+                    )}
+                    {eventtype !== "depense" && (
+                      <div>
+                        <span className="mb-1.5 block text-sm font-medium">
+                          Note
+                        </span>
+                        <StarRating
+                          value={Number(values.note) || 0}
+                          onChange={(note) =>
+                            setValues((previous) => ({ ...previous, note }))
+                          }
+                        />
+                      </div>
+                    )}
+                    {(eventtype === "soins" || eventtype === "balade") &&
+                      (!isRecurring || updateScope !== "occurrence") && (
+                        <Field label="Répétition">
+                          <Select
+                            value={recurrenceValue}
+                            onValueChange={(value) =>
+                              setValues((previous) => ({
+                                ...previous,
+                                frequencevalue:
+                                  value === "none" ? undefined : value,
+                                frequencetype:
+                                  value === "none" ? undefined : "recurring",
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {!isRecurring && (
+                                <SelectItem value="none">
+                                  Ne pas répéter
+                                </SelectItem>
+                              )}
+                              <SelectItem value="daily">
+                                Tous les jours
+                              </SelectItem>
+                              <SelectItem value="weekly">
+                                Toutes les semaines
+                              </SelectItem>
+                              <SelectItem value="biweekly">
+                                Toutes les deux semaines
+                              </SelectItem>
+                              <SelectItem value="monthly">
+                                Tous les mois
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      )}
                   </div>
-                )}
-                {canChangeSharing && groups && (
-                  <fieldset className="md:col-span-2 rounded-xl border p-4">
-                    <legend className="px-2 text-sm font-semibold">Partager avec des groupes</legend>
-                    {eligibleGroups.length ? <div className="grid gap-2 sm:grid-cols-2">
-                      {eligibleGroups.map((group) => {
-                        const selected = sharedGroupIds.includes(group.id);
-                        return <label key={group.id} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2">
-                          <input type="checkbox" checked={selected} onChange={(event) => setValues((previous) => ({
-                            ...previous,
-                            shared_groups: event.target.checked
-                              ? [...(previous.shared_groups ?? []), { id: group.id, name: group.name }]
-                              : (previous.shared_groups ?? []).filter((candidate) => candidate.id !== group.id),
-                          }))} />
-                          <span>{group.name}</span>
-                        </label>;
-                      })}
-                    </div> : <p className="text-sm text-muted-foreground">
-                      Aucun groupe actif ne contient tous les animaux sélectionnés.
-                    </p>}
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Seuls les groupes où tous les animaux sont acceptés peuvent recevoir l’événement.
-                    </p>
-                  </fieldset>
-                )}
+                </FormSection>
                 {(eventtype === "soins" || eventtype === "rdv") && (
-                        <div>
-                            {!isPremium ? (
-                              <PremiumNotice feature="medicalDocuments" compact />
-                            ) : <>
-                            <label className="block text-sm font-medium mb-1">Documents (PDF ou images, 3 fichiers maximum, 3 Mo maximum par fichier)</label>
-                            <Input
-                                ref={inputRef}
-                                type="file"
-                                name="documents"
-                                accept="application/pdf,image/jpeg,image/png"
-                                multiple
-                                onChange={handleFileChange}
-                                disabled={filesLeft <= 0}
-                            />
-                                <ul className="mt-1 text-xs text-muted-foreground">
-                                    {allFiles.map((fileObj, idx) => (
-                                        <li key={idx} className="flex items-center gap-2">
-                                            {fileObj.name}
-                                            <button
-                                                type="button"
-                                                className="text-red-500 ml-2"
-                                                onClick={() => {
-                                                    if (fileObj.fromS3) {
-                                                        setFilePendingRemoval(fileObj.name);
-                                                    } else {
-                                                        setSelectedFiles(prev => prev.filter((_, i) => i !== idx - visibleLinkedFiles.length));
-                                                    }
-                                                }}
-                                                aria-label="Supprimer ce fichier"
-                                            >
-                                                Supprimer
-                                            </button>
-                                            {fileObj.fromS3 && <span className="ml-2 text-green-600">(déjà lié)</span>}
-                                        </li>
-                                    ))}
-                                </ul>
-                                {errors.documents && (
-                                    <p className="text-xs text-red-500">{errors.documents}</p>
-                                )}
-                            </>}
-                        </div>
+                  <label className="flex min-h-11 items-center gap-3 rounded-control border bg-card px-3 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={values.todisplay ?? true}
+                      onChange={(changeEvent) =>
+                        setValues((previous) => ({
+                          ...previous,
+                          todisplay: changeEvent.target.checked,
+                        }))
+                      }
+                    />
+                    Afficher dans le dossier médical
+                  </label>
                 )}
-            </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Commentaire</label>
-            <Textarea
-                name="commentaire"
-                value={values.commentaire || ""}
-                onChange={handleTextareaChange}
-                placeholder="Ajouter un commentaire"
-                rows={3}
-            />
-          </div>
-          {/* Ajoute ici d'autres champs spécifiques (animaux, documents, etc.) */}
-          <DialogFooter className="mt-auto flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
-              Annuler
-            </Button>
-            <Button type="submit" variant={"outline"} disabled={isSubmitting}>
-              {getButtonLabel()}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-      <ConfirmDialog open={Boolean(filePendingRemoval)} title="Retirer ce document médical ?"
+                <FormSection title="Commentaire">
+                  <Textarea
+                    name="commentaire"
+                    value={values.commentaire || ""}
+                    onChange={handleTextareaChange}
+                    rows={5}
+                    placeholder="Informations utiles, consignes, préparation…"
+                  />
+                </FormSection>
+              </div>
+            ),
+          },
+          {
+            title: "Finaliser",
+            description:
+              "Ajoutez les documents utiles puis vérifiez votre événement.",
+            icon: CheckCircle2,
+            content: (
+              <div className="space-y-4">
+                {(eventtype === "soins" || eventtype === "rdv") && (
+                  <FormSection
+                    title="Documents médicaux"
+                    description="PDF, JPEG ou PNG · 3 fichiers maximum · 3 Mo par fichier."
+                  >
+                    {!isPremium ? (
+                      <PremiumNotice feature="medicalDocuments" compact />
+                    ) : (
+                      <>
+                        <Input
+                          ref={inputRef}
+                          type="file"
+                          name="documents"
+                          accept="application/pdf,image/jpeg,image/png"
+                          multiple
+                          onChange={handleFileChange}
+                          disabled={filesLeft <= 0}
+                        />
+                        {allFiles.length > 0 && (
+                          <ul className="mt-3 divide-y rounded-control border">
+                            {allFiles.map((file, index) => (
+                              <li
+                                key={`${file.name}-${index}`}
+                                className="flex items-center gap-3 px-3 py-2 text-sm"
+                              >
+                                <FileText
+                                  className="size-4 shrink-0 text-primary"
+                                  aria-hidden="true"
+                                />
+                                <span className="min-w-0 flex-1 truncate">
+                                  {file.name.split("/").pop()}
+                                </span>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    file.fromS3
+                                      ? setFilePendingRemoval(file.name)
+                                      : setSelectedFiles((previous) =>
+                                          previous.filter(
+                                            (_, candidateIndex) =>
+                                              candidateIndex !==
+                                              index - visibleLinkedFiles.length,
+                                          ),
+                                        )
+                                  }
+                                >
+                                  Retirer
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </FormSection>
+                )}
+                <FormSection title="Résumé">
+                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div>
+                      <dt className="text-muted-foreground">Événement</dt>
+                      <dd className="mt-1 font-semibold">
+                        {values.nom || "Sans nom"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Type</dt>
+                      <dd className="mt-1 font-semibold">{eventTitle}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Date</dt>
+                      <dd className="mt-1 font-semibold">
+                        {values.dateevent || "Non renseignée"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Animaux</dt>
+                      <dd className="mt-1 font-semibold">
+                        {values.animaux?.length || 0} sélectionné(s)
+                      </dd>
+                    </div>
+                  </dl>
+                </FormSection>
+              </div>
+            ),
+          },
+        ]}
+      />
+      <ConfirmDialog
+        open={Boolean(filePendingRemoval)}
+        title="Retirer ce document médical ?"
         description="Le document sera supprimé définitivement lors de l’enregistrement."
-        confirmLabel="Retirer" onCancel={() => setFilePendingRemoval(undefined)} onConfirm={() => {
-          if (filePendingRemoval) setRemovedLinkedFiles((previous) => previous.includes(filePendingRemoval) ? previous : [...previous, filePendingRemoval]);
+        confirmLabel="Retirer"
+        onCancel={() => setFilePendingRemoval(undefined)}
+        onConfirm={() => {
+          if (filePendingRemoval)
+            setRemovedLinkedFiles((previous) =>
+              previous.includes(filePendingRemoval)
+                ? previous
+                : [...previous, filePendingRemoval],
+            );
           setFilePendingRemoval(undefined);
-        }} />
-    </Dialog>
+        }}
+      />
+    </>
   );
 };

@@ -1,9 +1,6 @@
 import type { Event, MappedEvent } from '@/features/events/types/event';
 import { differenceInDays, isBefore, startOfDay } from 'date-fns';
-import { FaMoneyBillWave, FaTrophy, FaStethoscope, FaCheckCircle } from "react-icons/fa";
-import { FaHandHoldingMedical } from "react-icons/fa6";
-import { LuTrafficCone } from "react-icons/lu";
-import { TiCompass } from "react-icons/ti";
+import { Banknote, CircleCheck, Compass, HandHeart, Stethoscope, TrafficCone, Trophy } from 'lucide-react';
 
 export const filterToday = (events: Event[]) => {
   const today = new Date().toDateString();
@@ -21,23 +18,33 @@ export const filterLate = (events: Event[]) => {
 };
 
 export const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  depense: FaMoneyBillWave,
-  balade: TiCompass,
-  soins: FaHandHoldingMedical,
-  concours: FaTrophy,
-  entrainement: LuTrafficCone,
-  autre: FaCheckCircle,
-  rdv: FaStethoscope,
+  depense: Banknote,
+  balade: Compass,
+  soins: HandHeart,
+  concours: Trophy,
+  entrainement: TrafficCone,
+  autre: CircleCheck,
+  rdv: Stethoscope,
 };
 
 export const colorsMap: Record<string, string> = {
-    depense: "--color-rouan",
-    balade: "--color-baie",
-    soins: "--color-isabelle",
-    concours: "--color-primary",
-    entrainement: "--color-aubere",
-    autre: "--color-baie-cerise",
-    rdv: "--color-baie-brun",
+    depense: "var(--event-depense)",
+    balade: "var(--event-balade)",
+    soins: "var(--event-soins)",
+    concours: "var(--event-concours)",
+    entrainement: "var(--event-entrainement)",
+    autre: "var(--event-autre)",
+    rdv: "var(--event-rdv)",
+};
+
+export const eventToneClasses: Record<string, string> = {
+  depense: "event-tone-depense",
+  balade: "event-tone-balade",
+  soins: "event-tone-soins",
+  concours: "event-tone-concours",
+  entrainement: "event-tone-entrainement",
+  autre: "event-tone-autre",
+  rdv: "event-tone-rdv",
 };
 
 export const titleMap: Record<string, string> = {
@@ -60,8 +67,8 @@ export const mapEventData = (event: Event): MappedEvent => {
 
   return {
     ...event,
-    color: colorsMap[event.eventtype] || "--color-baie-cerise",
-    icon: iconsMap[event.eventtype] || FaCheckCircle,
+    color: colorsMap[event.eventtype] || "var(--event-autre)",
+    icon: iconsMap[event.eventtype] || CircleCheck,
     delay,
     titleType: titleMap[event.eventtype] || "Autre",
   };

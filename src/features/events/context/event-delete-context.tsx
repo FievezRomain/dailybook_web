@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as Sentry from "@sentry/react";
 import { ConfirmDialog } from "@/shared/components/feedback/ConfirmDialog";
 import type { RecurrenceScope } from '../types/event';
+import { RecurrenceScopeSelector } from '../components/RecurrenceScopeSelector';
 
 type EventDeleteContextType = {
   openDelete: (event: MappedEvent) => void;
@@ -47,20 +48,7 @@ export function EventDeleteProvider({ children }: { children: ReactNode }) {
         open={!!eventToDelete}
         title="Confirmer la suppression"
         description={eventToDelete && (eventToDelete.idparent || eventToDelete.frequencevalue) ? (
-          <fieldset className="grid gap-2">
-            <legend className="mb-1 font-medium">Choisissez la portée avant de supprimer :</legend>
-            {([
-              ['occurrence', 'Cette occurrence uniquement'],
-              ['following', 'Cette occurrence et les suivantes'],
-              ['series', 'Toute la série'],
-            ] as const).map(([scope, label]) => (
-              <label key={scope} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2">
-                <input type="radio" name="delete-scope" value={scope} checked={deleteScope === scope}
-                  onChange={() => setDeleteScope(scope)} />
-                <span>{label}</span>
-              </label>
-            ))}
-          </fieldset>
+          <RecurrenceScopeSelector value={deleteScope} onChange={setDeleteScope} />
         ) : "Voulez-vous vraiment supprimer cet événement ?"}
         onCancel={closeDelete}
         onConfirm={handleConfirmDelete}
