@@ -1,344 +1,459 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/components/ui/dialog";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { Textarea } from "@/shared/components/ui/textarea";
 import { useRef, useState } from "react";
-import type { Animal } from "@/features/animals/types/animal";
+import { HeartPulse, Home, PawPrint, Trash2, Utensils } from "lucide-react";
 import { toast } from "sonner";
+
 import { useAnimalForm } from "@/features/animals/hooks/use-animal-form";
-import { X } from "lucide-react";
+import type { Animal } from "@/features/animals/types/animal";
+import {
+  FormSection,
+  SteppedFormSheet,
+} from "@/shared/components/forms/SteppedFormSheet";
+import { Button } from "@/shared/components/ui/button";
+import { DateInput } from "@/shared/components/ui/form-feedback";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 const especeOptions = [
-	{ label: 'Chat', value: 'Chat' }, { label: 'Chien', value: 'Chien' }, { label: 'Poisson', value: 'Poisson' },
-	{ label: 'Oiseaux', value: 'Oiseaux' }, { label: 'Lapin', value: 'Lapin' }, { label: 'Rongeur', value: 'Rongeur' },
-	{ label: 'Reptile', value: 'Reptile' }, { label: 'Furet', value: 'Furet' }, { label: 'Cheval', value: 'Cheval' },
-	{ label: 'Poney', value: 'Poney' }, { label: 'Âne', value: 'Âne' }, { label: 'Mulet et bardot', value: 'Mulet et bardot' },
-	{ label: 'Poule', value: 'Poule' }, { label: 'Canard', value: 'Canard' }, { label: 'Cochon', value: 'Cochon' },
-	{ label: 'Chèvre', value: 'Chèvre' }, { label: 'Mouton', value: 'Mouton' }, { label: 'Bovin', value: 'Bovin' },
-	{ label: 'Dinde', value: 'Dinde' }, { label: 'Oie', value: 'Oie' }, { label: 'Caille', value: 'Caille' },
-	{ label: 'Écureuil', value: 'Écureuil' }, { label: 'Amphibien', value: 'Amphibien' }, { label: 'Insecte', value: 'Insecte' },
-	{ label: 'Crustacé', value: 'Crustacé' }, { label: 'Arachnide', value: 'Arachnide' }, { label: 'Lama et alpaga', value: 'Lama et alpaga' },
-	{ label: 'Autruche et émeu', value: 'Autruche et émeu' }, { label: 'Autre', value: 'Autre' },
+  "Chat",
+  "Chien",
+  "Poisson",
+  "Oiseaux",
+  "Lapin",
+  "Rongeur",
+  "Reptile",
+  "Furet",
+  "Cheval",
+  "Poney",
+  "Âne",
+  "Mulet et bardot",
+  "Poule",
+  "Canard",
+  "Cochon",
+  "Chèvre",
+  "Mouton",
+  "Bovin",
+  "Dinde",
+  "Oie",
+  "Caille",
+  "Écureuil",
+  "Amphibien",
+  "Insecte",
+  "Crustacé",
+  "Arachnide",
+  "Lama et alpaga",
+  "Autruche et émeu",
+  "Autre",
 ];
-
 const unityOptions = [
-	{ label: 'g', value: 'gramme' }, { label: 'kg', value: 'kilogramme' }, { label: 'mg', value: 'milligramme' },
-	{ label: 'q', value: 'quintal' }, { label: 't', value: 'tonne' }, { label: 'L', value: 'litre' },
-	{ label: 'mL', value: 'millilitre' }, { label: 'cL', value: 'centilitre' },
+  { label: "g", value: "gramme" },
+  { label: "kg", value: "kilogramme" },
+  { label: "mg", value: "milligramme" },
+  { label: "q", value: "quintal" },
+  { label: "t", value: "tonne" },
+  { label: "L", value: "litre" },
+  { label: "mL", value: "millilitre" },
+  { label: "cL", value: "centilitre" },
 ];
 
 type AnimalFormDrawerProps = {
-	open: boolean;
-	onClose: () => void;
-	onSubmit: (data: Partial<Animal>, imageFile?: File) => void;
-	isSubmitting?: boolean;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: Partial<Animal>, imageFile?: File) => void;
+  isSubmitting?: boolean;
+  initialAnimal?: Partial<Animal>;
 };
 
-export function AnimalFormDrawer({ open, onClose, onSubmit, isSubmitting = false, initialAnimal }: AnimalFormDrawerProps & { initialAnimal?: Partial<Animal> }) {
-    const {
-		values,
-		errors,
-		handleChange,
-		handleTextareaChange,
-		handleSubmit,
-		resetForm,
-		setValues,
-	} = useAnimalForm(initialAnimal);
-    const [imageFile, setImageFile] = useState<File | undefined>(undefined);
-    const [removeS3Image, setRemoveS3Image] = useState(false); // Flag pour suppression S3
-    const inputRef = useRef<HTMLInputElement>(null);
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-sm font-medium">{label}</span>
+      {children}
+    </label>
+  );
+}
 
-	// Gestion du changement de fichier image
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			if (!file.type.startsWith("image/")) {
-				toast.error("Le fichier doit être une image.");
-				return;
-			}
-			if (file.size > 3 * 1024 * 1024) {
-				toast.error("L'image ne doit pas dépasser 3 Mo.");
-				return;
-			}
-			setImageFile(file);
-		}
-	};
+export function AnimalFormDrawer({
+  open,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+  initialAnimal,
+}: AnimalFormDrawerProps) {
+  const {
+    values,
+    errors,
+    handleChange,
+    handleTextareaChange,
+    handleSubmit,
+    resetForm,
+    setValues,
+  } = useAnimalForm(initialAnimal);
+  const [imageFile, setImageFile] = useState<File>();
+  const [removeS3Image, setRemoveS3Image] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isEdit = Boolean(initialAnimal?.id);
 
-	// Suppression de l'image locale (avant enregistrement)
-	const handleRemoveImage = () => {
-		setImageFile(undefined);
-		if (inputRef.current) inputRef.current.value = "";
-	};
+  function handleClose() {
+    resetForm();
+    setImageFile(undefined);
+    setRemoveS3Image(false);
+    if (inputRef.current) inputRef.current.value = "";
+    onClose();
+  }
 
-	// Flag pour suppression de l'image S3 (affichage uniquement)
-	const handleRemoveLinkedImage = () => {
-		setRemoveS3Image(true);
-	};
+  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Le fichier doit être une image.");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("L’image ne doit pas dépasser 3 Mo.");
+      return;
+    }
+    setImageFile(file);
+  }
 
-	// Reset à la fermeture
-	const handleClose = () => {
-		resetForm();
-		setImageFile(undefined);
-		setRemoveS3Image(false);
-		if (inputRef.current) inputRef.current.value = "";
-		onClose();
-	};
-
-	return (
-		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent showCloseButton={false} className="max-w-[1200px] w-[90vw] h-[90vh] rounded-2xl p-0 overflow-hidden flex flex-col">
-				<DialogHeader className="px-6 py-4 flex flex-row items-center justify-between">
-					<DialogTitle>Ajouter un animal</DialogTitle>
-                    <Button
-                        onClick={onClose}
-                        className="p-2 rounded hover:bg-white/20 text-white"
-                        variant="ghost"
-                        type="button"
-                        tabIndex={0}
-                        aria-label="Fermer"
+  return (
+    <SteppedFormSheet
+      open={open}
+      onClose={handleClose}
+      onSubmit={handleSubmit((submittedValues) =>
+        onSubmit(
+          {
+            ...submittedValues,
+            image: removeS3Image ? null : submittedValues.image,
+          },
+          imageFile,
+        ),
+      )}
+      title={
+        isEdit ? `Modifier ${values.nom || "un animal"}` : "Ajouter un animal"
+      }
+      eyebrow="Animaux"
+      description="Construisez sa fiche progressivement : identité, caractéristiques, quotidien puis informations complémentaires."
+      submitLabel={
+        isEdit ? "Enregistrer les modifications" : "Ajouter l’animal"
+      }
+      submitting={isSubmitting}
+      steps={[
+        {
+          title: "Identité",
+          description:
+            "Les informations indispensables pour reconnaître votre animal.",
+          icon: PawPrint,
+          content: (
+            <FormSection
+              title="Identité"
+              description="Les champs marqués d’un astérisque sont nécessaires."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Nom *">
+                  <Input
+                    name="nom"
+                    value={values.nom || ""}
+                    onChange={handleChange}
+                    required
+                    aria-invalid={Boolean(errors.nom)}
+                    placeholder="Son nom"
+                  />
+                  {errors.nom && (
+                    <span className="text-xs text-destructive">
+                      {errors.nom}
+                    </span>
+                  )}
+                </Field>
+                <Field label="Espèce *">
+                  <Select
+                    name="espece"
+                    value={values.espece || ""}
+                    onValueChange={(value) =>
+                      setValues((previous) => ({ ...previous, espece: value }))
+                    }
+                    required
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={Boolean(errors.espece)}
                     >
-                        <X size={20} />
+                      <SelectValue placeholder="Choisir une espèce" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {especeOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.espece && (
+                    <span className="text-xs text-destructive">
+                      {errors.espece}
+                    </span>
+                  )}
+                </Field>
+                <Field label="Date de naissance *">
+                  <DateInput
+                    name="datenaissance"
+                    value={values.datenaissance || ""}
+                    onChange={handleChange}
+                    required
+                  />
+                  {errors.datenaissance && (
+                    <span className="text-xs text-destructive">
+                      {errors.datenaissance}
+                    </span>
+                  )}
+                </Field>
+                <Field label="Sexe">
+                  <Input
+                    name="sexe"
+                    value={values.sexe || ""}
+                    onChange={handleChange}
+                    placeholder="Femelle, mâle…"
+                  />
+                </Field>
+                <Field label="Race">
+                  <Input
+                    name="race"
+                    value={values.race || ""}
+                    onChange={handleChange}
+                  />
+                </Field>
+                <Field label="Robe ou couleur">
+                  <Input
+                    name="couleur"
+                    value={values.couleur || ""}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
+            </FormSection>
+          ),
+        },
+        {
+          title: "Caractéristiques",
+          description: "Identification et repères physiques utiles au suivi.",
+          icon: HeartPulse,
+          content: (
+            <div className="space-y-4">
+              <FormSection title="Identification">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Numéro d’identification">
+                    <Input
+                      name="numeroidentification"
+                      value={values.numeroidentification || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                  <Field label="Date d’arrivée">
+                    <DateInput
+                      name="datearrivee"
+                      value={values.datearrivee || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                </div>
+              </FormSection>
+              <FormSection
+                title="Mesures initiales"
+                description="Ces valeurs pourront ensuite être complétées dans l’historique."
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Poids">
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      name="poids"
+                      value={values.poids || ""}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  </Field>
+                  <Field label="Taille">
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      name="taille"
+                      value={values.taille || ""}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  </Field>
+                </div>
+              </FormSection>
+            </div>
+          ),
+        },
+        {
+          title: "Quotidien",
+          description: "Alimentation et quantité habituelle.",
+          icon: Utensils,
+          content: (
+            <FormSection title="Alimentation">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Alimentation">
+                  <Input
+                    name="food"
+                    value={values.food || ""}
+                    onChange={handleChange}
+                    placeholder="Croquettes, foin…"
+                  />
+                </Field>
+                <Field label="Quantité">
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    name="quantity"
+                    value={values.quantity || ""}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                  />
+                </Field>
+                <Field label="Unité">
+                  <Select
+                    name="unity"
+                    value={values.unity || ""}
+                    onValueChange={(value) =>
+                      setValues((previous) => ({ ...previous, unity: value }))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choisir une unité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unityOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </FormSection>
+          ),
+        },
+        {
+          title: "Compléments",
+          description: "Photo, filiation, dates de vie et informations libres.",
+          icon: Home,
+          content: (
+            <div className="space-y-4">
+              <FormSection
+                title="Photo"
+                description="JPEG, PNG ou WebP, 3 Mo maximum."
+              >
+                <Input
+                  ref={inputRef}
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={
+                    Boolean(imageFile) ||
+                    (Boolean(initialAnimal?.image) && !removeS3Image)
+                  }
+                />
+                {imageFile && (
+                  <div className="mt-2 flex items-center justify-between rounded-control bg-muted/40 p-2 text-xs">
+                    <span className="truncate">{imageFile.name}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setImageFile(undefined);
+                        if (inputRef.current) inputRef.current.value = "";
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" />
+                      Retirer
                     </Button>
-				</DialogHeader>
-				<form className="flex-1 overflow-y-auto p-6 flex flex-col gap-6" onSubmit={handleSubmit(async (vals) => {
-                    onSubmit({ ...vals, image: removeS3Image ? null : vals.image }, imageFile);
-                })}>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Nom *</label>
-                            <Input
-                                name="nom"
-                                value={values.nom || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="Nom *"
-                            />
-                            {errors.nom && <p className="text-xs text-red-500">{errors.nom}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Espèce *</label>
-                            <Select
-                                name="espece"
-                                value={values.espece || ""}
-                                onValueChange={value => setValues(prev => ({ ...prev, espece: value }))}
-                                required
-                            >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Espèce" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {especeOptions.map(opt => (
-                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                            </Select>
-                            {errors.espece && <p className="text-xs text-red-500">{errors.espece}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Date de naissance *</label>
-                            <Input
-                                type="date"
-                                name="datenaissance"
-                                value={values.datenaissance || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="Date de naissance *"
-                            />
-                            {errors.datenaissance && <p className="text-xs text-red-500">{errors.datenaissance}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Race</label>
-                            <Input
-                                name="race"
-                                value={values.race || ""}
-                                onChange={handleChange}
-                                placeholder="Race"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Date d’arrivée</label>
-                            <Input
-                                type="date"
-                                name="datearrivee"
-                                value={values.datearrivee || ""}
-                                onChange={handleChange}
-                                placeholder="Date d'arrivée"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Numéro d’identification</label>
-                            <Input
-                                name="numeroidentification"
-                                value={values.numeroidentification || ""}
-                                onChange={handleChange}
-                                placeholder="Numéro d'identification"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Alimentation</label>
-                            <Input
-                                name="food"
-                                value={values.food || ""}
-                                onChange={handleChange}
-                                placeholder="Alimentation"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Poids</label>
-                            <Input
-                                name="poids"
-                                value={values.poids || ""}
-                                onChange={handleChange}
-                                placeholder="Poids"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Sexe</label>
-                            <Input
-                                name="sexe"
-                                value={values.sexe || ""}
-                                onChange={handleChange}
-                                placeholder="Sexe"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Taille</label>
-                            <Input
-                                name="taille"
-                                value={values.taille || ""}
-                                onChange={handleChange}
-                                placeholder="Taille"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Quantité</label>
-                            <Input
-                                name="quantity"
-                                value={values.quantity || ""}
-                                onChange={handleChange}
-                                placeholder="Quantité"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Unité</label>
-                            <Select
-                                name="unity"
-                                value={values.unity || ""}
-                                onValueChange={value => setValues(v => ({ ...v, unity: value }))}
-                            >
-                            <SelectTrigger  className="w-full">
-                                <SelectValue placeholder="Unité" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {unityOptions.map(opt => (
-                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Robe</label>
-                            <Input
-                                name="couleur"
-                                value={values.couleur || ""}
-                                onChange={handleChange}
-                                placeholder="Robe"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Nom du père</label>
-                            <Input
-                                name="nompere"
-                                value={values.nompere || ""}
-                                onChange={handleChange}
-                                placeholder="Nom du père"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Nom de la mère</label>
-                            <Input
-                                name="nommere"
-                                value={values.nommere || ""}
-                                onChange={handleChange}
-                                placeholder="Nom de la mère"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Image</label>
-                            <Input
-                                type="file"
-                                name="image"
-                                accept="image/*"
-                                ref={inputRef}
-                                onChange={handleImageChange}
-                                max={1}
-                                disabled={!!imageFile || (!!initialAnimal?.image && !removeS3Image)}
-                            />
-                            {/* Affiche l'image locale sélectionnée */}
-                            {imageFile && (
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-xs text-green-600">Image sélectionnée : {imageFile.name}</p>
-                                    <Button type="button" size="sm" variant="ghost" onClick={handleRemoveImage}>
-                                        Supprimer
-                                    </Button>
-                                </div>
-                            )}
-                            {/* Affiche l'image déjà liée à l'animal (S3) si présente et non supprimée */}
-                            {initialAnimal?.image && !removeS3Image && (
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-xs text-green-600">Image enregistrée : {initialAnimal.image}</p>
-                                    <Button type="button" size="sm" variant="ghost" onClick={handleRemoveLinkedImage}>
-                                        Supprimer
-                                    </Button>
-                                </div>
-                            )}
-                            {/* Message si l'image S3 a été marquée pour suppression */}
-                            {removeS3Image && (
-                                <p className="text-xs text-red-500 mt-1">Image marquée pour suppression. Enregistrez pour confirmer.</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Date de départ</label>
-                            <Input
-                                type="date"
-                                name="datedepart"
-                                value={values.datedepart || ""}
-                                onChange={handleChange}
-                                placeholder="Date de départ"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Date de décès</label>
-                            <Input
-                                type="date"
-                                name="datedeces"
-                                value={values.datedeces || ""}
-                                onChange={handleChange}
-                                placeholder="Date de décès"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Informations complémentaires</label>
-                        <Textarea
-                            name="informations"
-                            value={values.informations || ""}
-                            onChange={handleTextareaChange}
-                            placeholder="Informations complémentaires"
-                            rows={2}
-                        />
-                    </div>
-                    <DialogFooter className="mt-auto flex justify-end gap-2">
-                        <Button type="button" variant="ghost" onClick={handleClose} disabled={isSubmitting}>
-                            Annuler
-                        </Button>
-                        <Button type="submit" variant="outline" disabled={isSubmitting}>
-                            {isSubmitting ? "Ajout..." : "Ajouter"}
-                        </Button>
-                    </DialogFooter>
-				</form>
-			</DialogContent>
-		</Dialog>
-	);
+                  </div>
+                )}
+                {initialAnimal?.image && !removeS3Image && (
+                  <div className="mt-2 flex items-center justify-between rounded-control bg-muted/40 p-2 text-xs">
+                    <span>Photo actuelle conservée</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setRemoveS3Image(true)}
+                    >
+                      <Trash2 aria-hidden="true" />
+                      Retirer
+                    </Button>
+                  </div>
+                )}
+                {removeS3Image && (
+                  <p className="mt-2 text-xs text-destructive">
+                    La photo sera supprimée lors de l’enregistrement.
+                  </p>
+                )}
+              </FormSection>
+              <FormSection title="Filiation et parcours">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Nom du père">
+                    <Input
+                      name="nompere"
+                      value={values.nompere || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                  <Field label="Nom de la mère">
+                    <Input
+                      name="nommere"
+                      value={values.nommere || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                  <Field label="Date de départ">
+                    <DateInput
+                      name="datedepart"
+                      value={values.datedepart || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                  <Field label="Date de décès">
+                    <DateInput
+                      name="datedeces"
+                      value={values.datedeces || ""}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                </div>
+              </FormSection>
+              <FormSection title="Informations complémentaires">
+                <Textarea
+                  name="informations"
+                  value={values.informations || ""}
+                  onChange={handleTextareaChange}
+                  rows={5}
+                  placeholder="Habitudes, particularités, informations importantes…"
+                />
+              </FormSection>
+            </div>
+          ),
+        },
+      ]}
+    />
+  );
 }

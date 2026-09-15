@@ -1,16 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
-import { Skeleton } from "@/shared/components/ui/skeleton";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/shared/components/ui/carousel";
-import { SignedImage } from "@/shared/components/feedback/SignedImage";
-import { getValidAnimalImage } from "@/features/animals/utils/animals";
-import { Input } from "@/shared/components/ui/input";
+import { useMemo, useState } from "react";
+import { Camera, Images, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useBodyPictures } from "@/features/animals/hooks/use-body-pictures";
-import { X } from "lucide-react";
-import { ConfirmDialog } from '@/shared/components/feedback/ConfirmDialog';
-import type { AnimalBodyPicture } from '../types/animal';
-import { PremiumNotice, usePremiumGate } from '@/shared/components/feedback/PremiumGate';
 
+import { getValidAnimalImage } from "@/features/animals/utils/animals";
+import { ConfirmDialog } from "@/shared/components/feedback/ConfirmDialog";
+import {
+  PremiumNotice,
+  usePremiumGate,
+} from "@/shared/components/feedback/PremiumGate";
+import { SignedImage } from "@/shared/components/feedback/SignedImage";
+import { Card } from "@/shared/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/shared/components/ui/carousel";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { useBodyPictures } from "@/features/animals/hooks/use-body-pictures";
+import type { AnimalBodyPicture } from "../types/animal";
 
 interface AnimalEvolutionCardProps {
   idAnimal?: number;
@@ -18,174 +35,267 @@ interface AnimalEvolutionCardProps {
   canEdit: boolean;
 }
 
-export function AnimalEvolutionCard({ idAnimal, isPremium, canEdit }: AnimalEvolutionCardProps) {
+export function AnimalEvolutionCard({
+  idAnimal,
+  isPremium,
+  canEdit,
+}: AnimalEvolutionCardProps) {
   const { handlePremiumError } = usePremiumGate();
-  const { pictures: bodyPics, isLoading, error, addPicture, deletePicture, updatePictureUrl, refetch } =
-    useBodyPictures(idAnimal, isPremium);
-
-  const trackingMonths = useMemo(() => Array.from({ length: 12 }, (_, index) => {
-    const value = new Date();
-    value.setDate(1);
-    value.setMonth(value.getMonth() - index);
-    const key = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}`;
-    return { key, date: `${key}-01`, label: value.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) };
-  }), []);
-  const [selectedMonth, setSelectedMonth] = useState(trackingMonths[0].key);
-  const [pictureToDelete, setPictureToDelete] = useState<AnimalBodyPicture | null>(null);
-
-  // Vérifie si une photo a déjà été ajoutée ce mois-ci
-  const hasPhotoThisMonth = useMemo(() => {
-    return bodyPics.some(pic => {
-      if (!pic.date_enregistrement) return false;
-      return pic.date_enregistrement.slice(0, 7) === selectedMonth;
-    });
-  }, [bodyPics, selectedMonth]);
-
-  const [isUploading, setIsUploading] = useState(false);
-
-  // State pour stocker les tailles des images
-  const [imageSizes, setImageSizes] = useState<{ [id: number]: { width: number; height: number } }>({});
-
-  useEffect(() => {
-    bodyPics.forEach((photo) => {
-      if (photo.imageSigned?.url) {
-        const img = new window.Image();
-        img.src = photo.imageSigned.url;
-        img.onload = () => {
-          setImageSizes((prev) => ({
-            ...prev,
-            [photo.id]: { width: img.naturalWidth, height: img.naturalHeight }
-          }));
+  const {
+    pictures,
+    isLoading,
+    error,
+    addPicture,
+    deletePicture,
+    updatePictureUrl,
+    refetch,
+  } = useBodyPictures(idAnimal, isPremium);
+  const months = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) => {
+        const value = new Date();
+        value.setDate(1);
+        value.setMonth(value.getMonth() - index);
+        const key = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}`;
+        return {
+          key,
+          label: value.toLocaleDateString("fr-FR", {
+            month: "long",
+            year: "numeric",
+          }),
         };
-      }
-    });
-  }, [bodyPics]);
+      }),
+    [],
+  );
+  const [selectedMonth, setSelectedMonth] = useState(months[0].key);
+  const [isUploading, setIsUploading] = useState(false);
+  const [pictureToDelete, setPictureToDelete] =
+    useState<AnimalBodyPicture | null>(null);
+  const orderedPictures = [...pictures].sort((left, right) =>
+    (right.date_enregistrement ?? "").localeCompare(
+      left.date_enregistrement ?? "",
+    ),
+  );
+  const hasPictureForMonth = pictures.some(
+    (picture) => picture.date_enregistrement?.slice(0, 7) === selectedMonth,
+  );
 
-  // Gestion du changement de fichier image
-	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		if (!file.type.startsWith("image/")) {
-			toast.error("Le fichier doit être une image.");
-			return;
-		}
-		if (file.size > 1024 * 1024) {
-			toast.error("L'image ne doit pas dépasser 1 Mo.");
-			return;
-		}
-
-		setIsUploading(true);
-		try {
-			await addPicture({ file, date: `${selectedMonth}-01` });
-
-			toast.success("Image envoyée avec succès !");
-		} catch (error) {
-			if (!await handlePremiumError(error, 'bodyTracking')) toast.error("Erreur lors de l’upload de l’image.");
-		} finally {
-			setIsUploading(false);
-		}
-	};
-
-  const handleDeleteImage = async (picture: (typeof bodyPics)[number]) => {
-    try {
-      await deletePicture(picture);
-      toast.success("Photo supprimée !");
-      setPictureToDelete(null);
-    } catch (error) {
-      if (!await handlePremiumError(error, 'bodyTracking')) toast.error("Erreur lors de la suppression.");
+  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Le fichier doit être une image.");
+      return;
     }
-  };
+    if (file.size > 1024 * 1024) {
+      toast.error("L’image ne doit pas dépasser 1 Mo.");
+      return;
+    }
+    setIsUploading(true);
+    try {
+      await addPicture({ file, date: `${selectedMonth}-01` });
+      toast.success("Photo ajoutée au suivi.");
+    } catch (uploadError) {
+      if (!(await handlePremiumError(uploadError, "bodyTracking")))
+        toast.error("Impossible d’ajouter cette photo.");
+    } finally {
+      setIsUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function confirmDelete() {
+    if (!pictureToDelete) return;
+    try {
+      await deletePicture(pictureToDelete);
+      toast.success("Photo supprimée.");
+      setPictureToDelete(null);
+    } catch (deleteError) {
+      if (!(await handlePremiumError(deleteError, "bodyTracking")))
+        toast.error("Impossible de supprimer cette photo.");
+    }
+  }
 
   return (
-    <div className="bg-card flex flex-col gap-2 rounded-xl shadow-sm dark:shadow-lg dark:shadow-black/30 p-6 flex-1 min-h-0">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-bold">Évolution physique</h2>
-        {!isPremium && <PremiumNotice feature="bodyTracking" compact className="max-w-xl" />}
-        {isPremium && canEdit && !isUploading && (
-          <div className="flex flex-wrap items-end gap-2">
-            <label className="grid gap-1 text-xs" htmlFor={`body-month-${idAnimal}`}>Mois du suivi
-              <select id={`body-month-${idAnimal}`} className="h-9 rounded-md border bg-background px-3 text-sm capitalize"
-                value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
-                {trackingMonths.map((month) => <option key={month.key} value={month.key} disabled={bodyPics.some((picture) => picture.date_enregistrement?.slice(0, 7) === month.key)}>{month.label}</option>)}
-              </select>
-            </label>
-            {!hasPhotoThisMonth ? <label className="grid gap-1 text-xs" htmlFor={`body-file-${idAnimal}`}>Photo JPEG, PNG ou WebP · 1 Mo maximum
-              <Input id={`body-file-${idAnimal}`} type="file" name="image" accept="image/jpeg,image/png,image/webp"
-                onChange={handleImageChange} className="w-86 cursor-pointer" />
-            </label> : <span className="text-xs text-muted-foreground">Une photo existe déjà pour ce mois.</span>}
-          </div>
-        )}
-        {isPremium && isUploading && (
-          <span className="text-xs text-muted-foreground flex items-center gap-2">
-            <Skeleton className="w-6 h-6 rounded-full inline-block" />
-            Upload en cours...
+    <Card className="h-full gap-0 overflow-hidden rounded-[24px] p-0 shadow-surface">
+      <header className="border-b bg-muted/20 px-5 py-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 place-items-center rounded-[14px] bg-primary/10 text-primary">
+            <Images className="size-5" aria-hidden="true" />
           </span>
-        )}
-      </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-48 rounded-xl" />
-      ) : error ? (
-        <div role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-          Impossible de charger le suivi visuel. <button type="button" className="underline" onClick={() => void refetch()}>Réessayer</button>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
+              Souvenirs
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em]">
+              Évolution physique
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Un repère photo par mois pour voir les changements.
+            </p>
+          </div>
         </div>
-      ) : bodyPics.length > 0 ? (
-        <div className="w-full h-full flex justify-center items-center relative">
-          <div className="w-full max-w-lg 2xl:max-w-3xl mx-auto flex items-center justify-center relative" style={{ minHeight: 300 }}>
-            <Carousel>
-              <CarouselContent>
-                {[...bodyPics].sort((left, right) => (right.date_enregistrement ?? '').localeCompare(left.date_enregistrement ?? '')).map((photo, idx) => {
-                  const size = imageSizes[photo.id];
-                  return (
-                    <CarouselItem key={idx} className="flex flex-col items-center justify-center h-full relative">
-                      {/* Croix de suppression */}
-                      {canEdit && <button
-                        type="button"
-                        className="absolute top-2 right-2 z-20 bg-black/60 hover:bg-black/80 rounded-full p-1"
-                        onClick={() => setPictureToDelete(photo)}
-                        title="Supprimer cette photo"
-                      >
-                        <X size={20} className="text-white" />
-                      </button>}
+      </header>
+      <div className="p-5">
+        {!isPremium ? (
+          <PremiumNotice feature="bodyTracking" />
+        ) : (
+          canEdit && (
+            <div className="mb-5 rounded-[18px] bg-muted/45 p-4">
+              <div className="grid gap-3 sm:grid-cols-[1fr_1.4fr] sm:items-end">
+                <label
+                  className="grid gap-1.5 text-xs font-medium"
+                  htmlFor={`body-month-${idAnimal}`}
+                >
+                  Mois du suivi
+                  <Select
+                    value={selectedMonth}
+                    onValueChange={setSelectedMonth}
+                  >
+                    <SelectTrigger
+                      id={`body-month-${idAnimal}`}
+                      className="w-full capitalize"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((month) => (
+                        <SelectItem
+                          key={month.key}
+                          value={month.key}
+                          disabled={pictures.some(
+                            (picture) =>
+                              picture.date_enregistrement?.slice(0, 7) ===
+                              month.key,
+                          )}
+                        >
+                          <span className="capitalize">{month.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </label>
+                {!hasPictureForMonth ? (
+                  <label
+                    className="grid gap-1.5 text-xs font-medium"
+                    htmlFor={`body-file-${idAnimal}`}
+                  >
+                    Ajouter une photo
+                    <Input
+                      id={`body-file-${idAnimal}`}
+                      type="file"
+                      name="image"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleImageChange}
+                      disabled={isUploading}
+                      className="cursor-pointer bg-card"
+                    />
+                  </label>
+                ) : (
+                  <p className="rounded-control bg-card px-3 py-2.5 text-xs text-muted-foreground">
+                    Une photo existe déjà pour ce mois.
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        )}
+        {isLoading || isUploading ? (
+          <Skeleton className="h-72 w-full rounded-[18px]" />
+        ) : error ? (
+          <div
+            role="alert"
+            className="rounded-[18px] bg-destructive/10 p-4 text-sm text-destructive"
+          >
+            Impossible de charger le suivi visuel.{" "}
+            <button
+              type="button"
+              className="font-semibold underline"
+              onClick={() => void refetch()}
+            >
+              Réessayer
+            </button>
+          </div>
+        ) : orderedPictures.length ? (
+          <Carousel className="mx-auto w-full max-w-xl">
+            <CarouselContent>
+              {orderedPictures.map((photo, index) => (
+                <CarouselItem key={photo.id}>
+                  <figure className="relative overflow-hidden rounded-[20px] bg-muted/50">
+                    <div className="grid min-h-72 place-items-center p-4">
                       <SignedImage
                         imageSigned={photo.imageSigned}
-                        alt={photo.filename || `Photo ${idx + 1}`}
-                        classNames="rounded-xl transition-transform duration-300 hover:scale-105 mx-auto"
-                        width={size?.width || 100}
-                        height={size?.height || 200}
+                        alt={photo.filename || `Photo ${index + 1}`}
+                        classNames="max-h-80 w-auto rounded-[16px] object-contain"
+                        width={520}
+                        height={340}
                         onErrorRefresh={() => {
-                          if (idAnimal) {
+                          if (idAnimal)
                             getValidAnimalImage(
-                              photo.imageSigned, photo.filename, idAnimal, 'body', undefined,
-                              (_animalId, pictureId, image) => updatePictureUrl(pictureId, image), photo.id,
+                              photo.imageSigned,
+                              photo.filename,
+                              idAnimal,
+                              "body",
+                              undefined,
+                              (_animalId, pictureId, image) =>
+                                updatePictureUrl(pictureId, image),
+                              photo.id,
                             );
-                          }
                         }}
                       />
-                      <div className="mt-2 text-sm text-muted-foreground text-center">
-                        {photo.date_enregistrement && <span>{new Date(photo.date_enregistrement).toLocaleDateString()}</span>}
-                      </div>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              {/* Flèches positionnées en absolute */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
-                <CarouselPrevious />
-              </div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
-                <CarouselNext />
-              </div>
-            </Carousel>
+                    </div>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-background/90 text-destructive shadow-surface backdrop-blur hover:bg-background"
+                        onClick={() => setPictureToDelete(photo)}
+                        aria-label="Supprimer cette photo"
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </button>
+                    )}
+                    <figcaption className="border-t bg-card/90 px-4 py-3 text-center text-xs text-muted-foreground">
+                      {photo.date_enregistrement
+                        ? new Date(
+                            `${photo.date_enregistrement}T12:00:00`,
+                          ).toLocaleDateString("fr-FR", {
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "Date inconnue"}
+                    </figcaption>
+                  </figure>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-3" />
+            <CarouselNext className="right-3" />
+          </Carousel>
+        ) : (
+          <div className="grid min-h-64 place-items-center rounded-[20px] border border-dashed text-center">
+            <div>
+              <span className="mx-auto grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+                <Camera className="size-5" aria-hidden="true" />
+              </span>
+              <p className="mt-3 text-sm font-semibold">
+                Aucune photo de suivi
+              </p>
+              <p className="mt-1 max-w-56 text-xs leading-5 text-muted-foreground">
+                Ajoutez une photo mensuelle pour construire une évolution
+                visuelle.
+              </p>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="text-muted-foreground text-sm">Aucune photo physique disponible.</div>
-      )}
-      <ConfirmDialog open={pictureToDelete !== null} title="Supprimer cette photo de suivi ?"
+        )}
+      </div>
+      <ConfirmDialog
+        open={pictureToDelete !== null}
+        title="Supprimer cette photo de suivi ?"
         description="La photo sera supprimée définitivement du suivi corporel."
-        confirmLabel="Supprimer" onCancel={() => setPictureToDelete(null)}
-        onConfirm={() => pictureToDelete && void handleDeleteImage(pictureToDelete)} />
-    </div>
+        confirmLabel="Supprimer"
+        onCancel={() => setPictureToDelete(null)}
+        onConfirm={() => void confirmDelete()}
+      />
+    </Card>
   );
 }

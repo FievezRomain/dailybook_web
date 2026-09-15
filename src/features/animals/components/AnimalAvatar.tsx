@@ -30,10 +30,10 @@ export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, class
           }}
         />
       ) : hasError ? (
-        <Skeleton className="w-full h-full rounded-full" />
+        <Skeleton className={`shrink-0 rounded-full ${classNames ?? ""}`} style={{ width: `${width}px`, height: `${height}px` }} />
       ) : (
-        <div className="w-full h-full rounded-full flex items-center justify-center shadow-sm" style={{ width: `${width}px`, height: `${height}px` }}>
-          <span className="text-2xl font-semibold">{animal.nom?.charAt(0) ?? "?"}</span>
+        <div className={`flex shrink-0 items-center justify-center rounded-full bg-muted text-foreground shadow-sm ${classNames ?? ""}`} style={{ width: `${width}px`, height: `${height}px` }}>
+          <span className="text-sm font-semibold">{animal.nom?.charAt(0) ?? "?"}</span>
         </div>
       )}
     </>
