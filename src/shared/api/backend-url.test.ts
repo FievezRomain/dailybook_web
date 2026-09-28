@@ -1,7 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveBackendApiUrl } from './backend-url';
 
 describe('resolveBackendApiUrl', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it.each([
     ['http://localhost:8080', 'http://localhost:8080'],
     ['https://api.vasco.example/', 'https://api.vasco.example'],
@@ -10,7 +14,6 @@ describe('resolveBackendApiUrl', () => {
   });
 
   it.each([
-    undefined,
     'localhost:8080',
     'ftp://api.vasco.example',
     'https://api.vasco.example/api/v1',
@@ -18,5 +21,11 @@ describe('resolveBackendApiUrl', () => {
     'https://api.vasco.example?token=secret',
   ])('refuse une configuration ambiguë ou sensible: %s', (value) => {
     expect(() => resolveBackendApiUrl(value)).toThrow('Service indisponible.');
+  });
+
+  it('refuse une configuration absente indépendamment de l’environnement du runner', () => {
+    vi.stubEnv('VASCO_API_URL', '');
+
+    expect(() => resolveBackendApiUrl()).toThrow('Service indisponible.');
   });
 });
