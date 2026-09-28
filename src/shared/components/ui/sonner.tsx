@@ -34,6 +34,11 @@ const Toaster = ({ closeButton = true, duration = 5000, toastOptions, ...props }
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--success-bg":
+            "color-mix(in oklab, var(--palomino) 48%, var(--popover))",
+          "--success-text": "var(--foreground)",
+          "--success-border":
+            "color-mix(in oklab, var(--baie) 48%, var(--border))",
         } as React.CSSProperties
       }
       {...props}

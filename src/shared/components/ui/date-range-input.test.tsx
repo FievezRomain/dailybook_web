@@ -9,8 +9,12 @@ describe('DateRangeInput', () => {
     render(<DateRangeInput value={{ from: undefined }} onValueChange={onValueChange} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Plage de dates' }))
-    expect(screen.getByRole('dialog', { name: 'Sélectionner plage de dates' })).toBeInTheDocument()
+    const dialog = screen.getByRole('dialog', { name: 'Sélectionner plage de dates' })
+    expect(dialog).toBeInTheDocument()
     expect(screen.getAllByRole('grid')).toHaveLength(2)
+    expect(dialog.querySelectorAll('.rdp-weekday')[0]).toHaveTextContent(/lu/i)
+    expect(screen.getByRole('button', { name: 'Mois précédent' })).toBeInTheDocument()
+    expect(dialog).toHaveClass('max-h-[calc(100vh-2rem)]', 'max-w-[calc(100vw-2rem)]', 'overflow-y-auto')
     fireEvent.click(screen.getByRole('button', { name: '7 jours' }))
 
     const range = onValueChange.mock.calls[0][0]

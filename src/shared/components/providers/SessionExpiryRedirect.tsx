@@ -2,22 +2,24 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { closeAuthenticatedSession } from '@/features/user/api/user-api'
+import { useLogoutCurrentUser } from '@/features/user/hooks/use-logout-current-user'
 import { safeReturnPath } from '@/shared/security/safe-return-path'
 import { sessionExpiryEvent } from '@/shared/security/session-expiry'
 
 export function SessionExpiryRedirect() {
   const router = useRouter()
+  const logoutCurrentUser = useLogoutCurrentUser()
 
   useEffect(() => {
     const redirect = async (event: Event) => {
       const returnTo = safeReturnPath((event as CustomEvent<{ returnTo?: string }>).detail?.returnTo ?? null)
-      await closeAuthenticatedSession().catch(() => undefined)
+      await logoutCurrentUser().catch(() => undefined)
       router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+      router.refresh()
     }
     window.addEventListener(sessionExpiryEvent, redirect)
     return () => window.removeEventListener(sessionExpiryEvent, redirect)
-  }, [router])
+  }, [logoutCurrentUser, router])
 
   return null
 }

@@ -2,25 +2,28 @@ import { render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const replace = vi.hoisted(() => vi.fn())
-const closeAuthenticatedSession = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
+const refresh = vi.hoisted(() => vi.fn())
+const logoutCurrentUser = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }))
-vi.mock('@/features/user/api/user-api', () => ({ closeAuthenticatedSession }))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ replace, refresh }) }))
+vi.mock('@/features/user/hooks/use-logout-current-user', () => ({ useLogoutCurrentUser: () => logoutCurrentUser }))
 
 import { SessionExpiryRedirect } from './SessionExpiryRedirect'
 import { sessionExpiryEvent } from '@/shared/security/session-expiry'
 
 afterEach(() => {
   replace.mockClear()
-  closeAuthenticatedSession.mockClear()
+  refresh.mockClear()
+  logoutCurrentUser.mockClear()
 })
 
 describe('SessionExpiryRedirect', () => {
   it('clôture la session puis redirige une expiration vers Login avec un retour interne sûr', async () => {
     render(<SessionExpiryRedirect />)
     window.dispatchEvent(new CustomEvent(sessionExpiryEvent, { detail: { returnTo: '/profile?tab=security' } }))
-    await vi.waitFor(() => expect(closeAuthenticatedSession).toHaveBeenCalledOnce())
+    await vi.waitFor(() => expect(logoutCurrentUser).toHaveBeenCalledOnce())
     await vi.waitFor(() => expect(replace).toHaveBeenCalledWith('/login?returnTo=%2Fprofile%3Ftab%3Dsecurity'))
+    expect(refresh).toHaveBeenCalledOnce()
   })
 
   it('rejette un retour externe ou ambigu', async () => {

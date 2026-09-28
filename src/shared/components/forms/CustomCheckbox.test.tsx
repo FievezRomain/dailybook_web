@@ -14,7 +14,10 @@ describe('CustomCheckbox', () => {
     expect(onChange).toHaveBeenCalledOnce()
 
     rerender(<CustomCheckbox checked onChange={onChange} disabled label="Terminer l’objectif" />)
-    expect(screen.getByRole('checkbox', { name: 'Terminer l’objectif' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('checkbox', { name: 'Terminer l’objectif' })).toBeDisabled()
+    const checkedCheckbox = screen.getByRole('checkbox', { name: 'Terminer l’objectif' })
+    expect(checkedCheckbox).toHaveAttribute('aria-checked', 'true')
+    expect(checkedCheckbox).toBeDisabled()
+    expect(checkedCheckbox.firstElementChild).toHaveClass('border-checkbox-checked', 'bg-checkbox-checked')
+    expect(checkedCheckbox.querySelector('svg')).toHaveClass('text-white')
   })
 })

@@ -47,6 +47,10 @@ type NumberInputProps = Omit<InputProps, "type" | "inputMode" | "onChange"> & {
   onValueChange?: (rawValue: string, normalizedValue: number | null) => void
 }
 
+type UnitInputProps = NumberInputProps & {
+  unit: string
+}
+
 function NumberInput({ className, decimal = true, onChange, onValueChange, ...props }: NumberInputProps) {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     onChange?.(event)
@@ -68,4 +72,18 @@ function NumberInput({ className, decimal = true, onChange, onValueChange, ...pr
   )
 }
 
-export { NumberInput, PasswordInput, type NumberInputProps, type PasswordInputProps }
+function UnitInput({ unit, className, ...props }: UnitInputProps) {
+  return (
+    <div data-slot="unit-input" className="relative">
+      <NumberInput className={cn("pr-16", className)} {...props} />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-px right-px flex min-w-12 items-center justify-center rounded-r-[calc(var(--shape-control)-1px)] border-l bg-muted/45 px-3 text-xs font-semibold text-muted-foreground"
+      >
+        {unit}
+      </span>
+    </div>
+  )
+}
+
+export { NumberInput, PasswordInput, UnitInput, type NumberInputProps, type PasswordInputProps, type UnitInputProps }

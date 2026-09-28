@@ -2,14 +2,13 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Bell, ChevronDown, ChevronLeft, ChevronRight, Menu, UserRound } from 'lucide-react'
 import * as React from 'react'
-import type { ComponentType } from 'react'
 
 import { cn } from '@/lib/utils'
 import { IconButton } from '@/shared/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
+import { Icon, type IconName } from '@/shared/components/ui/icons'
 import { GlobalCreate } from './GlobalCreate'
 import { isCurrentDestination, moreNavigation, primaryNavigation, trackingNavigation } from './navigation'
 
@@ -30,24 +29,23 @@ function railItemClasses({ active, expanded, nested = false }: { active: boolean
   )
 }
 
-function RailMenuButton({ active, expanded, icon: Icon, inline = false, label, open, ...props }: React.ComponentProps<'button'> & { active: boolean; expanded: boolean; icon: ComponentType<{ className?: string }>; inline?: boolean; label: string; open: boolean }) {
-  const Chevron = inline ? ChevronDown : ChevronRight
+function RailMenuButton({ active, expanded, icon, inline = false, label, open, ...props }: React.ComponentProps<'button'> & { active: boolean; expanded: boolean; icon: IconName; inline?: boolean; label: string; open: boolean }) {
   return (
     <button type="button" aria-label={expanded ? undefined : label} className={railItemClasses({ active, expanded })} {...props}>
-      <Icon aria-hidden="true" className="size-5 shrink-0" />
+      <Icon name={icon} className="size-5" />
       <span className={cn('items-center justify-between overflow-hidden', expanded ? 'flex min-w-0 flex-1' : 'hidden w-0 flex-none')}>
         <RailLabel expanded={expanded}>{label}</RailLabel>
-        <Chevron aria-hidden="true" className={cn('size-4 shrink-0 transition-[opacity,transform] duration-[var(--motion-fast)] motion-reduce:transition-none', expanded ? 'opacity-100' : 'w-0 opacity-0', open && 'rotate-180')} />
+        <Icon name={inline ? 'expand' : 'next'} className={cn('size-4 transition-[opacity,transform] duration-[var(--motion-fast)] motion-reduce:transition-none', expanded ? 'opacity-100' : 'w-0 opacity-0', open && 'rotate-180')} />
       </span>
     </button>
   )
 }
 
-function RailLink({ href, label, icon: Icon, pathname, expanded, nested = false }: { href: string; label: string; icon?: ComponentType<{ className?: string }>; pathname: string; expanded: boolean; nested?: boolean }) {
+function RailLink({ href, label, icon, pathname, expanded, nested = false }: { href: string; label: string; icon?: IconName; pathname: string; expanded: boolean; nested?: boolean }) {
   const active = pathname === href || (!nested && isCurrentDestination(pathname, href))
   const link = (
     <Link href={href} aria-current={active ? 'page' : undefined} aria-label={expanded ? undefined : label} className={railItemClasses({ active, expanded, nested })}>
-      {Icon && <Icon aria-hidden="true" className="size-5 shrink-0" />}
+      {icon && <Icon name={icon} className="size-5" />}
       <RailLabel expanded={expanded}>{label}</RailLabel>
     </Link>
   )
@@ -55,11 +53,11 @@ function RailLink({ href, label, icon: Icon, pathname, expanded, nested = false 
   return expanded ? link : <Tooltip><TooltipTrigger asChild>{link}</TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip>
 }
 
-function RailDropdown({ active, currentPath, expanded, icon: Icon, items, label }: { active: boolean; currentPath: string; expanded: boolean; icon: ComponentType<{ className?: string }>; items: typeof moreNavigation; label: string }) {
+function RailDropdown({ active, currentPath, expanded, icon, items, label }: { active: boolean; currentPath: string; expanded: boolean; icon: IconName; items: typeof moreNavigation; label: string }) {
   const [open, setOpen] = React.useState(false)
   const trigger = (
     <DropdownMenuTrigger asChild>
-      <RailMenuButton active={active} expanded={expanded} icon={Icon} label={label} open={open} aria-current={active ? 'page' : undefined} />
+      <RailMenuButton active={active} expanded={expanded} icon={icon} label={label} open={open} aria-current={active ? 'page' : undefined} />
     </DropdownMenuTrigger>
   )
 
@@ -73,7 +71,7 @@ function RailDropdown({ active, currentPath, expanded, icon: Icon, items, label 
   )
 }
 
-function RailInlineMenu({ active, currentPath, expanded, icon: Icon, items, label }: { active: boolean; currentPath: string; expanded: boolean; icon: ComponentType<{ className?: string }>; items: typeof moreNavigation; label: string }) {
+function RailInlineMenu({ active, currentPath, expanded, icon, items, label }: { active: boolean; currentPath: string; expanded: boolean; icon: IconName; items: typeof moreNavigation; label: string }) {
   const [open, setOpen] = React.useState(active)
   const submenuId = React.useId()
 
@@ -82,7 +80,7 @@ function RailInlineMenu({ active, currentPath, expanded, icon: Icon, items, labe
       <RailMenuButton
         active={active}
         expanded={expanded}
-        icon={Icon}
+        icon={icon}
         inline
         label={label}
         open={open}
@@ -110,7 +108,7 @@ function TrackingNavigation({ currentPath, expanded, inline }: { currentPath: st
 
 function RailMore({ currentPath, expanded, inline }: { currentPath: string; expanded: boolean; inline: boolean }) {
   const active = moreNavigation.some((item) => currentPath === item.href || currentPath.startsWith(`${item.href}/`))
-  return <RailAdaptiveMenu active={active} currentPath={currentPath} expanded={expanded} icon={Menu} inline={inline} items={moreNavigation} label="Autre" />
+  return <RailAdaptiveMenu active={active} currentPath={currentPath} expanded={expanded} icon="otherMenu" inline={inline} items={moreNavigation} label="Autre" />
 }
 
 export function AppRail({ currentPath, hideGlobalCreateOnPaths }: { currentPath: string; hideGlobalCreateOnPaths: string[] }) {
@@ -153,12 +151,12 @@ export function AppRail({ currentPath, hideGlobalCreateOnPaths }: { currentPath:
   return (
     <aside data-expanded={expanded} data-mounted={mounted} className={cn('sticky top-4 hidden h-[calc(100dvh-2rem)] shrink-0 flex-col gap-3 overflow-hidden rounded-surface border bg-card py-5 shadow-surface md:flex motion-reduce:transition-none', mounted && 'transition-[width,padding] duration-[260ms] ease-[var(--ease-emphasis)]', expanded ? 'w-[264px] px-5' : 'w-24 px-3')}>
       <div className={cn('flex h-11 items-center justify-between', expanded ? 'gap-2' : 'gap-0')}>
-        <Link href="/dashboard" aria-label={expanded ? undefined : 'Vasco — Accueil'} className={cn('flex min-w-0 items-center overflow-hidden rounded-control outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50', expanded ? 'flex-1 gap-3' : 'w-8 shrink-0 justify-center')}>
+        <Link href="/dashboard" aria-label={expanded ? undefined : 'Vasco — Accueil'} className={cn('flex min-w-0 items-center overflow-hidden rounded-control outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50', expanded ? 'flex-1 gap-2' : 'w-8 shrink-0 justify-center')}>
           <span className={cn('flex shrink-0 items-center justify-center', expanded ? 'size-11' : 'size-8')}><Image src="/logo.png" alt="" width={44} height={44} className="size-full object-contain" priority /></span>
-          <RailLabel expanded={expanded}><span className="text-lg font-bold">VASCO</span></RailLabel>
+          <RailLabel expanded={expanded}><span className="text-lg font-semibold text-primary">VASCO</span></RailLabel>
         </Link>
         <IconButton label={expanded ? 'Réduire la navigation' : 'Développer la navigation'} variant="secondary" onClick={toggleExpanded} className={cn('shrink-0', !expanded && 'size-10')}>
-          <ChevronLeft className={cn('transition-transform duration-[260ms] ease-[var(--ease-emphasis)] motion-reduce:transition-none', !expanded && 'rotate-180')} />
+          <Icon name="collapseRail" className={cn('size-5 transition-transform duration-[260ms] ease-[var(--ease-emphasis)] motion-reduce:transition-none', !expanded && 'rotate-180')} />
         </IconButton>
       </div>
 
@@ -168,8 +166,8 @@ export function AppRail({ currentPath, hideGlobalCreateOnPaths }: { currentPath:
         <RailMore currentPath={currentPath} expanded={expanded} inline={inlineSubmenus} />
       </nav>
       <nav aria-label="Navigation du compte" className="mt-auto grid gap-1">
-        <RailLink href="/notifications" label="Notifications" icon={Bell} pathname={currentPath} expanded={expanded} />
-        <RailLink href="/profile" label="Profil" icon={UserRound} pathname={currentPath} expanded={expanded} />
+        <RailLink href="/notifications" label="Notifications" icon="notifications" pathname={currentPath} expanded={expanded} />
+        <RailLink href="/profile" label="Profil" icon="profile" pathname={currentPath} expanded={expanded} />
       </nav>
     </aside>
   )

@@ -135,7 +135,8 @@ function DateRangeInput({
         role="dialog"
         aria-label={`Sélectionner ${label.toLocaleLowerCase("fr-FR")}`}
         align="start"
-        className="w-auto! max-w-[calc(100vw-2rem)] p-3"
+        collisionPadding={16}
+        className="max-h-[calc(100vh-2rem)] w-auto! max-w-[calc(100vw-2rem)] overflow-y-auto p-2"
         onEscapeKeyDown={() => setOpen(false)}
       >
         <div className="mb-2 flex flex-wrap gap-1.5">
@@ -166,7 +167,7 @@ function DateRangeInput({
           onSelect={(nextValue) =>
             onValueChange(nextValue ?? { from: undefined })
           }
-          className="rounded-surface bg-muted/50 p-2 [--cell-size:--spacing(7)]"
+          className="rounded-surface bg-muted/50 p-1 [--cell-size:--spacing(6)]"
         />
         <Button
           type="button"

@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils'
 import { Badge } from './badge'
 import { Button } from './button'
 
-function PremiumNotice({ action = 'upgrade', className, context = 'inline', description, onAction, title }: { action?: 'upgrade' | 'dismiss'; className?: string; context?: 'inline' | 'card'; description: string; onAction: () => void; title: string }) {
+function PremiumNotice({ action = 'upgrade', className, context = 'inline', description, href, onAction, title }: { action?: 'upgrade' | 'dismiss'; className?: string; context?: 'inline' | 'card'; description: string; href?: string; onAction: () => void; title: string }) {
   const card = context === 'card'
   return <aside data-slot="premium-notice" aria-label={`${title} · Premium`} className={cn('flex border border-foreground/60 bg-card', card ? 'w-full max-w-[380px] flex-col items-start gap-3 rounded-[14px] p-5' : 'w-full max-w-[760px] flex-wrap items-center gap-[14px] rounded-[14px] px-[18px] py-4', className)}>
     <div className={cn('min-w-0', !card && 'flex-1')}><Badge variant="outline" className="mb-2 rounded-full border-foreground/60 bg-transparent">Premium</Badge><p className="text-[15px] font-semibold">{title}</p><p className="mt-1 text-xs text-muted-foreground">{description}</p></div>
-    <Button type="button" size={action === 'upgrade' ? 'default' : 'sm'} variant={action === 'upgrade' ? 'default' : 'ghost'} onClick={onAction}>{action === 'upgrade' ? 'Découvrir Premium' : 'Masquer'}</Button>
+    {action === 'upgrade' && href ? <Button asChild><a href={href} target="_blank" rel="noopener noreferrer">Passer en Premium</a></Button> : <Button type="button" size={action === 'upgrade' ? 'default' : 'sm'} variant={action === 'upgrade' ? 'default' : 'ghost'} onClick={onAction}>{action === 'upgrade' ? 'Passer en Premium' : 'Masquer'}</Button>}
   </aside>
 }
 

@@ -1,17 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/shared/components/ui/drawer'
+import { Icon, type IconName } from '@/shared/components/ui/icons'
 import { isCurrentDestination, moreNavigation, primaryNavigation, trackingNavigation, type NavigationDestination } from './navigation'
 
-function CompactMenu({ active, description, icon: Icon, items, label, navigationLabel, title }: {
+function CompactMenu({ active, description, icon, items, label, navigationLabel, title }: {
   active: boolean
   description: string
-  icon: LucideIcon
+  icon: IconName
   items: NavigationDestination[]
   label: string
   navigationLabel: string
@@ -21,7 +20,7 @@ function CompactMenu({ active, description, icon: Icon, items, label, navigation
     <Drawer>
       <DrawerTrigger asChild>
         <button type="button" aria-current={active ? 'page' : undefined} className={cn('flex h-14 w-[62px] flex-col items-center justify-center gap-0.5 rounded-control p-1 text-[11px] font-medium text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50', active && 'text-primary')}>
-          <span className={cn('flex h-7 w-9 items-center justify-center rounded-full', active && 'bg-accent')}><Icon aria-hidden="true" className="size-5" /></span>
+          <span className={cn('flex h-7 w-9 items-center justify-center rounded-full', active && 'bg-accent')}><Icon name={icon} className="size-5" /></span>
           <span>{label}</span>
         </button>
       </DrawerTrigger>
@@ -40,17 +39,17 @@ export function CompactNavigation({ currentPath }: { currentPath: string }) {
   const trackingActive = currentPath.startsWith('/performances/')
   return (
     <nav aria-label="Navigation principale" className="fixed right-4 bottom-4 left-4 z-sticky mx-auto flex h-20 max-w-[358px] items-center justify-between rounded-surface border bg-card px-4 py-3 shadow-[0_10px_15px_rgba(26,13,8,0.14)] [@media(max-height:560px)]:right-0 [@media(max-height:560px)]:bottom-0 [@media(max-height:560px)]:left-0 [@media(max-height:560px)]:h-[72px] [@media(max-height:560px)]:max-w-none [@media(max-height:560px)]:rounded-b-none md:hidden">
-      {primaryNavigation.map(({ href, label, icon: Icon }) => {
-        if (label === 'Suivi') return <CompactMenu key={href} active={trackingActive} description="Choisir entre vos objectifs et vos statistiques." icon={Icon!} items={trackingNavigation} label="Suivi" navigationLabel="Destinations de suivi" title="Suivi" />
+      {primaryNavigation.map(({ href, label, icon }) => {
+        if (label === 'Suivi') return <CompactMenu key={href} active={trackingActive} description="Choisir entre vos objectifs et vos statistiques." icon={icon!} items={trackingNavigation} label="Suivi" navigationLabel="Destinations de suivi" title="Suivi" />
         const active = isCurrentDestination(currentPath, href)
         return (
           <Link key={href} href={href} aria-current={active ? 'page' : undefined} className={cn('flex h-14 w-[62px] flex-col items-center justify-center gap-0.5 rounded-control p-1 text-[11px] font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50', active ? 'text-primary' : 'text-muted-foreground')}>
-            <span className={cn('flex h-7 w-9 items-center justify-center rounded-full', active && 'bg-accent')}>{Icon && <Icon aria-hidden="true" className="size-5" />}</span>
+            <span className={cn('flex h-7 w-9 items-center justify-center rounded-full', active && 'bg-accent')}>{icon && <Icon name={icon} className="size-5" />}</span>
             <span>{label}</span>
           </Link>
         )
       })}
-      <CompactMenu active={moreActive} description="Accéder aux autres espaces Vasco." icon={Menu} items={moreNavigation} label="Autre" navigationLabel="Autres destinations" title="Autres destinations" />
+      <CompactMenu active={moreActive} description="Accéder aux autres espaces Vasco." icon="otherMenu" items={moreNavigation} label="Autre" navigationLabel="Autres destinations" title="Autres destinations" />
     </nav>
   )
 }

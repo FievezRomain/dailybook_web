@@ -1,0 +1,174 @@
+:root {
+    color-scheme: light;
+
+    /* Palette officielle Vasco. Ces valeurs sont l'unique source de vérité. */
+    --gris: #f8ebe8;
+    --palomino: #f6e6ce;
+    --rouan: #d3ccc9;
+    --isabelle: #c9b69f;
+    --aubere: #baa89b;
+    --alezan: #ce9871;
+    --bai-cerise: #b07165;
+    --baie: #956540;
+    --bai-brun: #694233;
+
+    /* Rôles sémantiques du thème clair. */
+    --background: #ffffff;
+    --foreground: oklch(0.2 0.015 45);
+    --card: #ffffff;
+    --card-foreground: var(--foreground);
+    --popover: #ffffff;
+    --popover-foreground: var(--foreground);
+    --primary: var(--baie);
+    --primary-foreground: #ffffff;
+    --secondary: oklch(0.94 0.018 42);
+    --secondary-foreground: oklch(0.27 0.02 45);
+    --muted: oklch(0.95 0.006 50);
+    --muted-foreground: oklch(0.45 0.015 45);
+    --accent: oklch(0.92 0.025 50);
+    --accent-foreground: oklch(0.25 0.02 45);
+    --destructive: oklch(0.5 0.16 28);
+    --destructive-foreground: #ffffff;
+    --success: oklch(0.45 0.11 150);
+    --success-foreground: #ffffff;
+    --warning: oklch(0.67 0.13 75);
+    --warning-foreground: oklch(0.2 0.02 60);
+    --info: oklch(0.48 0.1 235);
+    --info-foreground: oklch(0.2 0.015 45);
+    --border: oklch(0.86 0.012 48);
+    --input: oklch(0.86 0.012 48);
+    --ring: var(--baie);
+    --checkbox-checked: var(--baie);
+
+    --chart-1: var(--baie);
+    --chart-2: var(--bai-brun);
+    --chart-3: var(--bai-cerise);
+    --chart-4: var(--alezan);
+    --chart-5: var(--aubere);
+
+    /* Catégories événementielles, composées uniquement avec la palette Vasco. */
+    --event-soins: var(--isabelle);
+    --event-rdv: var(--bai-brun);
+    --event-balade: var(--baie);
+    --event-entrainement: var(--aubere);
+    --event-concours: var(--alezan);
+    --event-depense: var(--rouan);
+    --event-autre: var(--bai-cerise);
+
+    /* Échelles de mise en page et de mouvement. */
+    --space-page-gutter: clamp(1rem, 3vw, 2rem);
+    --space-section: clamp(1.25rem, 3vw, 2rem);
+    --space-surface: 1.5rem;
+    --space-control: 0.5rem;
+    --shape-control: 0.625rem;
+    --shape-surface: 0.875rem;
+    --shape-overlay: 1rem;
+    --elevation-surface: 0 1px 2px rgb(105 66 51 / 0.08), 0 8px 24px rgb(105 66 51 / 0.05);
+    --elevation-overlay: 0 20px 45px rgb(105 66 51 / 0.18);
+    --scrim: rgb(105 66 51 / 0.52);
+    --material-glass: rgb(255 255 255 / 0.86);
+    --material-glass-border: rgb(255 255 255 / 0.55);
+    --motion-instant: 80ms;
+    --motion-fast: 140ms;
+    --motion-base: 200ms;
+    --motion-slow: 280ms;
+    --ease-standard: cubic-bezier(.2, 0, 0, 1);
+    --ease-enter: cubic-bezier(0, 0, 0, 1);
+    --ease-exit: cubic-bezier(.3, 0, 1, 1);
+    --z-index-sticky: 100;
+    --z-index-dropdown: 300;
+    --z-index-overlay: 500;
+    --z-index-toast: 700;
+    --radius: var(--shape-control);
+
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+    --text: var(--foreground);
+}
+
+.dark {
+    color-scheme: dark;
+    --background: #0a0a0a;
+    --foreground: oklch(0.96 0.006 55);
+    --card: oklch(0.25 0.014 45);
+    --card-foreground: var(--foreground);
+    --popover: oklch(0.23 0.014 45);
+    --popover-foreground: var(--foreground);
+    --primary: var(--baie);
+    --primary-foreground: #ffffff;
+    --secondary: oklch(0.31 0.02 45);
+    --secondary-foreground: var(--foreground);
+    --muted: oklch(0.29 0.012 45);
+    --muted-foreground: oklch(0.75 0.012 50);
+    --accent: oklch(0.34 0.028 50);
+    --accent-foreground: var(--foreground);
+    --destructive: oklch(0.7 0.15 28);
+    --destructive-foreground: oklch(0.16 0.02 28);
+    --success: oklch(0.7 0.12 150);
+    --success-foreground: oklch(0.16 0.02 150);
+    --warning: oklch(0.78 0.13 80);
+    --warning-foreground: oklch(0.19 0.02 65);
+    --info: oklch(0.72 0.1 235);
+    --info-foreground: oklch(0.16 0.02 235);
+    --border: oklch(0.37 0.015 45);
+    --input: oklch(0.34 0.015 45);
+    --ring: var(--baie);
+    --checkbox-checked: var(--baie);
+    --elevation-surface: 0 1px 2px rgb(0 0 0 / 0.25), 0 8px 24px rgb(0 0 0 / 0.2);
+    --elevation-overlay: 0 20px 45px rgb(0 0 0 / 0.45);
+    --scrim: rgb(0 0 0 / 0.62);
+    --material-glass: oklch(0.25 0.014 45 / 0.88);
+    --material-glass-border: rgb(255 255 255 / 0.12);
+}
+
+/* Mode volontairement distinct, activé explicitement pour la perception des couleurs. */
+html[data-color-vision='accessible'] {
+    --primary: #2764a5;
+    --primary-foreground: #ffffff;
+    --ring: #2764a5;
+    --success: #287d68;
+    --success-foreground: #ffffff;
+    --warning: #b16b00;
+    --warning-foreground: #ffffff;
+    --destructive: #a33b20;
+    --destructive-foreground: #ffffff;
+    --info: #326da8;
+    --info-foreground: #ffffff;
+    --chart-1: #2764a5;
+    --chart-2: #c66a00;
+    --chart-3: #287d68;
+    --chart-4: #a88700;
+    --chart-5: #a54178;
+    --event-soins: var(--chart-4);
+    --event-rdv: var(--chart-1);
+    --event-balade: var(--chart-3);
+    --event-entrainement: var(--chart-2);
+    --event-concours: var(--chart-5);
+    --event-depense: var(--chart-4);
+    --event-autre: var(--destructive);
+}
+
+html.dark[data-color-vision='accessible'] {
+    --primary: #78aee8;
+    --primary-foreground: #102a43;
+    --ring: #ead16e;
+    --success: #70c9b1;
+    --success-foreground: #12362d;
+    --warning: #ead16e;
+    --warning-foreground: #3b2d00;
+    --destructive: #e28b70;
+    --destructive-foreground: #431d12;
+    --info: #85b8e8;
+    --info-foreground: #102a43;
+    --chart-1: #78aee8;
+    --chart-2: #e3a05b;
+    --chart-3: #70c9b1;
+    --chart-4: #ead16e;
+    --chart-5: #dc8fba;
+}

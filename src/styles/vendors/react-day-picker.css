@@ -1,0 +1,12 @@
+.rdp-root {
+    display: flex;
+    --rdp-accent-color: var(--primary);
+    --rdp-accent-background-color: color-mix(in oklab, var(--primary) 20%, transparent);
+    --rdp-day_button-border-radius: var(--shape-control);
+}
+
+.rdp-selected .rdp-day_button {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 500;
+}

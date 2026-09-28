@@ -92,6 +92,6 @@ export function PremiumNotice({ feature, className, compact = false }: {
   const content = premiumFeatures[feature];
 
   return (
-    <PremiumNoticePrimitive className={className} context={compact ? 'card' : 'inline'} title={content.title} description={content.description} onAction={() => openPremiumDialog(feature)} />
+    <PremiumNoticePrimitive className={className} context={compact ? 'card' : 'inline'} title={content.title} description={content.description} href="https://www.vascoandco.fr/produit/vasco-premium/" onAction={() => openPremiumDialog(feature)} />
   );
 }

@@ -18,14 +18,15 @@ describe('AppRail Vasco', () => {
     const user = userEvent.setup()
     render(<AppRail currentPath="/performances/objectives" hideGlobalCreateOnPaths={[]} />)
 
-    expect(await screen.findByText('VASCO')).toHaveClass('text-lg')
+    expect(await screen.findByText('VASCO')).toHaveClass('text-lg', 'font-semibold', 'text-primary')
     await waitFor(() => expect(screen.getByRole('button', { name: 'Réduire la navigation' })).toBeVisible())
+    expect(screen.getByText('VASCO').closest('a')).toHaveClass('gap-2')
     expect(screen.getByRole('button', { name: 'Suivi' })).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('button', { name: 'Autre' })).toBeVisible()
     for (const item of [screen.getByRole('link', { name: 'Accueil' }), screen.getByRole('button', { name: 'Suivi' }), screen.getByRole('button', { name: 'Autre' })]) {
       expect(item).toHaveClass('h-12', 'w-full', 'items-center', 'gap-3', 'rounded-control', 'p-2', 'hover:bg-muted')
     }
-    expect(screen.getByRole('button', { name: 'Suivi' }).querySelector('.lucide-chevron-down')).toHaveClass('rotate-180')
+    expect(screen.getByRole('button', { name: 'Suivi' }).querySelector('[data-icon-name="expand"]')).toHaveClass('rotate-180')
     expect(screen.getByRole('link', { name: 'Objectifs' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: 'Statistiques' })).toHaveAttribute('href', '/performances/statistics')
     expect(screen.getByRole('link', { name: 'Objectifs' }).closest('aside')).not.toBeNull()

@@ -46,7 +46,7 @@ function DataRefresh({ pathname }: { pathname: string }) {
           <RefreshCw aria-hidden="true" className="size-4" />
         </IconButton>
       </TooltipTrigger>
-      <TooltipContent>{isRefreshing ? 'Synchronisation…' : freshness}</TooltipContent>
+      <TooltipContent placement="bottom">Actualiser</TooltipContent>
     </Tooltip>
   )
 }

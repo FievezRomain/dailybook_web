@@ -32,7 +32,7 @@ type SteppedFormSheetProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   title: string;
   description: string;
-  eyebrow: string;
+  eyebrow?: string;
   steps: FormStep[];
   submitLabel: string;
   submitting?: boolean;
@@ -55,6 +55,7 @@ export function SteppedFormSheet({
   const [stepError, setStepError] = useState<string>();
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
+  const explicitSubmitRef = useRef(false);
   const activeStep = steps[currentStep];
   const ActiveIcon = activeStep.icon;
   const isLastStep = currentStep === steps.length - 1;
@@ -91,6 +92,21 @@ export function SteppedFormSheet({
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   }
 
+  function submitExplicitly() {
+    if (!formRef.current?.reportValidity()) return;
+    explicitSubmitRef.current = true;
+    formRef.current.requestSubmit();
+  }
+
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!explicitSubmitRef.current) {
+      event.preventDefault();
+      return;
+    }
+    explicitSubmitRef.current = false;
+    onSubmit(event);
+  }
+
   return (
     <Dialog
       open={open}
@@ -102,11 +118,13 @@ export function SteppedFormSheet({
         closeLabel="Fermer le formulaire"
         className={`h-[min(860px,calc(100dvh-1.5rem))] max-w-4xl grid-rows-[auto_auto_minmax(0,1fr)] gap-0 overflow-hidden rounded-[26px] bg-background p-0 ${toneClassName}`}
       >
-        <DialogHeader className="relative gap-0 border-b bg-card px-5 py-4 pr-14 text-left sm:px-6">
+        <DialogHeader className="relative gap-0 border-b bg-background px-5 py-4 pr-14 text-left sm:px-6">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
-              {eyebrow}
-            </p>
+            {eyebrow && (
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
+                {eyebrow}
+              </p>
+            )}
             <DialogTitle className="text-xl leading-tight tracking-[-0.02em] sm:text-2xl">
               {title}
             </DialogTitle>
@@ -167,7 +185,7 @@ export function SteppedFormSheet({
         <form
           id={formId}
           ref={formRef}
-          onSubmit={onSubmit}
+          onSubmit={handleFormSubmit}
           aria-label={title}
           className="flex min-h-0 flex-1 flex-col"
           aria-busy={submitting}
@@ -190,9 +208,11 @@ export function SteppedFormSheet({
                   </p>
                 </div>
               </div>
-              {typeof activeStep.content === "function"
-                ? activeStep.content({ advance })
-                : activeStep.content}
+              {typeof activeStep.content === "function" ? (
+                activeStep.content({ advance })
+              ) : (
+                activeStep.content
+              )}
               {stepError && (
                 <p
                   role="alert"
@@ -227,7 +247,11 @@ export function SteppedFormSheet({
               )}
             </Button>
             {isLastStep ? (
-              <Button type="submit" disabled={submitting}>
+              <Button
+                type="button"
+                disabled={submitting}
+                onClick={submitExplicitly}
+              >
                 {submitting ? "Enregistrement…" : submitLabel}
               </Button>
             ) : (
@@ -295,8 +319,8 @@ export function SingleStepFormCard({
         if (!nextOpen) onClose?.();
       }}
     >
-      <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-3xl grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-[26px] p-0">
-        <DialogHeader className="border-b bg-muted/20 px-5 py-4 pr-14 sm:px-6">
+      <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-3xl grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-[26px] bg-background p-0">
+        <DialogHeader className="border-b bg-background px-5 py-4 pr-14 sm:px-6">
           <div className="flex items-start gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-[12px] bg-primary/10 text-primary">
               <Icon className="size-4" aria-hidden="true" />

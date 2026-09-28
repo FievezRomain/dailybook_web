@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { CalendarDays, ChartNoAxesCombined, House, PawPrint } from 'lucide-react'
 
 import { getPageTitle, isCurrentDestination, moreNavigation, primaryNavigation, trackingNavigation } from './navigation'
 
 describe('navigation du shell Vasco', () => {
   it('conserve les domaines et leurs destinations réelles', () => {
     expect(primaryNavigation.map(({ label }) => label)).toEqual(['Accueil', 'Suivi', 'Agenda', 'Animaux'])
-    expect(primaryNavigation.map(({ icon }) => icon)).toEqual([House, ChartNoAxesCombined, CalendarDays, PawPrint])
+    expect(primaryNavigation.map(({ icon }) => icon)).toEqual(['home', 'tracking', 'agenda', 'animals'])
     expect(trackingNavigation.map(({ label }) => label)).toEqual(['Objectifs', 'Statistiques'])
     expect(moreNavigation.map(({ href }) => href)).toEqual(['/groups', '/contacts', '/notes', '/wishes'])
   })

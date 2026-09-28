@@ -1,17 +1,16 @@
-import type { LucideIcon } from 'lucide-react'
-import { CalendarDays, ChartNoAxesCombined, House, PawPrint } from 'lucide-react'
+import type { IconName } from '@/shared/components/ui/icons'
 
 export type NavigationDestination = {
   href: string
   label: string
-  icon?: LucideIcon
+  icon?: IconName
 }
 
 export const primaryNavigation: NavigationDestination[] = [
-  { href: '/dashboard', label: 'Accueil', icon: House },
-  { href: '/performances/objectives', label: 'Suivi', icon: ChartNoAxesCombined },
-  { href: '/calendar', label: 'Agenda', icon: CalendarDays },
-  { href: '/animals', label: 'Animaux', icon: PawPrint },
+  { href: '/dashboard', label: 'Accueil', icon: 'home' },
+  { href: '/performances/objectives', label: 'Suivi', icon: 'tracking' },
+  { href: '/calendar', label: 'Agenda', icon: 'agenda' },
+  { href: '/animals', label: 'Animaux', icon: 'animals' },
 ]
 
 export const trackingNavigation: NavigationDestination[] = [

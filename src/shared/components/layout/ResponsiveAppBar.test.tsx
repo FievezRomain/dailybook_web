@@ -29,7 +29,11 @@ describe('ResponsiveAppBar', () => {
     renderAppBar(client)
 
     expect(screen.getByRole('heading', { name: 'Accueil' })).toHaveClass('text-lg')
-    fireEvent.click(screen.getByRole('button', { name: /Actualiser les données — À l'instant/ }))
+    const refreshButton = screen.getByRole('button', { name: /Actualiser les données — À l'instant/ })
+    fireEvent.pointerEnter(refreshButton)
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Actualiser')
+    expect(screen.getByRole('tooltip')).toHaveClass('top-full', 'mt-2')
+    fireEvent.click(refreshButton)
     expect(refetchQueries).toHaveBeenCalledWith({ type: 'active' })
   })
 

@@ -222,7 +222,7 @@ describe("fondations UI Vasco", () => {
       "Disponible avec Premium",
     );
     expect(screen.getByRole("tooltip")).toHaveTextContent("⌘K");
-    expect(screen.getByRole("tooltip")).toHaveClass("top-full", "bg-primary");
+    expect(screen.getByRole("tooltip")).toHaveClass("top-full", "bg-primary", "z-[var(--z-index-toast)]");
     expect(trigger).toHaveAttribute("aria-describedby");
     fireEvent.keyDown(trigger, { key: "Escape" });
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();

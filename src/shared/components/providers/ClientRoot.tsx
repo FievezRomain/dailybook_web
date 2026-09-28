@@ -5,6 +5,7 @@ import { Toaster } from '@/shared/components/ui/sonner';
 import { QueryProvider } from './QueryProvider';
 import { PremiumDialogProvider } from '@/shared/components/feedback/PremiumGate';
 import { SessionExpiryRedirect } from './SessionExpiryRedirect';
+import { GlobalCreateProvider } from './GlobalCreateProvider';
 
 export default function ClientRoot({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   return (
@@ -13,7 +14,9 @@ export default function ClientRoot({ children, nonce }: { children: React.ReactN
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}>
           <SessionExpiryRedirect />
           <Toaster />
-          <PremiumDialogProvider>{children}</PremiumDialogProvider>
+          <PremiumDialogProvider>
+            <GlobalCreateProvider>{children}</GlobalCreateProvider>
+          </PremiumDialogProvider>
         </ThemeProvider>
       </QueryProvider>
     </ErrorBoundary>

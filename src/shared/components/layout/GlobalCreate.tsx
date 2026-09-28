@@ -1,20 +1,20 @@
-import { Banknote, CalendarPlus, ContactRound, Gift, NotebookPen, PawPrint, Plus, Target, UsersRound } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { Button } from "@/shared/components/ui/button";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { useCurrentUser } from '@/features/user/hooks/use-current-user';
 import { useEventFormDrawer } from "@/features/events/context/event-form-drawer-context";
 import { getLocalDateString } from "@/shared/utils/dates";
 import { useAnimalFormDrawer } from "@/features/animals/context/animal-form-drawer-context";
 import { useObjectiveFormDrawer } from '@/features/objectives/context/objective-form-drawer-context';
-import { useRouter } from 'next/navigation';
 import { usePremiumDialog } from '@/shared/components/feedback/PremiumGate';
+import { useGlobalCreate } from '@/shared/components/providers/GlobalCreateProvider';
 import { cn } from '@/lib/utils';
+import { Icon, type IconName } from '@/shared/components/ui/icons';
 
 type CreateAction = {
   label: string;
   description: string;
-  icon: ReactNode;
+  icon: IconName;
   onClick: () => void;
   premium?: boolean;
 };
@@ -33,9 +33,9 @@ export function GlobalCreate({
   placement = 'rail',
 }: GlobalCreateProps) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   const { user, isPremium } = useCurrentUser();
   const { openPremiumDialog } = usePremiumDialog();
+  const { openEntityForm } = useGlobalCreate();
 
   // Utilise le context pour ouvrir le formulaire
   const { openDrawer } = useEventFormDrawer();
@@ -50,61 +50,55 @@ export function GlobalCreate({
     openAnimalDrawer({ initialAnimal: { datenaissance: getLocalDateString(), email: user?.email } });
   }
   function onCreateNote() {
-    router.push('/notes?create=1');
+    openEntityForm('note');
   }
   function onCreateContact() {
-    router.push('/contacts?create=1');
+    openEntityForm('contact');
   }
   function onCreateWish() {
-    router.push('/wishes?create=1');
+    openEntityForm('wish');
   }
   function onCreateGroup() {
-    if (isPremium) router.push('/groups?create=1');
+    if (isPremium) openEntityForm('group');
     else openPremiumDialog('groupManagement');
   }
 
   const actions: CreateAction[] = [
-    { label: 'Événement', description: 'Rendez-vous, soin ou activité', icon: <CalendarPlus className="size-5" />, onClick: () => onCreateEvent() },
+    { label: 'Événement', description: 'Planifier un soin, une balade ou un rendez-vous', icon: 'event', onClick: () => onCreateEvent() },
     {
       label: 'Animal',
-      description: 'Nouvelle fiche animale',
-      icon: <PawPrint className="size-5" />,
+      description: 'Ajouter un nouveau compagnon et son profil',
+      icon: 'animals',
       onClick: onCreateAnimal,
     },
     {
       label: 'Objectif',
-      description: 'Un cap et ses prochaines étapes',
-      icon: <Target className="size-5" />,
+      description: 'Définir un suivi avec une échéance et des étapes',
+      icon: 'objective',
       onClick: () => openObjectiveDrawer(),
     },
     {
       label: 'Note',
-      description: 'Information rapide',
-      icon: <NotebookPen className="size-5" />,
+      description: 'Écrire rapidement ou enregistrer avec la voix',
+      icon: 'note',
       onClick: onCreateNote,
     },
     {
       label: 'Contact',
-      description: 'Personne ou professionnel utile',
-      icon: <ContactRound className="size-5" />,
+      description: 'Enregistrer une personne et ses informations utiles',
+      icon: 'contact',
       onClick: onCreateContact,
     },
     {
       label: 'Souhait',
-      description: 'Une envie à garder en vue',
-      icon: <Gift className="size-5" />,
+      description: 'Garder une idée avec son prix éventuel',
+      icon: 'heart',
       onClick: onCreateWish,
     },
     {
-      label: 'Dépense',
-      description: 'Suivi d’un montant',
-      icon: <Banknote className="size-5" />,
-      onClick: () => onCreateEvent('depense'),
-    },
-    {
       label: 'Groupe',
-      description: 'Coordination partagée',
-      icon: <UsersRound className="size-5" />,
+      description: 'Créer un espace partagé pour vos proches et animaux',
+      icon: 'group',
       onClick: onCreateGroup,
       premium: true,
     },
@@ -125,7 +119,8 @@ export function GlobalCreate({
             aria-label="Créer"
             variant="default"
             >
-            <Plus
+            <Icon
+                name="add"
                 className={`size-5 transition-transform duration-[var(--motion-base)] motion-reduce:transition-none ${
                 open ? "rotate-45" : ""
                 }`}
@@ -151,7 +146,7 @@ export function GlobalCreate({
                   action.onClick();
                 }}
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-primary">{action.icon}</span>
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-primary"><Icon name={action.icon} className="size-5" /></span>
                 <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold text-foreground">{action.label}</span><span className="block text-[11px] font-normal text-muted-foreground">{action.description}</span></span>
                 {action.premium && <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-semibold text-primary">Premium</span>}
               </Button>

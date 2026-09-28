@@ -1,0 +1,4 @@
+/* Les formulaires modaux restent une surface continue en thème sombre. */
+.dark [data-slot="dialog-content"] > [data-slot="dialog-header"] {
+    background-color: inherit;
+}

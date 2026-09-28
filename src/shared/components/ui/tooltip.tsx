@@ -63,7 +63,7 @@ function TooltipContent({ className, children, placement = 'top', shortcut, ...p
       id={contentId}
       role="tooltip"
       className={cn(
-        'absolute left-1/2 z-50 flex w-max max-w-64 -translate-x-1/2 items-center gap-2 rounded-[8px] bg-primary px-2.5 py-[7px] text-[11px] font-semibold text-primary-foreground shadow-overlay motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95',
+        'absolute left-1/2 z-[var(--z-index-toast)] flex w-max max-w-64 -translate-x-1/2 items-center gap-2 rounded-[8px] bg-primary px-2.5 py-[7px] text-[11px] font-semibold text-primary-foreground shadow-overlay motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95',
         placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
         className,
       )}

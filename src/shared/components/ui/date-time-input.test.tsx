@@ -24,6 +24,15 @@ describe("DateInput et TimeInput", () => {
     expect(calendarDialog.querySelector('[data-slot="calendar"]')).toHaveStyle({
       "--cell-size": "1.5rem",
     });
+    expect(screen.getByText(/septembre 2026/i)).toBeInTheDocument();
+    expect(calendarDialog.querySelector(".rdp-weekday")).toHaveTextContent(/lu/i);
+    expect(screen.getByRole("button", { name: "Mois précédent" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Mois suivant" })).toBeInTheDocument();
+    expect(calendarDialog).toHaveClass(
+      "max-h-[calc(100vh-2rem)]",
+      "max-w-[calc(100vw-2rem)]",
+      "overflow-y-auto",
+    );
     const day = document.querySelector<HTMLButtonElement>(
       'button[data-day]:not([data-selected-single="true"])',
     );

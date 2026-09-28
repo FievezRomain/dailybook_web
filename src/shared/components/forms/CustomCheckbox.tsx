@@ -21,9 +21,9 @@ export function CustomCheckbox({ checked, onChange, disabled = false, label = 'M
     >
       <span className={cn(
         "flex size-6 items-center justify-center rounded-md border-2 transition-[background-color,border-color] duration-[var(--motion-fast)]",
-        checked ? "border-foreground bg-foreground" : "border-muted-foreground bg-card hover:border-foreground",
+        checked ? "border-checkbox-checked bg-checkbox-checked" : "border-muted-foreground bg-card hover:border-checkbox-checked",
       )}>
-        {checked && <Check aria-hidden="true" className="size-4 text-background" />}
+        {checked && <Check aria-hidden="true" className="size-4 text-white" />}
       </span>
     </button>
   );

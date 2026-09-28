@@ -115,11 +115,13 @@ function DateInput({
         role="dialog"
         aria-label="Choisir une date"
         align="start"
-        className="w-auto! p-1"
+        collisionPadding={16}
+        className="max-h-[calc(100vh-2rem)] w-auto! max-w-[calc(100vw-2rem)] overflow-y-auto p-1"
         onEscapeKeyDown={() => setOpen(false)}
       >
         <Calendar
           mode="single"
+          defaultMonth={parseDate(currentValue)}
           style={{ "--cell-size": "1.5rem" } as React.CSSProperties}
           className="p-1 text-xs [&_.rdp-month]:gap-2 [&_.rdp-week]:mt-1 [&_.rdp-weekday]:text-[10px]"
           classNames={{ day_button: "text-[11px]" }}

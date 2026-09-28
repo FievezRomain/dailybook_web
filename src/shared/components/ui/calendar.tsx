@@ -6,6 +6,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
+import { fr } from "date-fns/locale"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -18,6 +19,8 @@ function Calendar({
   captionLayout = "label",
   buttonVariant = "ghost",
   formatters,
+  locale = fr,
+  labels,
   components,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
@@ -35,9 +38,15 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
+      locale={locale}
+      labels={{
+        labelPrevious: () => "Mois précédent",
+        labelNext: () => "Mois suivant",
+        ...labels,
+      }}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString("fr-FR", { month: "short" }),
         ...formatters,
       }}
       classNames={{
