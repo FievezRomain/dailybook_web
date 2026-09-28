@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
+import { getAdminAuth } from '@/lib/firebase-admin';
 import { SESSION_COOKIE_NAME } from '@/constants/cookies';
 import { isSameOriginRequest } from '@/lib/auth/server/isSameOriginRequest';
 import { WebApiError } from '@/shared/api/api-error';
@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await parseJson(req, sessionRequestSchema);
+    const adminAuth = getAdminAuth();
 
     const decodedToken = await adminAuth.verifyIdToken(body.idToken, true);
     const authenticatedAt = decodedToken.auth_time;

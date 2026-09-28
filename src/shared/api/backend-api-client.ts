@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import axios, { AxiosError } from 'axios';
 import { cookies } from 'next/headers';
 import { SESSION_COOKIE_NAME } from '@/constants/cookies';
-import { adminAuth } from '@/lib/firebase-admin';
+import { getAdminAuth } from '@/lib/firebase-admin';
 import { WebApiError } from './api-error';
 import { resolveBackendApiUrl } from './backend-url';
 
@@ -49,7 +49,7 @@ export async function backendApiClient<T = unknown>(
   }
 
   try {
-    await adminAuth.verifySessionCookie(sessionCookie, true);
+    await getAdminAuth().verifySessionCookie(sessionCookie, true);
   } catch {
     throw new WebApiError({
       code: 'UNAUTHENTICATED', message: 'Votre session est invalide ou expirée.', status: 401, requestId,
@@ -117,7 +117,7 @@ async function backendRequestContext() {
     });
   }
   try {
-    await adminAuth.verifySessionCookie(sessionCookie, true);
+    await getAdminAuth().verifySessionCookie(sessionCookie, true);
   } catch {
     throw new WebApiError({
       code: 'UNAUTHENTICATED', message: 'Votre session est invalide ou expirée.', status: 401, requestId,
