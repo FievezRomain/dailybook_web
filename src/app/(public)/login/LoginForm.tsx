@@ -1,15 +1,23 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { getIdToken } from 'firebase/auth';
-import styles from '@/styles/pages/login.module.scss';
+import { AlertCircle, ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import { signInUser, isEmailVerified } from '@/lib/firebaseService';
-import { Button } from '@/components/ui';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
 import Link from 'next/link';
+import { establishAuthenticatedSession } from '@/features/user/api/user-api';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AuthShell } from '@/shared/components/layout/AuthShell';
+import { safeReturnPath } from '@/shared/security/safe-return-path';
+import { getLoginErrorMessage } from '@/features/auth/utils/login-error-message';
 
 export default function LoginForm() {
+        const router = useRouter();
+        const searchParams = useSearchParams();
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
+        const [showPassword, setShowPassword] = useState(false);
         const [error, setError] = useState<string | null>(null);
         const [loading, setLoading] = useState(false);
 
@@ -26,162 +34,83 @@ export default function LoginForm() {
                         // Vérification si l'utilisateur a son email validée
                         const verified = await isEmailVerified();
                         if (!verified) {
-                                window.location.href = '/verify-email';
+                                router.replace('/verify-email');
                                 return;
                         }
 
-                        // 2. Récupérer le idToken
-                        const idToken = await getIdToken(user, true);
+                        // Crée le cookie web puis ouvre la session métier FastAPI.
+                        await establishAuthenticatedSession(user);
 
-                        // 3. Envoyer ce token à l’API pour créer le cookie
-                        const res = await fetch('/api/session/login', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ idToken: idToken }),
-                        });
-
-                        if (!res.ok) {
-                                throw new Error('Erreur lors de la création du cookie de session');
-                        }
-
-                        // 4. Rediriger
-                        window.location.href = '/dashboard';
+                        // Rediriger uniquement lorsque les deux sessions sont prêtes.
+                        const returnTo = searchParams.get('returnTo');
+                        router.replace(safeReturnPath(returnTo));
                 } catch (err) {
-                        console.error(err);
-                        if (err instanceof Error) {
-                                setError(err.message);
-                        } else {
-                                setError("Email ou mot de passe incorrect");
-                        }
+                        setError(getLoginErrorMessage(err));
                         setLoading(false);
                 }
         };
 
         return (
-                <div className={`${styles.page}`}>
-                        <div className={`${styles.layout} shadow-lg`}>
-                                {/* PANEL GAUCHE */}
-                                <section
-                                        className={`${styles.panel} flex flex-col justify-between`}
-                                        style={{
-                                                background: `linear-gradient(
-                                                        135deg,
-                                                        rgba(var(--color-baie), 1),
-                                                        rgba(var(--color-alezan), 1),
-                                                        rgba(var(--color-primary), 1)
-                                                        )`,
-                                        }}
-                                >
-                                        <div className="max-w-md space-y-6">
-                                                <div className="flex items-center gap-3">
-                                                        <img src="/logo.png" alt="Logo" className="h-15 w-auto" />
-                                                        <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[rgba(var(--color-background),0.85)]">
-                                                                Vasco and co
-                                                        </p>
-                                                </div>
-
-                                                <div className="space-y-3 text-[rgba(var(--color-background),1)]">
-                                                        <h1 className="text-2xl md:text-[1.9rem] font-semibold leading-snug">
-                                                                Bienvenue dans votre journal quotidien
-                                                        </h1>
-                                                        <p className="text-sm leading-relaxed opacity-90">
-                                                                Centralisez vos événements, vos notes, vos objectifs et bien plus
-                                                                encore dans un espace clair, simple et sécurisé.
-                                                        </p>
-                                                </div>
-                                        </div>
-
-                                        <div className="mt-10 space-y-2 max-w-md">
-                                                <p className="text-sm text-[rgba(var(--color-background),0.9)]">
-                                                        Pas encore de compte ?
-                                                </p>
-                                                <Button
-                                                        asChild
-                                                        size="lg"
-                                                        className="w-full bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--card)]/90 border border-[var(--border)]"
-                                                >
-                                                        <Link href="/register">Créer mon compte</Link>
-                                                </Button>
-                                        </div>
-                                </section>
-
-                                {/* PANEL DROIT */}
-                                <section className={`${styles.panel} bg-[var(--card)] text-[var(--foreground)]`}>
-                                        {/* card = bloc centré verticalement avec espace au‑dessus et au‑dessous */}
-                                        <div className="mx-auto flex h-full w-full max-w-xl flex-col justify-center">
-                                                <div className="space-y-2 mb-8">
-                                                        <h2 className="text-2xl font-semibold">Connexion</h2>
-                                                        <p className="text-sm text-[var(--muted-foreground)]">
-                                                                Accédez à votre espace personnel
-                                                        </p>
-                                                </div>
-
-                                                <form onSubmit={handleSubmit} className="space-y-4">
-                                                        <div className="space-y-1.5">
-                                                                <label
-                                                                        htmlFor="email"
-                                                                        className="text-xs font-medium text-[var(--muted-foreground)]"
-                                                                >
-                                                                        Identifiant
-                                                                </label>
-                                                                <input
-                                                                        id="email"
-                                                                        type="email"
-                                                                        value={email}
-                                                                        onChange={e => setEmail(e.target.value)}
-                                                                        placeholder="votre.email@exemple.com"
-                                                                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
-                                                                        required
-                                                                />
-                                                        </div>
-
-                                                        <div className="space-y-1.5">
-                                                                <div className="flex items-center justify-between text-xs">
-                                                                        <label
-                                                                                htmlFor="password"
-                                                                                className="font-medium text-[var(--muted-foreground)]"
-                                                                        >
-                                                                                Mot de passe
-                                                                        </label>
-                                                                        <button
-                                                                                type="button"
-                                                                                className="border-none bg-none p-0 text-[var(--primary)] hover:underline"
-                                                                        >
-                                                                                Mot de passe oublié ?
-                                                                        </button>
-                                                                </div>
-                                                                <input
-                                                                        id="password"
-                                                                        type="password"
-                                                                        value={password}
-                                                                        onChange={e => setPassword(e.target.value)}
-                                                                        placeholder="Votre mot de passe"
-                                                                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
-                                                                        required
-                                                                />
-                                                        </div>
-
-                                                        {error && (
-                                                                <p className="text-xs rounded-xl border border-[rgba(var(--color-error),0.35)] bg-[rgba(var(--color-error),0.08)] px-3 py-2 text-[rgb(var(--color-error))]">
-                                                                {error}
-                                                                </p>
-                                                        )}
-
-                                                        {/* bouton aligné verticalement avec celui de gauche grâce au flex column + space-between du panel */}
-                                                        <div className="pt-4">
-                                                                <Button
-                                                                        type="submit"
-                                                                        size="lg"
-                                                                        disabled={loading}
-                                                                        className="w-full"
-                                                                >
-                                                                        {loading ? 'Connexion...' : 'Je me connecte'}
-                                                                </Button>
-                                                        </div>
-                                                </form>
-                                        </div>
-                                </section>
-                        </div>
-                </div>
+          <AuthShell>
+            <div className="w-full max-w-[460px]">
+              <div className="mb-9">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Bienvenue</p>
+                <h1 className="mt-3 text-[clamp(2.5rem,5vw,4rem)] font-semibold leading-[0.98] tracking-[-0.045em]">Ravi de vous<br />retrouver.</h1>
+                <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">Connectez-vous pour reprendre le fil du quotidien de vos animaux.</p>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
+                  <div className="space-y-2">
+                    <label htmlFor="login-email" className="text-sm font-semibold">Adresse e-mail</label>
+                    <div className="relative">
+                      <Mail aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="login-email"
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      inputMode="email"
+                      placeholder="vous@exemple.fr"
+                      size="large"
+                      className="rounded-[14px] bg-card pl-11! text-base! shadow-xs"
+                    />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="login-password" className="text-sm font-semibold">Mot de passe</label>
+                    <div className="relative">
+                      <LockKeyhole aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="login-password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                        placeholder="Votre mot de passe"
+                        size="large"
+                        className="rounded-[14px] bg-card px-11! text-base! shadow-xs"
+                      />
+                      <button type="button" aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)} className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                        {showPassword ? <EyeOff aria-hidden="true" className="size-4" /> : <Eye aria-hidden="true" className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  {error && <p role="alert" className="flex items-start gap-2 rounded-[14px] border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive"><AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{error}</p>}
+                  <Button type="submit" size="lg" className="group w-full rounded-full" disabled={loading}>
+                    {loading ? 'Connexion en cours…' : 'Se connecter'}
+                    {!loading && <ArrowRight aria-hidden="true" className="transition-transform group-hover:translate-x-1 motion-reduce:transition-none" />}
+                  </Button>
+              </form>
+              <div className="mt-8 flex items-center gap-3" aria-hidden="true"><span className="h-px flex-1 bg-border" /><span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Première visite ?</span><span className="h-px flex-1 bg-border" /></div>
+              <p className="mt-6 rounded-[18px] border bg-card px-5 py-4 text-center text-sm text-muted-foreground shadow-xs">
+                  Vous n’avez pas encore d’espace ?{' '}
+                  <Link href="/register" className="font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    Créer un compte
+                  </Link>
+              </p>
+            </div>
+          </AuthShell>
         );
 }

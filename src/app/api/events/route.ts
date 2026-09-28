@@ -1,23 +1,23 @@
-import { apiBack } from '@/lib/apiBack';
-import { getStatusFromError } from '@/utils/apiUtils';
+import { backendApiClient } from '@/shared/api/backend-api-client';
+import { parseJson, validateMutationRequest } from '@/shared/api/bff-request';
+import { bffError, bffSuccess } from '@/shared/api/bff-response';
+import { createEventSchema, eventListSchema } from '@/features/events/schemas/event';
 
 export async function GET() {
   try {
-    const data = await apiBack('eventsByUser', 'GET');
-    return Response.json(data);
-  } catch (error: any) {
-    const status = getStatusFromError(error);
-    return new Response(JSON.stringify({ error: error.message }), { status });
+    return bffSuccess(eventListSchema.parse(await backendApiClient('api/v1/events')));
+  } catch (error) {
+    return bffError(error);
   }
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
+export async function POST(request: Request) {
+  const csrfError = validateMutationRequest(request);
+  if (csrfError) return csrfError;
   try {
-    const data = await apiBack('createEvent', 'POST', body);
-    return Response.json(data);
-  } catch (error: any) {
-    const status = getStatusFromError(error);
-    return new Response(JSON.stringify({ error: error.message }), { status });
+    const body = await parseJson(request, createEventSchema);
+    return bffSuccess(eventListSchema.parse(await backendApiClient('api/v1/events', 'POST', body)), { status: 201 });
+  } catch (error) {
+    return bffError(error);
   }
 }

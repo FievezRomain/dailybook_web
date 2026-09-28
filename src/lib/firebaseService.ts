@@ -1,13 +1,21 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  AuthError,
+} from 'firebase/auth';
 import { auth } from './firebase';
 
 export const signInUser = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-export const registerUser = async (email: string, password: string) => {
+export const registerUser = async (email: string, password: string, firstName: string) => {
     try {
-      return await createUserWithEmailAndPassword(auth, email, password);
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(credential.user, { displayName: firstName.trim() });
+      return credential;
     } catch (err) {
       const error = err as AuthError;
       switch (error.code) {
@@ -32,24 +40,7 @@ export const sendVerificationEmail = async () => {
 };
 
 export const isEmailVerified = async () => {
-  try{
-    const user = auth.currentUser;
-    await user?.reload();
-    return user?.emailVerified ?? false;
-  } catch (error) {
-    const err = error as AuthError;
-
-    switch (err.code) {
-      case 'auth/invalid-email':
-        throw new Error("Adresse e-mail invalide.");
-      case 'auth/user-disabled':
-        throw new Error("Ce compte a été désactivé.");
-      case 'auth/user-not-found':
-        throw new Error("Aucun utilisateur ne correspond à cet e-mail.");
-      case 'auth/wrong-password':
-        throw new Error("Mot de passe incorrect.");
-      default:
-        throw new Error("Erreur inconnue lors de la connexion.");
-    }
-  }
+  const user = auth.currentUser;
+  await user?.reload();
+  return user?.emailVerified ?? false;
 };

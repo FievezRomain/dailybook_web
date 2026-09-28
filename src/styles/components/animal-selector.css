@@ -1,0 +1,32 @@
+.animal-selector-scroll {
+    overscroll-behavior-inline: contain;
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+}
+
+.animal-selector-scroll:hover,
+.animal-selector-scroll:focus-within {
+    scrollbar-color: color-mix(in srgb, var(--primary) 34%, transparent) transparent;
+}
+
+.animal-selector-scroll::-webkit-scrollbar {
+    height: 5px;
+}
+
+.animal-selector-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.animal-selector-scroll::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: transparent;
+}
+
+.animal-selector-scroll:hover::-webkit-scrollbar-thumb,
+.animal-selector-scroll:focus-within::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--primary) 34%, transparent);
+}
+
+.animal-selector-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--primary) 52%, transparent);
+}
