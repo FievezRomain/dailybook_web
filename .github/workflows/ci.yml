@@ -3,7 +3,7 @@ name: Web quality
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -45,8 +45,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests
-        run: npm test
+      - name: Unit tests and enforced coverage
+        run: npm run test:coverage
 
       - name: Firebase Admin CommonJS compatibility
         run: npm run test:firebase-admin-runtime
@@ -56,3 +56,50 @@ jobs:
 
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
+
+  browser-quality:
+    needs: quality
+    # Les références visuelles ont été validées sur Windows, comme le poste de
+    # référence produit. Garder le même moteur de rendu évite les faux positifs
+    # d’anticrénelage entre Windows et Linux.
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      VASCO_API_URL: http://127.0.0.1:8000
+      NEXT_PUBLIC_BUCKET_HOSTNAME: storage.example
+      NEXT_PUBLIC_FIREBASE_API_KEY: ci-placeholder
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci.invalid
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-project
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ci.invalid
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+      NEXT_PUBLIC_FIREBASE_APP_ID: 1:000000000000:web:ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Browser, accessibility, security and visual regression tests
+        run: npm run test:e2e
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
