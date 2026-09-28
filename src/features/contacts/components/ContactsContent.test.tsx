@@ -22,11 +22,14 @@ describe('ContactsContent', () => {
     await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ nom: 'Clinique Vasco', profession: 'Vétérinaire', telephone: '0102030405', email_contact: 'contact@vasco.test' }));
   });
 
-  it('expose les coordonnées dans le détail', () => {
+  it('expose toutes les informations directement dans la fiche du répertoire', () => {
     mocks.query.mockReturnValue({ contacts: [{ id: 7, nom: 'Maréchal', profession: 'Maréchal-ferrant', telephone: '0600000000', email: 'marechal@vasco.test' }], isLoading: false, isError: false, isMutating: false, createContact: mocks.create, updateContact: vi.fn(), deleteContact: mocks.remove, refetch: vi.fn() });
     render(<ContactsContent />);
-    fireEvent.click(screen.getByText('Maréchal'));
+
+    expect(screen.getByText('Maréchal')).toBeVisible();
+    expect(screen.getByText('Maréchal-ferrant')).toBeVisible();
     expect(screen.getByRole('link', { name: /0600000000/ })).toHaveAttribute('href', 'tel:0600000000');
     expect(screen.getByRole('link', { name: /marechal@vasco.test/ })).toHaveAttribute('href', 'mailto:marechal@vasco.test');
+    expect(screen.queryByText('Voir le détail')).not.toBeInTheDocument();
   });
 });

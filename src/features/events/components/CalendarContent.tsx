@@ -14,12 +14,6 @@ import {
   subMonths,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  ListFilter,
-} from "lucide-react";
 
 import { useAnimalsQuery } from "@/features/animals/hooks/use-animals";
 import { useEventDrawer } from "@/features/events/context/event-drawer-context";
@@ -30,6 +24,7 @@ import {
 import type { Event } from "@/features/events/types/event";
 import {
   eventToneClasses,
+  eventTypeOptions,
   mapEventData,
   titleMap,
 } from "@/features/events/utils/events";
@@ -54,12 +49,17 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { SystemState } from "@/shared/components/ui/system-state";
+import { Icon } from "@/shared/components/ui/icons";
 import { EventList } from "./EventList";
 
 function dayKey(value: Date | string) {
   return typeof value === "string"
     ? value.slice(0, 10)
     : format(value, "yyyy-MM-dd");
+}
+
+function capitalizeFirst(value: string) {
+  return value.charAt(0).toLocaleUpperCase("fr-FR") + value.slice(1);
 }
 function calendarDays(month: Date) {
   const first = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
@@ -116,14 +116,15 @@ function AgendaFilters({
   type: string;
 }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button type="button" size="sm" variant="outline">
-          <ListFilter aria-hidden="true" className="size-4" />
+    <div className="flex items-center">
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button type="button" size="sm" variant="outline" className={activeFilterCount ? "rounded-r-none" : undefined}>
+          <Icon name="filter" className="size-4" />
           Filtres{activeFilterCount ? ` (${activeFilterCount})` : ""}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[min(42rem,calc(100dvh-2rem))] max-w-xl overflow-y-auto">
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[min(42rem,calc(100dvh-2rem))] max-w-xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Filtrer l’agenda</DialogTitle>
           <DialogDescription>
@@ -134,6 +135,7 @@ function AgendaFilters({
           <SearchField
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
+            onClear={() => onSearchChange("")}
             className="h-10"
             placeholder="Rechercher un événement"
             label="Rechercher un événement"
@@ -142,12 +144,12 @@ function AgendaFilters({
             Type d’événement
             <Select value={type} onValueChange={onTypeChange}>
               <SelectTrigger aria-label="Type d’événement" className="w-full">
-                <ListFilter className="size-4" aria-hidden="true" />
+                <Icon name="filter" className="size-4" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les types</SelectItem>
-                {Object.entries(titleMap).map(([value, label]) => (
+                {eventTypeOptions.map(({ value, label }) => (
                   <SelectItem key={value} value={value}>
                     {label}
                   </SelectItem>
@@ -205,8 +207,22 @@ function AgendaFilters({
             </Button>
           </DialogClose>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      {activeFilterCount > 0 && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          aria-label="Réinitialiser les filtres"
+          title="Réinitialiser les filtres"
+          className="-ml-px rounded-l-none px-2.5 text-primary hover:text-primary"
+          onClick={onReset}
+        >
+          <Icon name="close" className="size-4" />
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -256,6 +272,9 @@ export default function CalendarContent() {
     Number(Boolean(search.trim())) +
     Number(type !== "all") +
     selectedAnimalIds.length;
+  const hasActiveFilters = activeFilterCount > 0;
+  const panelEvents = hasActiveFilters ? filteredEvents : selectedEvents;
+  const panelHighlights = hasActiveFilters ? [] : selectedHighlights;
   const openDetail = (event: Event) => openEventDrawer(mapEventData(event));
   const selectDate = (date: Date) => {
     setSelectedDate(date);
@@ -314,7 +333,7 @@ export default function CalendarContent() {
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-base font-semibold">
-                {format(month, "MMMM yyyy", { locale: fr })}
+                {capitalizeFirst(format(month, "MMMM yyyy", { locale: fr }))}
               </h2>
               <div className="flex items-center gap-1">
                 <AgendaFilters
@@ -337,7 +356,7 @@ export default function CalendarContent() {
                   size="compact"
                   onClick={() => setMonth((value) => subMonths(value, 1))}
                 >
-                  <ChevronLeft />
+                  <Icon name="previous" className="size-5" />
                 </IconButton>
                 <Button
                   type="button"
@@ -356,7 +375,7 @@ export default function CalendarContent() {
                   size="compact"
                   onClick={() => setMonth((value) => addMonths(value, 1))}
                 >
-                  <ChevronRight />
+                  <Icon name="next" className="size-5" />
                 </IconButton>
               </div>
             </div>
@@ -446,19 +465,21 @@ export default function CalendarContent() {
         >
           <div className="mb-3">
             <h2 className="text-[15px] font-semibold">
-              {format(selectedDate, "EEEE d MMMM", { locale: fr })}
+              {hasActiveFilters
+                ? "Recherche"
+                : capitalizeFirst(format(selectedDate, "EEEE d MMMM", { locale: fr }))}
             </h2>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {selectedEvents.length + selectedHighlights.length} élément
-              {selectedEvents.length + selectedHighlights.length > 1 ? "s" : ""}
+              {panelEvents.length + panelHighlights.length} élément
+              {panelEvents.length + panelHighlights.length > 1 ? "s" : ""}
             </p>
           </div>
-          {selectedEvents.length || selectedHighlights.length ? (
+          {panelEvents.length || panelHighlights.length ? (
             <div className="space-y-2">
-              {selectedEvents.length > 0 && (
-                <EventList events={selectedEvents} />
+              {panelEvents.length > 0 && (
+                <EventList events={panelEvents} />
               )}
-              {selectedHighlights.map((highlight) => (
+              {panelHighlights.map((highlight) => (
                 <div
                   key={highlight.id}
                   className="rounded-control border border-dashed p-3 text-xs"
@@ -473,13 +494,16 @@ export default function CalendarContent() {
           ) : (
             <div className="grid min-h-48 place-items-center text-center">
               <div>
-                <CalendarDays
-                  aria-hidden="true"
-                  className="mx-auto mb-3 size-7 text-muted-foreground"
-                />
-                <p className="text-sm font-semibold">Aucun événement ce jour</p>
+                <Icon name="agenda" className="mx-auto mb-3 size-7 text-muted-foreground" />
+                <p className="text-sm font-semibold">
+                  {hasActiveFilters
+                    ? "Aucun événement trouvé"
+                    : "Aucun événement ce jour"}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Utilisez Créer ou choisissez une autre date.
+                  {hasActiveFilters
+                    ? "Modifiez ou réinitialisez les filtres pour élargir la recherche."
+                    : "Utilisez Créer ou choisissez une autre date."}
                 </p>
               </div>
             </div>

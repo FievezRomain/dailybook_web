@@ -7,6 +7,10 @@ import type { Objective } from "@/features/objectives/types/objective";
 // Cache local pour les URLs signées
 const signedUrlCache: { [key: string]: { url: string; expiresAt: number } } = {};
 
+export function clearAnimalSignedUrlCache() {
+  Object.keys(signedUrlCache).forEach((key) => delete signedUrlCache[key]);
+}
+
 export async function enrichAnimal(animal: Animal): Promise<Animal> {
   if (!animal.image) return animal;
 

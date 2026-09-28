@@ -2,7 +2,6 @@ import type { Animal } from "@/features/animals/types/animal";
 import type { ImageSigned } from "@/types/image";
 import { getValidAnimalImage } from "@/features/animals/utils/animals";
 import { useState } from "react";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 import Image from "next/image";
 
 export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, classNames }: {
@@ -14,12 +13,14 @@ export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, class
 }) {
   const [failedUrl, setFailedUrl] = useState<string>();
   const hasError = failedUrl === animal.imageSigned?.url;
+  const initial = animal.nom?.trim().charAt(0).toLocaleUpperCase("fr-FR") || "?";
+  const imageUrl = animal.imageSigned && animal.image && !hasError ? animal.imageSigned.url : null;
 
   return (
     <>
-      {animal.imageSigned && animal.image && !hasError ? (
+      {imageUrl ? (
         <Image
-          src={animal.imageSigned.url}
+          src={imageUrl}
           alt={animal.nom ?? "Animal"}
           className={classNames ? `${classNames}` : `w-full h-full object-cover rounded-full`}
           width={width}
@@ -29,11 +30,9 @@ export function AnimalAvatar({ animal, onUpdateAnimalImage, width, height, class
             getValidAnimalImage(animal.imageSigned, animal.image ?? "", animal.id, 'animal', onUpdateAnimalImage, undefined, undefined);
           }}
         />
-      ) : hasError ? (
-        <Skeleton className={`shrink-0 rounded-full ${classNames ?? ""}`} style={{ width: `${width}px`, height: `${height}px` }} />
       ) : (
-        <div className={`flex shrink-0 items-center justify-center rounded-full bg-muted text-foreground shadow-sm ${classNames ?? ""}`} style={{ width: `${width}px`, height: `${height}px` }}>
-          <span className="text-sm font-semibold">{animal.nom?.charAt(0) ?? "?"}</span>
+        <div className={`flex shrink-0 items-center justify-center rounded-full bg-muted text-primary shadow-sm ${classNames ?? ""}`} style={{ width: `${width}px`, height: `${height}px` }}>
+          <span className="text-sm font-bold">{initial}</span>
         </div>
       )}
     </>

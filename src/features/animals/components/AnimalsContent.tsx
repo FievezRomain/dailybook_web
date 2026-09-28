@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from "react";
-import { CalendarDays, Ruler, Scale } from 'lucide-react';
+import { CalendarDays, MoreHorizontal, Ruler, Scale } from 'lucide-react';
 import { AnimalSelector } from "./AnimalSelector";
 import { useEventsQuery } from "@/features/events/hooks/use-events";
 import { useAnimalsQuery } from "@/features/animals/hooks/use-animals";
@@ -19,6 +19,7 @@ import { getAnimalMedicalEvents } from '../utils/animal-medical';
 import { PageShell } from '@/shared/components/layout/PageShell';
 import { SystemState } from '@/shared/components/ui/system-state';
 import { AnimalAvatar } from './AnimalAvatar';
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui';
 
 function ageLabel(date?: string | null) {
   if (!date) return 'Âge inconnu';
@@ -112,13 +113,31 @@ export default function AnimalsContent() {
         </div>
 
         {selectedAnimal ? <section aria-label={`Aperçu de ${selectedAnimal.nom || 'l’animal'}`} className="relative overflow-hidden rounded-[26px] border bg-card shadow-surface">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-[#b07165] to-[#ce9871]" />
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-6">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-bai-cerise to-alezan" />
+          {selectedAnimal.provenance === 'owner' && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Options animal"
+                  className="absolute right-4 top-4 z-10 size-12 shrink-0 rounded-full border border-border/70 bg-card shadow-sm hover:bg-muted sm:right-5 sm:top-5"
+                >
+                  <MoreHorizontal aria-hidden="true" className="size-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleEdit}>Modifier</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onClick={() => setAnimalToDelete(selectedAnimal)}>Supprimer</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <div className="flex flex-col gap-5 p-5 pr-20 sm:flex-row sm:items-center sm:p-6 sm:pr-20">
             <div className="shrink-0 rounded-full bg-muted p-1.5">
               <AnimalAvatar animal={selectedAnimal} width={82} height={82} classNames="size-[82px] rounded-full object-cover" onUpdateAnimalImage={updateAnimalImage} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <h2 className="truncate text-3xl font-semibold tracking-[-0.03em]">{selectedAnimal.nom || 'Animal'}</h2>
                 <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">{selectedAnimal.provenance === 'shared' ? 'Partagé' : 'Mon animal'}</span>
               </div>
@@ -132,16 +151,12 @@ export default function AnimalsContent() {
           </div>
         </section> : <div className="min-h-36 animate-pulse rounded-[26px] bg-muted motion-reduce:animate-none" />}
 
-        <section aria-label="Fiche animale" className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-12">
-            <div className="xl:col-span-5">
+        <section aria-label="Fiche animale" className="grid items-start gap-5 lg:grid-cols-2">
+          <div className="grid min-w-0 content-start gap-5">
             <AnimalGeneralCard
                 animal={selectedAnimal}
                 isLoading={isLoadingAnimals}
-                onEdit={handleEdit}
-                onDelete={() => selectedAnimal && setAnimalToDelete(selectedAnimal)}
             />
-            </div>
-          <div className="xl:col-span-7">
             <AnimalHealthCard
                 isLoading={isLoadingEvents || isLoadingAnimals || !effectiveSelectedId}
                 events={medicalEvents}
@@ -150,8 +165,10 @@ export default function AnimalsContent() {
                 canExport={selectedAnimal?.provenance === 'owner'}
             />
           </div>
-          <div className="xl:col-span-7"><AnimalPhysicalCard animal={selectedAnimal} isLoading={isLoadingAnimals} canEdit={selectedAnimal?.provenance === 'owner'} /></div>
-          <div className="xl:col-span-5"><AnimalEvolutionCard idAnimal={effectiveSelectedId} isPremium={isPremium} canEdit={selectedAnimal?.provenance === 'owner'} /></div>
+          <div className="grid min-w-0 content-start gap-5">
+            <AnimalPhysicalCard animal={selectedAnimal} isLoading={isLoadingAnimals} canEdit={selectedAnimal?.provenance === 'owner'} />
+            <AnimalEvolutionCard idAnimal={effectiveSelectedId} isPremium={isPremium} canEdit={selectedAnimal?.provenance === 'owner'} />
+          </div>
         </section>
       </div>
       <ConfirmDialog

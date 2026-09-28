@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import type { Animal } from '../types/animal';
 import { AnimalGeneralCard } from './AnimalGeneralCard';
@@ -11,26 +11,24 @@ const animal = {
 } satisfies Animal;
 
 describe('AnimalGeneralCard', () => {
-  it('identifie un animal partagé et ne propose aucune mutation', () => {
+  it('n’affiche pas d’indication de propriété pour un animal partagé', () => {
     render(
-      <AnimalGeneralCard animal={animal} isLoading={false} onEdit={vi.fn()} onDelete={vi.fn()} />,
+      <AnimalGeneralCard animal={animal} isLoading={false} />,
     );
 
-    expect(screen.getByText('Partagé via un groupe · lecture seule')).toBeInTheDocument();
+    expect(screen.queryByText('Partagé via un groupe · lecture seule')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Options animal' })).not.toBeInTheDocument();
   });
 
-  it('réserve le menu de mutation au propriétaire', () => {
+  it('n’affiche pas d’indication de propriété pour son propre animal', () => {
     render(
       <AnimalGeneralCard
         animal={{ ...animal, provenance: 'owner' }}
         isLoading={false}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
       />,
     );
 
-    expect(screen.getByText('Vous êtes propriétaire')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Options animal' })).toBeInTheDocument();
+    expect(screen.queryByText('Vous êtes propriétaire')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Options animal' })).not.toBeInTheDocument();
   });
 });

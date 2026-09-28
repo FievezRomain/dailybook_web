@@ -16,13 +16,12 @@ describe('useAnimalForm', () => {
     expect(result.current.errors).toEqual({
       nom: 'Le nom est requis',
       espece: "L'espèce est requise",
-      datenaissance: 'La date de naissance est requise',
     });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('soumet un brouillon valide', () => {
-    const animal = { nom: 'Moka', espece: 'Chat', datenaissance: '2020-02-02' };
+    const animal = { nom: 'Moka', espece: 'Chat' };
     const onSubmit = vi.fn();
     const { result } = renderHook(() => useAnimalForm(animal));
 

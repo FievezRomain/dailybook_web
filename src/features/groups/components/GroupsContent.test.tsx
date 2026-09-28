@@ -37,6 +37,7 @@ describe('GroupsContent', () => {
   it('laisse un membre Gratuit consulter un groupe actif et accepter une invitation', async () => {
     render(<PremiumDialogProvider><GroupsContent /></PremiumDialogProvider>);
     expect(screen.getByText('Détail Écurie Vasco')).toBeInTheDocument();
+    expect(screen.getByText('0 animaux')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Accepter' }));
     await waitFor(() => expect(mocks.respondInvitation).toHaveBeenCalledWith(4, { status: 'accepted' }));
   });

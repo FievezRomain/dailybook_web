@@ -9,7 +9,6 @@ import {
   type Layouts,
 } from "react-grid-layout";
 
-import { WeatherCard } from "@/features/weather/components/WeatherCard";
 import GoalsCard from "./cards/GoalsCard";
 import TodayTasksCard from "./cards/TodayTasksCard";
 import UpcomingTasksCard from "./cards/UpcomingTasksCard";
@@ -19,45 +18,40 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-const moduleIds = ["today", "weather", "upcoming", "objectives"] as const;
+const moduleIds = ["today", "upcoming", "objectives"] as const;
 type ModuleId = (typeof moduleIds)[number];
 
 const moduleLabels: Record<ModuleId, string> = {
   today: "Aujourd’hui",
-  weather: "Météo locale",
   upcoming: "Prochains jours",
   objectives: "Objectifs",
 };
 
 const defaultLayouts: Layouts = {
   lg: [
-    { i: "today", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
-    { i: "weather", x: 4, y: 0, w: 2, h: 3, minW: 2, minH: 3 },
-    { i: "upcoming", x: 4, y: 3, w: 2, h: 4, minW: 2, minH: 2 },
-    { i: "objectives", x: 0, y: 4, w: 4, h: 3, minW: 2, minH: 2 },
+    { i: "today", x: 0, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: "upcoming", x: 3, y: 0, w: 3, h: 4, minW: 2, minH: 2 },
+    { i: "objectives", x: 0, y: 4, w: 6, h: 6, minW: 2, minH: 4 },
   ],
   md: [
-    { i: "today", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
-    { i: "weather", x: 4, y: 0, w: 2, h: 3, minW: 2, minH: 3 },
-    { i: "upcoming", x: 4, y: 3, w: 2, h: 4, minW: 2, minH: 2 },
-    { i: "objectives", x: 0, y: 4, w: 4, h: 3, minW: 2, minH: 2 },
+    { i: "today", x: 0, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: "upcoming", x: 3, y: 0, w: 3, h: 4, minW: 2, minH: 2 },
+    { i: "objectives", x: 0, y: 4, w: 6, h: 6, minW: 2, minH: 4 },
   ],
   sm: [
-    { i: "today", x: 0, y: 0, w: 6, h: 4, minW: 2, minH: 3 },
-    { i: "weather", x: 0, y: 4, w: 2, h: 3, minW: 2, minH: 3 },
-    { i: "upcoming", x: 2, y: 4, w: 4, h: 3, minW: 2, minH: 2 },
-    { i: "objectives", x: 0, y: 7, w: 6, h: 3, minW: 2, minH: 2 },
+    { i: "today", x: 0, y: 0, w: 3, h: 4, minW: 2, minH: 3 },
+    { i: "upcoming", x: 3, y: 0, w: 3, h: 4, minW: 2, minH: 2 },
+    { i: "objectives", x: 0, y: 4, w: 6, h: 6, minW: 2, minH: 4 },
   ],
   xs: [
     { i: "today", x: 0, y: 0, w: 1, h: 4, minW: 1, minH: 3 },
-    { i: "weather", x: 0, y: 4, w: 1, h: 3, minW: 1, minH: 3 },
-    { i: "upcoming", x: 0, y: 7, w: 1, h: 3, minW: 1, minH: 2 },
-    { i: "objectives", x: 0, y: 10, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: "upcoming", x: 0, y: 4, w: 1, h: 3, minW: 1, minH: 2 },
+    { i: "objectives", x: 0, y: 7, w: 1, h: 6, minW: 1, minH: 4 },
   ],
 };
 
 const storageKey = "vasco:dashboard-layouts";
-const layoutVersion = 2;
+const layoutVersion = 6;
 const layoutChangeEvent = "vasco-dashboard-layouts-change";
 
 function cloneDefaultLayouts(): Layouts {
@@ -193,11 +187,6 @@ export default function GridCards() {
         isResizable
         isDraggable
       >
-        <div key="weather">
-          <Tile id="weather">
-            <WeatherCard />
-          </Tile>
-        </div>
         <div key="today">
           <Tile id="today">
             <TodayTasksCard />

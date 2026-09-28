@@ -1,22 +1,22 @@
 'use client';
 
-import { signOut } from 'firebase/auth';
 import { LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu';
-import { closeAuthenticatedSession } from '@/features/user/api/user-api';
 import { useCurrentUser } from '@/features/user/hooks/use-current-user';
-import { auth } from '@/lib/firebase';
+import { useLogoutCurrentUser } from '@/features/user/hooks/use-logout-current-user';
 
 export default function UserButton() {
   const router = useRouter();
   const { user } = useCurrentUser();
+  const logoutCurrentUser = useLogoutCurrentUser();
   const handleLogout = async () => {
-    await Promise.allSettled([signOut(auth), closeAuthenticatedSession()]);
+    await logoutCurrentUser();
     router.replace('/login');
+    router.refresh();
   };
 
   return <DropdownMenu>

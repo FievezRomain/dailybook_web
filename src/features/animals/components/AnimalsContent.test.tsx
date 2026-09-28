@@ -24,14 +24,21 @@ vi.mock('@/features/user/hooks/use-current-user', () => ({ useCurrentUser: () =>
 vi.mock('@/shared/components/feedback/ConfirmDialog', () => ({ ConfirmDialog: () => null }));
 
 describe('AnimalsContent', () => {
-  it('compose la fiche dans la grille asymétrique responsive', () => {
+  it('compose la fiche dans deux colonnes indépendantes sans espaces de ligne', () => {
     render(<AnimalsContent />);
 
     const workspace = screen.getByRole('region', { name: 'Fiche animale' });
-    expect(workspace).toHaveClass('md:grid-cols-2', 'xl:grid-cols-12');
-    expect(screen.getByText('Informations').parentElement).toHaveClass('xl:col-span-5');
-    expect(screen.getByText('Santé').parentElement).toHaveClass('xl:col-span-7');
-    expect(screen.getByText('Physique').parentElement).toHaveClass('xl:col-span-7');
-    expect(screen.getByText('Évolution').parentElement).toHaveClass('xl:col-span-5');
+    expect(workspace).toHaveClass('lg:grid-cols-2');
+    const identityColumn = screen.getByText('Informations').parentElement;
+    const trackingColumn = screen.getByText('Physique').parentElement;
+    expect(identityColumn).toHaveClass('grid', 'content-start', 'gap-5');
+    expect(identityColumn).toContainElement(screen.getByText('Santé'));
+    expect(trackingColumn).toHaveClass('grid', 'content-start', 'gap-5');
+    expect(trackingColumn).toContainElement(screen.getByText('Évolution'));
+    const optionsButton = screen.getByRole('button', { name: 'Options animal' });
+    expect(screen.getByRole('region', { name: 'Aperçu de Vasco' })).toContainElement(optionsButton);
+    expect(optionsButton).toHaveClass('absolute', 'right-4', 'top-4', 'size-12');
+    expect(optionsButton.querySelector('svg')).toHaveClass('size-6');
+    expect(workspace).not.toContainElement(screen.getByRole('button', { name: 'Options animal' }));
   });
 });

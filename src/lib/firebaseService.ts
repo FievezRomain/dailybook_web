@@ -40,24 +40,7 @@ export const sendVerificationEmail = async () => {
 };
 
 export const isEmailVerified = async () => {
-  try{
-    const user = auth.currentUser;
-    await user?.reload();
-    return user?.emailVerified ?? false;
-  } catch (error) {
-    const err = error as AuthError;
-
-    switch (err.code) {
-      case 'auth/invalid-email':
-        throw new Error("Adresse e-mail invalide.");
-      case 'auth/user-disabled':
-        throw new Error("Ce compte a été désactivé.");
-      case 'auth/user-not-found':
-        throw new Error("Aucun utilisateur ne correspond à cet e-mail.");
-      case 'auth/wrong-password':
-        throw new Error("Mot de passe incorrect.");
-      default:
-        throw new Error("Erreur inconnue lors de la connexion.");
-    }
-  }
+  const user = auth.currentUser;
+  await user?.reload();
+  return user?.emailVerified ?? false;
 };

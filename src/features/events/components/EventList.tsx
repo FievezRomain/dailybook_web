@@ -11,7 +11,7 @@ import { useAnimalsQuery } from "@/features/animals/hooks/use-animals";
 import { useEventsQuery } from "@/features/events/hooks/use-events";
 import { toast } from "sonner";
 
-export const EventList = ({ events }: { events: Event[] }) => {
+export const EventList = ({ events, strikeCompleted = false }: { events: Event[]; strikeCompleted?: boolean }) => {
   // Récupération des animaux
   const { animals, updateAnimalImage } = useAnimalsQuery();
 
@@ -66,6 +66,7 @@ export const EventList = ({ events }: { events: Event[] }) => {
             onDuplicate={() => handleDuplicate(event)}
             onUpdateAnimalImage={updateAnimalImage}
             onOpenDrawer={() => openDrawerDetail(event)}
+            strikeCompleted={strikeCompleted}
           />
         </div>
       ))}

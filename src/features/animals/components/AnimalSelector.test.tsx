@@ -17,6 +17,7 @@ describe('AnimalSelector', () => {
     render(<AnimalSelector animals={animals} selectedIds={[1]} onChange={onChange} onUpdateAnimalImage={vi.fn()} singleSelect />);
 
     expect(screen.getByRole('radiogroup', { name: 'Animaux disponibles' })).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: 'Animaux disponibles' })).toHaveClass('animal-selector-scroll', 'snap-x', 'snap-proximity');
     expect(screen.getByRole('radio', { name: /Vasco/ })).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByRole('radio', { name: 'Ariane, animal partagé' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Sélectionner un animal' })).not.toHaveClass('border', 'rounded-surface');
@@ -36,5 +37,24 @@ describe('AnimalSelector', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Tous' }));
     expect(onChange).toHaveBeenLastCalledWith([1, 2]);
+  });
+
+  it('range les animaux décédés ou partis derrière Voir plus comme sur mobile', () => {
+    const historicalAnimals = [
+      ...animals,
+      { id: 3, nom: 'Spirit', provenance: 'owner' as const, datedeces: '2025-03-12' },
+      { id: 4, nom: 'Nina', provenance: 'owner' as const, datedepart: '2024-08-20' },
+    ];
+    render(<AnimalSelector animals={historicalAnimals} selectedIds={[]} onChange={vi.fn()} onUpdateAnimalImage={vi.fn()} />);
+
+    expect(screen.queryByRole('button', { name: /Spirit/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Nina/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Voir plus d’animaux' }));
+    expect(screen.getByRole('button', { name: 'Spirit, animal décédé' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Nina, animal historique' })).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Voir moins d’animaux' }));
+    expect(screen.queryByRole('button', { name: /Spirit/ })).not.toBeInTheDocument();
   });
 });

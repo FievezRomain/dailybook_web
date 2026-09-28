@@ -40,17 +40,19 @@ export function EventFormDrawerWrapper() {
   const { groups, isLoading: isLoadingGroups } = useGroupsQuery();
 
   async function handleSubmit(data: Partial<Event>, removedDocuments: string[], updateScope: RecurrenceScope) {
+    const isCreation = Boolean(drawer.isDuplicate || !data.id);
     try {
       const input = eventInput(data);
-      if (drawer.isDuplicate || !data.id) {
+      if (isCreation) {
         await createEvent(input as CreateEventInput);
         toast.success("Événement créé avec succès.");
       } else {
-        await updateEvent(data.id, { ...input, update_scope: updateScope } as UpdateEventInput);
+        const eventId = data.id!;
+        await updateEvent(eventId, { ...input, update_scope: updateScope } as UpdateEventInput);
         const initialDocuments = new Set((drawer.initialEvent?.documents ?? []).map((document) => document.name));
         const addedDocuments = input.documents.filter((filename) => !initialDocuments.has(filename));
-        await Promise.all(addedDocuments.map((filename) => attachEventDocument(data.id!, filename)));
-        await Promise.all(removedDocuments.map((filename) => deleteEventDocument(data.id!, filename)));
+        await Promise.all(addedDocuments.map((filename) => attachEventDocument(eventId, filename)));
+        await Promise.all(removedDocuments.map((filename) => deleteEventDocument(eventId, filename)));
         if (removedDocuments.length) await refetch();
         toast.success("Événement mis à jour avec succès.");
       }

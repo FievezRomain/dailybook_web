@@ -60,7 +60,7 @@ function activityHint(
   return "Les conditions sont plutôt favorables aux activités extérieures.";
 }
 
-export function WeatherCard() {
+export function WeatherCard({ compact = false }: { compact?: boolean }) {
   const [locationState, setLocationState] = useState<LocationState>("idle");
   const [location, setLocation] = useState<WeatherQuery | null>(null);
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
@@ -161,21 +161,18 @@ export function WeatherCard() {
   );
 
   return (
-    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 py-0 shadow-sm">
-      <CardHeader className="flex flex-row items-center gap-3 space-y-0 border-b border-border/60 bg-muted/25 px-4 py-3 pr-14">
-        <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
-          <CloudSun className="size-5" aria-hidden="true" />
-        </span>
-        <CardTitle
-          role="heading"
-          aria-level={2}
-        >
-          Météo locale
-        </CardTitle>
-      </CardHeader>
+    <Card className={`flex h-full min-h-0 flex-col gap-0 overflow-hidden py-0 ${compact ? "border-0 bg-transparent shadow-none" : "border-border/70 shadow-sm"}`}>
+      {!compact && (
+        <CardHeader className="flex flex-row items-center gap-3 space-y-0 border-b border-border/60 bg-muted/25 px-4 py-3 pr-14">
+          <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
+            <CloudSun className="size-5" aria-hidden="true" />
+          </span>
+          <CardTitle role="heading" aria-level={2}>Météo locale</CardTitle>
+        </CardHeader>
+      )}
       <CardContent
         aria-live="polite"
-        className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4"
+        className={`min-h-0 flex-1 ${compact ? "overflow-visible p-0" : "overflow-y-auto p-3 sm:p-4"}`}
       >
         {locationState === "idle" && (
           <div className="flex flex-col items-start gap-3">
@@ -254,7 +251,7 @@ export function WeatherCard() {
             const CurrentIcon = currentCondition.Icon;
             return (
               <div className="space-y-3">
-                <section className="rounded-surface bg-primary/5 p-3">
+                <section className={compact ? "rounded-surface bg-primary/5 px-3 py-2.5" : "rounded-surface bg-primary/5 p-3"}>
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <p className="flex min-w-0 items-center gap-1.5 text-sm font-semibold">
                       <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -313,15 +310,15 @@ export function WeatherCard() {
                   )}
                 </section>
                 <div className="flex flex-wrap gap-1">
-                  <Button type="button" size="sm" variant="ghost" aria-expanded={detailsExpanded} onClick={() => setDetailsExpanded((value) => !value)}>
+                  {!compact && <Button type="button" size="sm" variant="ghost" aria-expanded={detailsExpanded} onClick={() => setDetailsExpanded((value) => !value)}>
                     {detailsExpanded ? "Masquer les prévisions" : "Voir les prévisions"}
-                  </Button>
+                  </Button>}
                   <Button type="button" size="sm" variant="ghost" aria-expanded={locationSearchOpen} onClick={() => setLocationSearchOpen((open) => !open)}>
                     Choisir une autre ville
                   </Button>
                 </div>
                 {locationSearchPanel}
-                {detailsExpanded && (
+                {!compact && detailsExpanded && (
                   <div className="space-y-3">
                     <section>
                       <h3 className="mb-2 font-semibold">Prévisions</h3>

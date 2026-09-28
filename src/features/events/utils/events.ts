@@ -1,31 +1,71 @@
 import type { Event, MappedEvent } from '@/features/events/types/event';
-import { differenceInDays, isBefore, startOfDay } from 'date-fns';
-import { Banknote, CircleCheck, Compass, HandHeart, Stethoscope, TrafficCone, Trophy } from 'lucide-react';
+import { differenceInCalendarDays, isAfter, isBefore, isSameDay, parseISO, startOfDay } from 'date-fns';
+import type { IconName } from '@/shared/components/ui/icons';
 
-export const filterToday = (events: Event[]) => {
-  const today = new Date().toDateString();
-  return events.filter(e => new Date(e.dateevent).toDateString() === today);
+const eventDate = (event: Event) => startOfDay(parseISO(event.dateevent));
+export const hasCompletedState = (event: Event) =>
+  ['completed', 'done', 'termine', 'true'].includes(
+    event.state
+      .trim()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLocaleLowerCase('fr-FR'),
+  );
+
+export const filterToday = (events: Event[], referenceDate = new Date()) =>
+  events.filter((event) => isSameDay(eventDate(event), referenceDate));
+
+export const filterUpcoming = (events: Event[], referenceDate = new Date()) => {
+  const today = startOfDay(referenceDate);
+  return events.filter((event) => isAfter(eventDate(event), today));
 };
 
-export const filterUpcoming = (events: Event[]) => {
-  const now = new Date();
-  return events.filter(e => new Date(e.dateevent) > now);
+export const filterLate = (events: Event[], referenceDate = new Date()) => {
+  const today = startOfDay(referenceDate);
+  return events
+    .filter((event) => isBefore(eventDate(event), today) && !hasCompletedState(event))
+    .sort((left, right) => eventDate(left).getTime() - eventDate(right).getTime());
 };
 
-export const filterLate = (events: Event[]) => {
-  const today = startOfDay(new Date());
-  return events.filter(e => new Date(e.dateevent) < today && e.state === "À faire");
-};
+function parseDateParts(value: string) {
+  const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+  return year && month && day ? Date.UTC(year, month - 1, day) : undefined;
+}
 
-export const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  depense: Banknote,
-  balade: Compass,
-  soins: HandHeart,
-  concours: Trophy,
-  entrainement: TrafficCone,
-  autre: CircleCheck,
-  rdv: Stethoscope,
-};
+function parseTimeParts(value?: string) {
+  if (!value) return undefined;
+  const [hours, minutes] = value.split(':').map(Number);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return undefined;
+  return hours * 60 + minutes;
+}
+
+export function formatWalkDuration(event: Pick<Event, 'dateevent' | 'heuredebutevent' | 'heuredebutbalade' | 'datefinbalade' | 'heurefinbalade'>) {
+  const startTime = parseTimeParts(event.heuredebutbalade || event.heuredebutevent);
+  const endTime = parseTimeParts(event.heurefinbalade);
+  const startDate = parseDateParts(event.dateevent);
+  const endDate = parseDateParts(event.datefinbalade || event.dateevent);
+  if (startTime === undefined || endTime === undefined || startDate === undefined || endDate === undefined) return undefined;
+
+  const durationMinutes = Math.round((endDate - startDate) / 86_400_000) * 1_440 + endTime - startTime;
+  if (durationMinutes <= 0) return undefined;
+
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+  return [hours ? `${hours} h` : '', minutes ? `${minutes} min` : ''].filter(Boolean).join(' ');
+}
+
+export const eventTypeOptions = [
+  { value: 'soins', label: 'Soins', icon: 'medical' },
+  { value: 'rdv', label: 'Rendez-vous médical', icon: 'stethoscope' },
+  { value: 'balade', label: 'Balade', icon: 'compass' },
+  { value: 'entrainement', label: 'Entraînement', icon: 'tracking' },
+  { value: 'concours', label: 'Concours', icon: 'trophy' },
+  { value: 'depense', label: 'Dépense', icon: 'expense' },
+  { value: 'autre', label: 'Autre', icon: 'circleCheck' },
+] as const;
+
+export const iconsMap: Record<string, IconName> =
+  Object.fromEntries(eventTypeOptions.map(({ value, icon }) => [value, icon]));
 
 export const colorsMap: Record<string, string> = {
     depense: "var(--event-depense)",
@@ -47,28 +87,22 @@ export const eventToneClasses: Record<string, string> = {
   rdv: "event-tone-rdv",
 };
 
-export const titleMap: Record<string, string> = {
-    depense: "Dépense",
-    balade: "Balade",
-    soins: "Soins",
-    concours: "Concours",
-    entrainement: "Entraînement",
-    autre: "Autre",
-    rdv: "Rendez-vous",
-};
+export const titleMap: Record<string, string> = Object.fromEntries(
+  eventTypeOptions.map(({ value, label }) => [value, label]),
+);
 
 export const mapEventData = (event: Event): MappedEvent => {
 
   let delay;
-  const eventDate = startOfDay(new Date(event.dateevent));
-  if (isBefore(eventDate, startOfDay(new Date())) && event.state === "À faire") {
-    delay = differenceInDays(startOfDay(new Date()), eventDate);
+  const datedEvent = eventDate(event);
+  if (isBefore(datedEvent, startOfDay(new Date())) && !hasCompletedState(event)) {
+    delay = differenceInCalendarDays(startOfDay(new Date()), datedEvent);
   }
 
   return {
     ...event,
     color: colorsMap[event.eventtype] || "var(--event-autre)",
-    icon: iconsMap[event.eventtype] || CircleCheck,
+    icon: iconsMap[event.eventtype] || 'circleCheck',
     delay,
     titleType: titleMap[event.eventtype] || "Autre",
   };

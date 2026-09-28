@@ -19,18 +19,10 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { Input } from "@/shared/components/ui/input";
 import { SearchField } from "@/shared/components/ui/search-field";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/shared/components/ui/sheet";
 import { useContactsQuery } from "../hooks/use-contacts";
 import type { Contact, CreateContactInput } from "../types/contact";
 
-type ContactValues = CreateContactInput;
+export type ContactValues = CreateContactInput;
 
 function contactLetter(name: string) {
   const letter = name
@@ -54,7 +46,7 @@ function initials(name: string) {
   );
 }
 
-function ContactForm({
+export function ContactForm({
   contact,
   busy,
   onClose,
@@ -173,97 +165,6 @@ function ContactForm({
   );
 }
 
-function ContactSheet({
-  contact,
-  onClose,
-  onEdit,
-}: {
-  contact: Contact | null;
-  onClose: () => void;
-  onEdit: (contact: Contact) => void;
-}) {
-  return (
-    <Sheet
-      open={contact !== null}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <SheetContent width="regular" className="gap-0 overflow-y-auto p-0">
-        <SheetHeader className="relative border-b bg-muted/20 px-6 py-8">
-          <div
-            aria-hidden="true"
-            className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-[#ce9871]"
-          />
-          <span className="mb-4 grid size-16 place-items-center rounded-[20px] bg-primary/10 text-xl font-semibold text-primary">
-            {contact ? initials(contact.nom) : ""}
-          </span>
-          <SheetTitle className="pr-10 text-2xl tracking-[-0.03em]">
-            {contact?.nom ?? "Contact"}
-          </SheetTitle>
-          <SheetDescription>
-            {contact?.profession || "Contact personnel"}
-          </SheetDescription>
-        </SheetHeader>
-        {contact && (
-          <div className="flex-1 space-y-3 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-              Coordonnées
-            </p>
-            {contact.telephone && (
-              <a
-                className="flex min-h-14 items-center gap-3 rounded-[16px] border bg-card p-3 transition-colors hover:bg-muted/40"
-                href={`tel:${contact.telephone}`}
-              >
-                <span className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary">
-                  <Phone className="size-4" />
-                </span>
-                <span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Téléphone
-                  </span>
-                  <span className="text-sm font-semibold">
-                    {contact.telephone}
-                  </span>
-                </span>
-              </a>
-            )}
-            {contact.email && (
-              <a
-                className="flex min-h-14 items-center gap-3 rounded-[16px] border bg-card p-3 transition-colors hover:bg-muted/40"
-                href={`mailto:${contact.email}`}
-              >
-                <span className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary">
-                  <Mail className="size-4" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[11px] text-muted-foreground">
-                    E-mail
-                  </span>
-                  <span className="block truncate text-sm font-semibold">
-                    {contact.email}
-                  </span>
-                </span>
-              </a>
-            )}
-            {!contact.telephone && !contact.email && (
-              <div className="rounded-[16px] border border-dashed p-5 text-sm text-muted-foreground">
-                Aucune coordonnée n’est encore renseignée.
-              </div>
-            )}
-          </div>
-        )}
-        <SheetFooter className="border-t bg-muted/10 p-5">
-          <Button variant="ghost" onClick={onClose}>
-            Fermer
-          </Button>
-          {contact && <Button onClick={() => onEdit(contact)}>Modifier</Button>}
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 export default function ContactsContent({
   startCreating = false,
 }: {
@@ -275,7 +176,6 @@ export default function ContactsContent({
   const [formContact, setFormContact] = useState<Contact | null | undefined>(
     startCreating ? null : undefined,
   );
-  const [detailContact, setDetailContact] = useState<Contact | null>(null);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const contacts = useMemo(
     () =>
@@ -320,7 +220,6 @@ export default function ContactsContent({
       toast.error("Le contact n'a pas pu être supprimé.");
     } finally {
       setContactToDelete(null);
-      setDetailContact(null);
     }
   }
   function goToLetter(letter: string) {
@@ -408,79 +307,103 @@ export default function ContactsContent({
                       {letter}
                     </h3>
                     {groups[letter].map((contact) => (
-                      <div
+                      <article
                         key={contact.id}
-                        className="group flex min-h-20 items-center gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-muted/25"
+                        className="group border-b px-4 py-4 transition-colors last:border-b-0 hover:bg-muted/20 sm:px-5"
                       >
-                        <button
-                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                          onClick={() => setDetailContact(contact)}
-                        >
-                          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                             {initials(contact.nom)}
                           </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-semibold">
+                          <div className="min-w-0 flex-1">
+                            <div className="pr-10">
+                              <h4 className="break-words text-base font-semibold">
                               {contact.nom}
-                            </span>
-                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                              {contact.profession ||
-                                contact.telephone ||
-                                contact.email ||
-                                "Coordonnées à compléter"}
-                            </span>
-                          </span>
-                        </button>
-                        <div className="flex items-center gap-1">
-                          {contact.telephone && (
-                            <a
-                              href={`tel:${contact.telephone}`}
-                              className="grid size-10 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                              aria-label={`Appeler ${contact.nom}`}
-                            >
-                              <Phone className="size-4" />
-                            </a>
-                          )}
-                          {contact.email && (
-                            <a
-                              href={`mailto:${contact.email}`}
-                              className="grid size-10 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                              aria-label={`Écrire à ${contact.nom}`}
-                            >
-                              <Mail className="size-4" />
-                            </a>
-                          )}
+                              </h4>
+                              <p className="mt-0.5 text-sm text-muted-foreground">
+                                {contact.profession || "Contact personnel"}
+                              </p>
+                            </div>
+                            <address className="mt-3 grid gap-2 not-italic sm:grid-cols-2">
+                              {contact.telephone ? (
+                                <a
+                                  href={`tel:${contact.telephone}`}
+                                  className="flex min-w-0 items-center gap-2.5 rounded-[14px] bg-muted/35 px-3 py-2.5 transition-colors hover:bg-primary/10 hover:text-primary"
+                                  aria-label={`Appeler ${contact.nom} au ${contact.telephone}`}
+                                >
+                                  <Phone
+                                    className="size-4 shrink-0 text-primary"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="min-w-0">
+                                    <span className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                      Téléphone
+                                    </span>
+                                    <span className="block break-words text-sm font-medium">
+                                      {contact.telephone}
+                                    </span>
+                                  </span>
+                                </a>
+                              ) : (
+                                <div className="flex min-w-0 items-center gap-2.5 rounded-[14px] border border-dashed px-3 py-2.5 text-muted-foreground">
+                                  <Phone className="size-4 shrink-0" aria-hidden="true" />
+                                  <span className="text-xs">Téléphone non renseigné</span>
+                                </div>
+                              )}
+                              {contact.email ? (
+                                <a
+                                  href={`mailto:${contact.email}`}
+                                  className="flex min-w-0 items-center gap-2.5 rounded-[14px] bg-muted/35 px-3 py-2.5 transition-colors hover:bg-primary/10 hover:text-primary"
+                                  aria-label={`Écrire à ${contact.nom} à l’adresse ${contact.email}`}
+                                >
+                                  <Mail
+                                    className="size-4 shrink-0 text-primary"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="min-w-0">
+                                    <span className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                      E-mail
+                                    </span>
+                                    <span className="block break-all text-sm font-medium">
+                                      {contact.email}
+                                    </span>
+                                  </span>
+                                </a>
+                              ) : (
+                                <div className="flex min-w-0 items-center gap-2.5 rounded-[14px] border border-dashed px-3 py-2.5 text-muted-foreground">
+                                  <Mail className="size-4 shrink-0" aria-hidden="true" />
+                                  <span className="text-xs">E-mail non renseigné</span>
+                                </div>
+                              )}
+                            </address>
+                          </div>
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                aria-label={`Actions pour ${contact.nom}`}
-                              >
-                                <MoreHorizontal />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => setDetailContact(contact)}
-                              >
-                                Voir le détail
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => setFormContact(contact)}
-                              >
-                                Modifier
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                variant="destructive"
-                                onClick={() => setContactToDelete(contact)}
-                              >
-                                Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="-mr-2 -mt-1 shrink-0"
+                              aria-label={`Actions pour ${contact.nom}`}
+                            >
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setFormContact(contact)}
+                            >
+                              Modifier
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => setContactToDelete(contact)}
+                            >
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         </div>
-                      </div>
+                      </article>
                     ))}
                   </section>
                 ))}
@@ -520,14 +443,6 @@ export default function ContactsContent({
           onSave={save}
         />
       )}
-      <ContactSheet
-        contact={detailContact}
-        onClose={() => setDetailContact(null)}
-        onEdit={(contact) => {
-          setDetailContact(null);
-          setFormContact(contact);
-        }}
-      />
       <ConfirmDialog
         open={contactToDelete !== null}
         title="Supprimer ce contact ?"

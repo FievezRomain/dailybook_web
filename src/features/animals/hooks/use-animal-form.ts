@@ -19,7 +19,6 @@ export function useAnimalForm(initial: Partial<Animal> = {}) {
     const errs: Record<string, string> = {};
     if (!vals.nom?.trim()) errs.nom = "Le nom est requis";
     if (!vals.espece) errs.espece = "L'espèce est requise";
-    if (!vals.datenaissance) errs.datenaissance = "La date de naissance est requise";
     return errs;
   };
 

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { UnitInput } from "@/shared/components/ui/specialized-inputs";
 
 const especeOptions = [
   "Chat",
@@ -65,7 +66,7 @@ const unityOptions = [
 type AnimalFormDrawerProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Partial<Animal>, imageFile?: File) => void;
+  onSubmit: (data: Partial<Animal>, imageFile?: File) => Promise<void>;
   isSubmitting?: boolean;
   initialAnimal?: Partial<Animal>;
 };
@@ -132,19 +133,18 @@ export function AnimalFormDrawer({
     <SteppedFormSheet
       open={open}
       onClose={handleClose}
-      onSubmit={handleSubmit((submittedValues) =>
-        onSubmit(
+      onSubmit={handleSubmit(async (submittedValues) => {
+        await onSubmit(
           {
             ...submittedValues,
             image: removeS3Image ? null : submittedValues.image,
           },
           imageFile,
-        ),
-      )}
+        );
+      })}
       title={
         isEdit ? `Modifier ${values.nom || "un animal"}` : "Ajouter un animal"
       }
-      eyebrow="Animaux"
       description="Construisez sa fiche progressivement : identité, caractéristiques, quotidien puis informations complémentaires."
       submitLabel={
         isEdit ? "Enregistrer les modifications" : "Ajouter l’animal"
@@ -206,12 +206,11 @@ export function AnimalFormDrawer({
                     </span>
                   )}
                 </Field>
-                <Field label="Date de naissance *">
+                <Field label="Date de naissance">
                   <DateInput
                     name="datenaissance"
                     value={values.datenaissance || ""}
                     onChange={handleChange}
-                    required
                   />
                   {errors.datenaissance && (
                     <span className="text-xs text-destructive">
@@ -275,9 +274,8 @@ export function AnimalFormDrawer({
               >
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Poids">
-                    <Input
-                      type="number"
-                      inputMode="decimal"
+                    <UnitInput
+                      unit="kg"
                       name="poids"
                       value={values.poids || ""}
                       onChange={handleChange}
@@ -286,9 +284,8 @@ export function AnimalFormDrawer({
                     />
                   </Field>
                   <Field label="Taille">
-                    <Input
-                      type="number"
-                      inputMode="decimal"
+                    <UnitInput
+                      unit="cm"
                       name="taille"
                       value={values.taille || ""}
                       onChange={handleChange}

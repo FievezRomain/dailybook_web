@@ -65,7 +65,7 @@ function Markdown({
   );
 }
 
-function NoteForm({
+export function NoteForm({
   note,
   busy,
   onClose,
@@ -94,7 +94,7 @@ function NoteForm({
         icon={StickyNote}
         eyebrow="Notes"
         title={note ? "Modifier la note" : "Créer une note"}
-        description="Écrivez librement : titres, listes et emphases seront rendus proprement à la lecture."
+        description="Écrivez librement : titres, listes et autres informations importantes à enregistrer."
         onClose={() => (dirty ? setConfirmClose(true) : onClose())}
         actions={
           <>
@@ -119,10 +119,7 @@ function NoteForm({
           </>
         }
       >
-        <FormSection
-          title="Contenu"
-          description="Le Markdown est interprété de manière sûre, sans exécuter de HTML utilisateur."
-        >
+        <FormSection title="Contenu">
           <div className="space-y-4">
             <label className="grid gap-2">
               <span className="text-sm font-medium">Titre</span>
@@ -180,7 +177,7 @@ function NoteDetail({
       <header className="relative border-b bg-muted/20 px-6 py-7 sm:px-9">
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-[#ce9871]"
+          className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-alezan"
         />
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
           {note.is_pinned ? "Note épinglée" : "Carnet"}
@@ -226,7 +223,7 @@ function NoteCard({
     >
       <div
         aria-hidden="true"
-        className={`h-1 ${featured ? "bg-gradient-to-r from-primary via-[#b07165] to-[#ce9871]" : "bg-muted"}`}
+        className={`h-1 ${featured ? "bg-gradient-to-r from-primary via-bai-cerise to-alezan" : "bg-muted"}`}
       />
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
@@ -357,8 +354,7 @@ export default function NotesContent({
             Vos idées, clairement organisées
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Retrouvez vos informations importantes sans voir les marqueurs de
-            mise en forme.
+            Retrouvez vos informations importantes.
           </p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold">
@@ -379,17 +375,12 @@ export default function NotesContent({
         />
       ) : (
         <>
-          <div className="flex items-center gap-3">
-            <SearchField
-              label="Rechercher dans les notes"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Rechercher un titre ou un contenu…"
-            />
-            <span className="hidden text-xs text-muted-foreground sm:block">
-              Résultats instantanés
-            </span>
-          </div>
+          <SearchField
+            label="Rechercher dans les notes"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Rechercher un titre ou un contenu…"
+          />
           {query.isLoading ? (
             <div className="grid gap-4 md:grid-cols-2">
               <Card className="h-52 animate-pulse bg-muted" />

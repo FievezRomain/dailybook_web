@@ -5,23 +5,17 @@ import {
   useMemo,
   useRef,
   useState,
-  type ComponentType,
 } from "react";
 import {
-  Activity,
   BarChart3,
   ChartNoAxesCombined,
-  CircleDollarSign,
-  Footprints,
   Gauge,
-  Medal,
-  Ruler,
-  Scale,
-  Utensils,
 } from "lucide-react";
 
 import { AnimalSelector } from "@/features/animals/components/AnimalSelector";
 import { useAnimalsQuery } from "@/features/animals/hooks/use-animals";
+import { useEventDrawer } from "@/features/events/context/event-drawer-context";
+import { mapEventData } from "@/features/events/utils/events";
 import { useCurrentUser } from "@/features/user/hooks/use-current-user";
 import {
   PremiumNotice,
@@ -31,20 +25,20 @@ import { PageHeader, PageShell } from "@/shared/components/layout/PageShell";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { DateInput } from "@/shared/components/ui/form-feedback";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { SystemState } from "@/shared/components/ui/system-state";
+import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/shared/components/ui/icons";
+import { EventActivityHeatmap } from "./EventActivityHeatmap";
+import { ActivityExactTable } from "./ActivityExactTable";
+import { ExpenseBreakdown } from "./ExpenseBreakdown";
 import { useStatisticsQuery } from "../hooks/use-statistics";
 import type {
   EventStatistics,
   PhysicalStatistics,
+  StatisticHistoryEntry,
   StatisticsChart,
+  StatisticsQueryInput,
   StatisticsType,
 } from "../types/statistics";
 
@@ -52,7 +46,7 @@ type TypeConfig = {
   label: string;
   description: string;
   unit: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: IconName;
   visual: "bars" | "donut" | "line" | "heatmap";
 };
 
@@ -61,50 +55,50 @@ const typeConfig: Record<StatisticsType, TypeConfig> = {
     label: "Dépenses",
     description: "Répartition des montants engagés",
     unit: "€",
-    icon: CircleDollarSign,
+    icon: "expense",
     visual: "donut",
   },
   entrainements: {
     label: "Entraînements",
     description: "Régularité des séances réalisées",
     unit: "",
-    icon: Activity,
-    visual: "bars",
+    icon: "training",
+    visual: "heatmap",
   },
   balades: {
     label: "Balades",
     description: "Fréquence des sorties dans le temps",
     unit: "",
-    icon: Footprints,
-    visual: "bars",
+    icon: "walk",
+    visual: "heatmap",
   },
   poids: {
     label: "Poids",
     description: "Évolution des mesures enregistrées",
     unit: "kg",
-    icon: Scale,
+    icon: "weight",
     visual: "line",
   },
   tailles: {
     label: "Taille",
     description: "Évolution de la croissance",
     unit: "cm",
-    icon: Ruler,
+    icon: "size",
     visual: "line",
   },
   alimentations: {
     label: "Alimentation",
-    description: "Régularité des relevés alimentaires",
+    description: "Évolution des quantités enregistrées",
     unit: "",
-    icon: Utensils,
-    visual: "heatmap",
+    icon: "food",
+    visual: "line",
   },
   concours: {
     label: "Concours",
     description: "Participation et résultats enregistrés",
     unit: "",
-    icon: Medal,
-    visual: "bars",
+    icon: "trophy",
+    visual: "heatmap",
   },
 };
 
@@ -115,6 +109,22 @@ const chartColors = [
   "var(--event-autre)",
   "var(--primary)",
   "var(--event-soins)",
+];
+
+const physicalEventTypes = new Set<StatisticsType>(["balades", "entrainements", "concours"]);
+const singleAnimalTypes = new Set<StatisticsType>([
+  "alimentations",
+  "poids",
+  "tailles",
+]);
+const statisticsTypeOrder: StatisticsType[] = [
+  "depenses",
+  "alimentations",
+  "entrainements",
+  "concours",
+  "balades",
+  "poids",
+  "tailles",
 ];
 
 function localDate(date: Date) {
@@ -488,60 +498,165 @@ function ExpenseDonut({ result }: { result: EventStatistics }) {
   );
 }
 
-function FoodHeatmap({ result }: { result: PhysicalStatistics }) {
-  const ordered = [...result.history]
-    .sort((left, right) => left.date.localeCompare(right.date))
-    .slice(-42);
-  const numericValues = ordered
-    .map((entry) => Number(entry.value))
-    .filter(Number.isFinite);
-  const max = Math.max(...numericValues, 1);
-  if (!ordered.length)
-    return (
-      <SystemState
-        title="Aucun relevé alimentaire"
-        description="Ajoutez des quantités ou aliments datés pour construire la régularité du suivi."
-      />
-    );
+function foodQuantityEntries(result: PhysicalStatistics) {
+  return result.history
+    .filter(
+      (entry) => entry.type === "quantity" && Number.isFinite(Number(entry.value)),
+    )
+    .sort((left, right) => left.date.localeCompare(right.date));
+}
+
+function FoodResultSummary({ result }: { result: PhysicalStatistics }) {
+  const quantities = foodQuantityEntries(result);
+  const latest = quantities.at(-1);
+  const first = quantities.at(0);
+  const variation =
+    latest && first ? Number(latest.value) - Number(first.value) : undefined;
+  const formatQuantity = (entry?: StatisticHistoryEntry) =>
+    entry
+      ? `${Number(entry.value).toLocaleString("fr-FR")}${entry.unity ? ` ${entry.unity}` : ""}`
+      : "—";
+
   return (
-    <div>
-      <div
-        className="grid grid-cols-7 gap-2"
-        role="img"
-        aria-label={`Heatmap de ${ordered.length} relevés alimentaires`}
+    <aside
+      className="space-y-3 xl:col-span-4"
+      aria-label="Résumé de l’alimentation"
+    >
+      <Card className="relative overflow-hidden rounded-[24px] border-primary/25 bg-primary p-5 text-primary-foreground shadow-surface">
+        <Icon
+          name="food"
+          size={112}
+          className="absolute -bottom-7 -right-7 opacity-10"
+          aria-hidden="true"
+        />
+        <p className="text-xs font-medium opacity-75">Dernière quantité</p>
+        <p className="mt-2 text-4xl font-semibold tracking-[-0.04em] tabular-nums">
+          {formatQuantity(latest)}
+        </p>
+        <p className="mt-5 text-xs opacity-75">
+          {latest
+            ? `Enregistrée le ${formatPeriodDate(latest.date)}`
+            : "Aucune quantité sur la période"}
+        </p>
+      </Card>
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="rounded-[20px] p-4 shadow-sm">
+          <p className="text-xs text-muted-foreground">Nombre d’entrées</p>
+          <p className="mt-2 text-xl font-semibold tabular-nums">
+            {result.history.length}
+          </p>
+        </Card>
+        <Card className="rounded-[20px] p-4 shadow-sm">
+          <p className="text-xs text-muted-foreground">Évolution</p>
+          <p className="mt-2 text-xl font-semibold tabular-nums">
+            {variation === undefined
+              ? "—"
+              : `${variation > 0 ? "+" : ""}${variation.toLocaleString("fr-FR")}${latest?.unity ? ` ${latest.unity}` : ""}`}
+          </p>
+        </Card>
+      </div>
+    </aside>
+  );
+}
+
+function FoodHistorySections({ result }: { result: PhysicalStatistics }) {
+  const ordered = [...result.history].sort((left, right) =>
+    right.date.localeCompare(left.date),
+  );
+  const foods = ordered.filter((entry) => entry.type === "food");
+  const quantities = ordered.filter((entry) => entry.type === "quantity");
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-2" aria-label="Historique alimentaire">
+      <FoodHistoryCard
+        title="Historique des aliments"
+        entries={foods}
+        empty="Aucun aliment renseigné sur cette période."
+        formatValue={(entry) => String(entry.value)}
+      />
+      <FoodHistoryCard
+        title="Historique des quantités"
+        entries={quantities}
+        empty="Aucune quantité renseignée sur cette période."
+        formatValue={(entry) =>
+          `${Number(entry.value).toLocaleString("fr-FR")}${entry.unity ? ` ${entry.unity}` : ""}`
+        }
+      />
+    </section>
+  );
+}
+
+function FoodHistoryCard({
+  title,
+  entries,
+  empty,
+  formatValue,
+}: {
+  title: string;
+  entries: StatisticHistoryEntry[];
+  empty: string;
+  formatValue: (entry: StatisticHistoryEntry) => string;
+}) {
+  return (
+    <Card className="gap-0 overflow-hidden rounded-[24px] p-0 shadow-surface">
+      <header className="border-b bg-muted/20 px-5 py-4">
+        <h2 className="text-lg font-semibold">{title}</h2>
+      </header>
+      {entries.length ? (
+        <ul className="divide-y px-5">
+          {entries.map((entry) => (
+            <li key={entry.id} className="flex min-h-12 items-center gap-4 py-3">
+              <span className="min-w-0 flex-1 text-sm text-muted-foreground">
+                {formatPeriodDate(entry.date)}
+              </span>
+              <span className="text-right text-sm font-semibold">
+                {formatValue(entry)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="px-5 py-6 text-sm text-muted-foreground">{empty}</p>
+      )}
+    </Card>
+  );
+}
+
+function FoodWeightComparison({
+  filters,
+}: {
+  filters: StatisticsQueryInput;
+}) {
+  const weightStatistics = useStatisticsQuery("poids", filters);
+
+  return (
+    <section aria-label="Comparaison entre l’alimentation et le poids">
+      <ChartFrame
+        title="Évolution du poids"
+        description="Même animal et même période que l’alimentation, pour comparer les deux évolutions."
       >
-        {ordered.map((entry) => {
-          const numeric = Number(entry.value);
-          const ratio = Number.isFinite(numeric) ? numeric / max : 0.5;
-          const tone =
-            ratio > 0.75
-              ? "bg-primary"
-              : ratio > 0.5
-                ? "bg-primary/75"
-                : ratio > 0.25
-                  ? "bg-primary/50"
-                  : "bg-primary/25";
-          return (
-            <button
-              key={entry.id}
-              type="button"
-              className={`aspect-square min-h-8 rounded-[8px] ${tone} outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring`}
-              aria-label={`${formatPeriodDate(entry.date)} : ${entry.value}${entry.unity ? ` ${entry.unity}` : ""}`}
-              title={`${formatPeriodDate(entry.date)} · ${entry.value}${entry.unity ? ` ${entry.unity}` : ""}`}
-            />
-          );
-        })}
-      </div>
-      <div className="mt-4 flex items-center justify-end gap-2 text-[11px] text-muted-foreground">
-        <span>Moins</span>
-        {["bg-primary/25", "bg-primary/50", "bg-primary/75", "bg-primary"].map(
-          (tone) => (
-            <span key={tone} className={`size-4 rounded-[5px] ${tone}`} />
-          ),
+        {weightStatistics.isPending ? (
+          <Skeleton className="h-72 w-full rounded-[20px]" />
+        ) : weightStatistics.isError ? (
+          <SystemState
+            state="error"
+            title="Le poids est indisponible"
+            description="La statistique d’alimentation reste affichée. Vous pouvez réessayer de charger le poids."
+            primaryAction={{
+              label: "Réessayer",
+              onClick: () => void weightStatistics.refetch(),
+            }}
+          />
+        ) : weightStatistics.data ? (
+          <LineChart chart={weightStatistics.data.statistic} unit="kg" />
+        ) : (
+          <SystemState
+            title="Aucune mesure de poids"
+            description="Ajoutez des mesures de poids pour les comparer à l’alimentation sur cette période."
+          />
         )}
-        <span>Plus</span>
-      </div>
-    </div>
+      </ChartFrame>
+    </section>
   );
 }
 
@@ -709,6 +824,7 @@ function ExactTable({
 export default function StatisticsContent() {
   const { isPremium, isLoading: isUserLoading } = useCurrentUser();
   const animalsQuery = useAnimalsQuery();
+  const { openDrawer: openEventDrawer } = useEventDrawer();
   const { handlePremiumError } = usePremiumGate();
   const initialDates = useMemo(() => defaultDates(), []);
   const animals = animalsQuery.animals ?? [];
@@ -716,8 +832,12 @@ export default function StatisticsContent() {
   const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const [dateDebut, setDateDebut] = useState(initialDates.dateDebut);
   const [dateFin, setDateFin] = useState(initialDates.dateFin);
-  const hasValidFilters =
+  const requiresSingleAnimal = singleAnimalTypes.has(type);
+  const hasValidAnimalSelection =
     selectedAnimals.length > 0 &&
+    (!requiresSingleAnimal || selectedAnimals.length === 1);
+  const hasValidFilters =
+    hasValidAnimalSelection &&
     Boolean(dateDebut && dateFin && dateDebut <= dateFin);
   const activeFilters = { animaux: selectedAnimals, dateDebut, dateFin };
   const statistics = useStatisticsQuery(
@@ -727,7 +847,6 @@ export default function StatisticsContent() {
   );
   const handledError = useRef<unknown>(undefined);
   const config = typeConfig[type];
-  const ActiveIcon = config.icon;
   const includesSharedAnimals = selectedAnimals.some(
     (id) => animals.find((animal) => animal.id === id)?.provenance === "shared",
   );
@@ -778,29 +897,61 @@ export default function StatisticsContent() {
             aria-label="Paramètres statistiques"
             className="rounded-[24px] border bg-background p-4 shadow-surface sm:p-5"
           >
-            <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_auto] xl:items-end">
-              <label className="grid gap-1.5 text-xs font-semibold">
+            <div>
+              <span className="mb-2 block text-xs font-semibold">
                 Indicateur
-                <Select
-                  value={type}
-                  onValueChange={(value) => setType(value as StatisticsType)}
-                >
-                  <SelectTrigger
-                    aria-label="Indicateur statistique"
-                    className="w-full"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(typeConfig).map(([value, item]) => (
-                      <SelectItem key={value} value={value}>
-                        <item.icon className="size-4" aria-hidden="true" />
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
+              </span>
+              <div
+                role="tablist"
+                aria-label="Indicateur statistique"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7"
+              >
+                {statisticsTypeOrder.map((value) => {
+                  const item = typeConfig[value];
+                  const isSelected = type === value;
+                  const isSingleAnimal = singleAnimalTypes.has(value);
+
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="tab"
+                      aria-label={item.label}
+                      aria-selected={isSelected}
+                      className={cn(
+                        "group flex min-h-20 min-w-0 items-center gap-2.5 overflow-hidden rounded-[16px] border px-3 py-3 text-left transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        isSelected
+                          ? "border-primary/45 bg-primary/[0.09] shadow-sm"
+                          : "border-border/70 bg-card hover:border-primary/25 hover:bg-muted/35",
+                      )}
+                      onClick={() => setType(value)}
+                    >
+                      <span
+                        className={cn(
+                          "grid size-9 shrink-0 place-items-center rounded-[11px] transition-colors",
+                          isSelected
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground group-hover:text-primary",
+                        )}
+                      >
+                        <Icon name={item.icon} size={19} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block break-words text-xs font-semibold leading-snug">
+                          {item.label}
+                        </span>
+                        {isSingleAnimal ? (
+                          <span className="mt-1 block text-[10px] leading-none text-muted-foreground">
+                            1 animal
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4 border-t pt-4 xl:grid-cols-[1fr_auto] xl:items-end">
               <div>
                 <span className="mb-1.5 block text-xs font-semibold">
                   Période
@@ -851,23 +1002,25 @@ export default function StatisticsContent() {
                     Chaque modification actualise automatiquement l’analyse.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  disabled={!animals.length}
-                  onClick={() =>
-                    setSelectedAnimals(
-                      selectedAnimals.length === animals.length
-                        ? []
-                        : animals.map((animal) => animal.id),
-                    )
-                  }
-                >
-                  {selectedAnimals.length === animals.length && animals.length
-                    ? "Aucun animal"
-                    : "Tous les animaux"}
-                </Button>
+                {!requiresSingleAnimal ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={!animals.length}
+                    onClick={() =>
+                      setSelectedAnimals(
+                        selectedAnimals.length === animals.length
+                          ? []
+                          : animals.map((animal) => animal.id),
+                      )
+                    }
+                  >
+                    {selectedAnimals.length === animals.length && animals.length
+                      ? "Aucun animal"
+                      : "Tous les animaux"}
+                  </Button>
+                ) : null}
               </div>
               {animalsQuery.isLoading ? (
                 <Skeleton className="h-16 w-full" />
@@ -887,12 +1040,13 @@ export default function StatisticsContent() {
                   selectedIds={selectedAnimals}
                   onChange={setSelectedAnimals}
                   onUpdateAnimalImage={animalsQuery.updateAnimalImage}
+                  singleSelect={requiresSingleAnimal}
                 />
               )}
             </div>
             <div className="mt-4 flex items-center gap-3 border-t pt-4">
               <span className="grid size-10 place-items-center rounded-[13px] bg-primary/10 text-primary">
-                <ActiveIcon className="size-5" aria-hidden="true" />
+                <Icon name={config.icon} size={20} aria-hidden="true" />
               </span>
               <div>
                 <p className="text-sm font-semibold">{config.label}</p>
@@ -905,7 +1059,26 @@ export default function StatisticsContent() {
             </div>
           </section>
 
-          {!hasValidFilters ? (
+          {requiresSingleAnimal && selectedAnimals.length > 1 ? (
+            <Card
+              role="alert"
+              className="relative min-h-72 overflow-hidden rounded-[24px] border-dashed bg-muted/15 shadow-none"
+            >
+              <div className="relative z-10 mx-auto grid max-w-lg justify-items-center py-12 text-center">
+                <span className="grid size-14 place-items-center rounded-full bg-card text-primary shadow-surface">
+                  <Icon name={config.icon} size={24} aria-hidden="true" />
+                </span>
+                <h2 className="mt-4 text-xl font-semibold">
+                  Sélectionnez un seul animal
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Le poids, la taille et l’alimentation sont des suivis
+                  individuels qui ne peuvent pas être mélangés entre plusieurs
+                  animaux.
+                </p>
+              </div>
+            </Card>
+          ) : !hasValidFilters ? (
             <Card className="relative min-h-72 overflow-hidden rounded-[24px] border-dashed bg-muted/15 shadow-none">
               <div
                 aria-hidden="true"
@@ -943,8 +1116,9 @@ export default function StatisticsContent() {
                     {config.label}
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {selectedAnimals.length} animal
-                    {selectedAnimals.length > 1 ? "aux" : ""} ·{" "}
+                    {selectedAnimals.length === 1
+                      ? "1 animal"
+                      : `${selectedAnimals.length} animaux`} ·{" "}
                     {formatPeriodDate(dateDebut)} — {formatPeriodDate(dateFin)}
                   </p>
                 </div>
@@ -983,16 +1157,22 @@ export default function StatisticsContent() {
                       description={config.description}
                     >
                       {"history" in statistics.data ? (
-                        config.visual === "heatmap" ? (
-                          <FoodHeatmap result={statistics.data} />
-                        ) : (
-                          <LineChart
-                            chart={statistics.data.statistic}
-                            unit={config.unit}
-                          />
-                        )
+                        <LineChart
+                          chart={statistics.data.statistic}
+                          unit={config.unit}
+                        />
                       ) : config.visual === "donut" ? (
                         <ExpenseDonut result={statistics.data} />
+                      ) : config.visual === "heatmap" ? (
+                        <EventActivityHeatmap
+                          animals={animals}
+                          dateDebut={dateDebut}
+                          dateFin={dateFin}
+                          label={config.label}
+                          onOpenEvent={(event) => openEventDrawer(mapEventData(event))}
+                          onUpdateAnimalImage={animalsQuery.updateAnimalImage}
+                          result={statistics.data}
+                        />
                       ) : (
                         <EventBars
                           result={statistics.data}
@@ -1000,9 +1180,30 @@ export default function StatisticsContent() {
                         />
                       )}
                     </ChartFrame>
-                    <ResultSummary result={statistics.data} config={config} />
+                    {type === "alimentations" &&
+                    "history" in statistics.data ? (
+                      <FoodResultSummary result={statistics.data} />
+                    ) : (
+                      <ResultSummary result={statistics.data} config={config} />
+                    )}
                   </div>
-                  <ExactTable result={statistics.data} />
+                  {type === "alimentations" &&
+                  "history" in statistics.data ? (
+                    <div className="space-y-5">
+                      <FoodWeightComparison filters={activeFilters} />
+                      <FoodHistorySections result={statistics.data} />
+                    </div>
+                  ) : type === "depenses" && !("history" in statistics.data) ? (
+                    <ExpenseBreakdown
+                      result={statistics.data}
+                      animals={animals}
+                      onUpdateAnimalImage={animalsQuery.updateAnimalImage}
+                    />
+                  ) : physicalEventTypes.has(type) && !("history" in statistics.data) ? (
+                    <ActivityExactTable result={statistics.data} includeRanking={type === "concours"} />
+                  ) : (
+                    <ExactTable result={statistics.data} />
+                  )}
                 </>
               ) : null}
             </section>

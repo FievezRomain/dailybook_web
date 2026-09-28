@@ -60,7 +60,6 @@ export const ObjectiveFormDrawer = ({
       onClose={onClose}
       onSubmit={handleSubmit(onSubmit)}
       title={title}
-      eyebrow="Suivi"
       description="Définissez une intention claire, associez les animaux concernés puis transformez-la en étapes réalisables."
       submitLabel={
         isDuplicate

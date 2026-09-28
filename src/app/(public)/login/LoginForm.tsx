@@ -10,6 +10,7 @@ import { establishAuthenticatedSession } from '@/features/user/api/user-api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthShell } from '@/shared/components/layout/AuthShell';
 import { safeReturnPath } from '@/shared/security/safe-return-path';
+import { getLoginErrorMessage } from '@/features/auth/utils/login-error-message';
 
 export default function LoginForm() {
         const router = useRouter();
@@ -44,12 +45,7 @@ export default function LoginForm() {
                         const returnTo = searchParams.get('returnTo');
                         router.replace(safeReturnPath(returnTo));
                 } catch (err) {
-                        console.error(err);
-                        if (err instanceof Error) {
-                                setError(err.message);
-                        } else {
-                                setError("Email ou mot de passe incorrect");
-                        }
+                        setError(getLoginErrorMessage(err));
                         setLoading(false);
                 }
         };

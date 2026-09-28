@@ -2,7 +2,6 @@ import * as Sentry from "@sentry/react";
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
-  CheckCircle2,
   FileText,
   ListChecks,
   PawPrint,
@@ -19,6 +18,7 @@ import { useEventForm } from "@/features/events/hooks/use-event-form";
 import type { Event, RecurrenceScope } from "@/features/events/types/event";
 import {
   eventToneClasses,
+  eventTypeOptions,
   iconsMap,
   titleMap,
 } from "@/features/events/utils/events";
@@ -42,6 +42,7 @@ import {
 } from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { getLocalDateString } from "@/shared/utils/dates";
+import { Icon } from "@/shared/components/ui/icons";
 import type { ImageSigned } from "@/types/image";
 import {
   getAnimalsAcceptedInEveryGroup,
@@ -103,7 +104,7 @@ export const EventFormDrawer = ({
   } = useEventForm(initialEvent);
   const eventtype = values.eventtype as keyof typeof titleMap;
   const eventTitle = titleMap[eventtype] || "Événement";
-  const EventTypeIcon = iconsMap[eventtype] || CalendarDays;
+  const eventTypeIcon = iconsMap[eventtype] || "event";
   const isEdit = Boolean(initialEvent?.id);
   const isRecurring = Boolean(
     initialEvent?.idparent || initialEvent?.frequencevalue,
@@ -205,7 +206,9 @@ export const EventFormDrawer = ({
         const duplicate = { ...data };
         delete duplicate.id;
         await onSubmit(duplicate, [], "occurrence");
-      } else await onSubmit(data, removedLinkedFiles, updateScope);
+      } else {
+        await onSubmit(data, removedLinkedFiles, updateScope);
+      }
     } catch (error) {
       await Promise.all(
         uploadedThisSession.map(async (fileName) => {
@@ -244,7 +247,6 @@ export const EventFormDrawer = ({
         onClose={onClose}
         onSubmit={handleSubmit(handleSave)}
         title={title}
-        eyebrow="Agenda"
         description="Planifiez l’essentiel, choisissez les animaux puis complétez uniquement les informations utiles à ce type d’événement."
         submitLabel={submitLabel}
         submitting={isSubmitting}
@@ -262,8 +264,7 @@ export const EventFormDrawer = ({
                     "Choisissez un type d’événement pour continuer.",
                   content: ({ advance }: { advance: () => void }) => (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {Object.entries(titleMap).map(([value, label]) => {
-                        const TypeIcon = iconsMap[value] || CalendarDays;
+                      {eventTypeOptions.map(({ value, label, icon }) => {
                         const selected = values.eventtype === value;
                         return (
                           <button
@@ -281,7 +282,7 @@ export const EventFormDrawer = ({
                             }}
                           >
                             <span className="event-detail-type-icon grid size-12 shrink-0 place-items-center rounded-[16px]">
-                              <TypeIcon className="size-5" aria-hidden="true" />
+                              <Icon name={icon} className="size-5" />
                             </span>
                             <span>
                               <span className="block font-semibold">
@@ -326,7 +327,7 @@ export const EventFormDrawer = ({
                             <SelectValue placeholder="Choisir un type" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(titleMap).map(([value, label]) => (
+                            {eventTypeOptions.map(({ value, label }) => (
                               <SelectItem key={value} value={value}>
                                 {label}
                               </SelectItem>
@@ -349,9 +350,9 @@ export const EventFormDrawer = ({
                           aria-label={`Type d’événement sélectionné : ${eventTitle}`}
                           className={`${toneClass} flex h-10 items-center gap-2 rounded-surface border border-foreground/60 bg-card px-3.5 text-[13px] font-medium`}
                         >
-                          <EventTypeIcon
+                          <Icon
+                            name={eventTypeIcon}
                             className="size-4 text-[var(--event-color)]"
-                            aria-hidden="true"
                           />
                           <span>{eventTitle}</span>
                         </div>
@@ -756,25 +757,6 @@ export const EventFormDrawer = ({
                     Afficher dans le dossier médical
                   </label>
                 )}
-                <FormSection title="Commentaire">
-                  <Textarea
-                    name="commentaire"
-                    value={values.commentaire || ""}
-                    onChange={handleTextareaChange}
-                    rows={5}
-                    placeholder="Informations utiles, consignes, préparation…"
-                  />
-                </FormSection>
-              </div>
-            ),
-          },
-          {
-            title: "Finaliser",
-            description:
-              "Ajoutez les documents utiles puis vérifiez votre événement.",
-            icon: CheckCircle2,
-            content: (
-              <div className="space-y-4">
                 {(eventtype === "soins" || eventtype === "rdv") && (
                   <FormSection
                     title="Documents médicaux"
@@ -833,31 +815,14 @@ export const EventFormDrawer = ({
                     )}
                   </FormSection>
                 )}
-                <FormSection title="Résumé">
-                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="text-muted-foreground">Événement</dt>
-                      <dd className="mt-1 font-semibold">
-                        {values.nom || "Sans nom"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Type</dt>
-                      <dd className="mt-1 font-semibold">{eventTitle}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Date</dt>
-                      <dd className="mt-1 font-semibold">
-                        {values.dateevent || "Non renseignée"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Animaux</dt>
-                      <dd className="mt-1 font-semibold">
-                        {values.animaux?.length || 0} sélectionné(s)
-                      </dd>
-                    </div>
-                  </dl>
+                <FormSection title="Commentaire">
+                  <Textarea
+                    name="commentaire"
+                    value={values.commentaire || ""}
+                    onChange={handleTextareaChange}
+                    rows={5}
+                    placeholder="Informations utiles, consignes, préparation…"
+                  />
                 </FormSection>
               </div>
             ),

@@ -25,6 +25,19 @@ describe('/api/events', () => {
     backendApiClient.mockResolvedValueOnce({ rows: [event] });
     expect((await GET()).status).toBe(422);
   });
+  it('normalise une note backend a 0 comme une note absente', async () => {
+    backendApiClient.mockResolvedValueOnce([
+      ...Array.from({ length: 18 }, (_, index) => ({ ...event, id: index + 1 })),
+      { ...event, id: 19, note: 0 },
+    ]);
+
+    const response = await GET();
+    const events = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(events).toHaveLength(19);
+    expect(events[18]).not.toHaveProperty('note');
+  });
   it('valide la création', async () => {
     backendApiClient.mockResolvedValue([event]);
     const response = await POST(request({

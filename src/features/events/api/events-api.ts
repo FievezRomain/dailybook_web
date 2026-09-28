@@ -30,8 +30,9 @@ export async function deleteEvent(id: number, scope: RecurrenceScope = 'occurren
 }
 
 export async function getEventDocumentUrl(eventId: number, filename: string) {
+  const query = new URLSearchParams({ resourceType: 'event', resourceId: String(eventId) });
   const response = await webApiClient.get<{ url: string }>(
-    `/events/${eventId}/documents/${encodeURIComponent(filename)}`,
+    `/files/${encodeURIComponent(filename)}?${query}`,
   );
   return validatePresignedUrl(response.data.url);
 }

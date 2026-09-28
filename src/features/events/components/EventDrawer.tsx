@@ -18,12 +18,14 @@ import { AnimalAvatar } from '@/features/animals/components/AnimalAvatar'
 import type { Animal } from '@/features/animals/types/animal'
 import { getEventDocumentUrl } from '@/features/events/api/events-api'
 import type { MappedEvent } from '@/features/events/types/event'
-import { eventToneClasses } from '@/features/events/utils/events'
+import { eventToneClasses, formatWalkDuration } from '@/features/events/utils/events'
 import { MediaViewer } from '@/shared/components/feedback/MediaViewer'
 import { Button } from '@/shared/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { RatingStars } from '@/shared/components/ui/rating-stars'
 import type { ImageSigned } from '@/types/image'
+import { Icon, type IconName } from '@/shared/components/ui/icons'
 
 type EventDrawerProps = {
   open: boolean
@@ -49,15 +51,60 @@ function formatRecurrence(value?: string) {
   return ({
     daily: 'Tous les jours', tlj: 'Tous les jours', weekly: 'Toutes les semaines', tls: 'Toutes les semaines',
     biweekly: 'Toutes les deux semaines', tl2s: 'Toutes les deux semaines', monthly: 'Tous les mois', tlm: 'Tous les mois',
+    yearly: 'Tous les ans', annual: 'Tous les ans', annee: 'Tous les ans',
   } as Record<string, string>)[value ?? ''] ?? 'Série récurrente'
+}
+
+function normalizeTechnicalValue(value: string) {
+  return value
+    .trim()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase('fr-FR')
+}
+
+function formatEventState(value?: string) {
+  const normalized = normalizeTechnicalValue(value ?? '')
+  if (['completed', 'done', 'termine', 'terminee', 'true'].includes(normalized)) return 'Terminé'
+  if (['pending', 'todo', 'a faire', 'false'].includes(normalized)) return 'À faire'
+  if (['in_progress', 'in progress', 'en cours'].includes(normalized)) return 'En cours'
+  return value?.trim() || 'À faire'
+}
+
+function formatReminder(value: string) {
+  return ({
+    '30m': '30 minutes avant',
+    '1h': '1 heure avant',
+    '1d': '1 jour avant',
+    annee: 'Dans un an',
+    annual: 'Dans un an',
+    yearly: 'Dans un an',
+  } as Record<string, string>)[normalizeTechnicalValue(value)] ?? value
+}
+
+function formatExpenseCategory(value?: string) {
+  return ({
+    alimentation: 'Alimentation',
+    equipement: 'Équipement',
+    accessoire: 'Accessoire',
+    garde: 'Garde',
+    formation: 'Formation',
+    assurance: 'Assurance',
+    balade: 'Balade',
+    entrainement: 'Entraînement',
+    concours: 'Concours',
+    rdv: 'Rendez-vous',
+    soins: 'Soins',
+    autre: 'Autre',
+  } as Record<string, string>)[normalizeTechnicalValue(value ?? '')] ?? 'Dépense'
 }
 
 function currentTimestamp() {
   return Date.now()
 }
 
-function SectionTitle({ icon: Icon, children, id }: { icon: ComponentType<{ className?: string }>; children: ReactNode; id: string }) {
-  return <h3 id={id} className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground"><Icon aria-hidden="true" className="size-4 text-[var(--event-color)]" />{children}</h3>
+function SectionTitle({ icon: LegacyIcon, iconName, children, id }: { icon?: ComponentType<{ className?: string }>; iconName?: IconName; children: ReactNode; id: string }) {
+  return <h3 id={id} className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground">{iconName ? <Icon name={iconName} className="size-4 text-[var(--event-color)]" /> : LegacyIcon ? <LegacyIcon aria-hidden="true" className="size-4 text-[var(--event-color)]" /> : null}{children}</h3>
 }
 
 function DetailRow({ detail }: { detail: Detail }) {
@@ -71,16 +118,16 @@ function DetailRow({ detail }: { detail: Detail }) {
 }
 
 export const EventDrawer = ({ open, onClose, event, animals, onEdit, onDelete, onUpdateAnimalImage }: EventDrawerProps) => {
-  const Icon = event.icon
   const toneClass = eventToneClasses[event.eventtype] ?? eventToneClasses.autre
   const date = eventDate(event.dateevent)
   const [signedUrls, setSignedUrls] = useState<Record<string, { url: string; expiresAt: number }>>({})
   const [documentError, setDocumentError] = useState<string>()
   const [selectedDocument, setSelectedDocument] = useState<{ name: string; url: string } | null>(null)
+  const walkDuration = event.eventtype === 'balade' ? formatWalkDuration(event) : undefined
 
   const detailRows: Detail[] = [
     ...(event.specialiste ? [{ icon: UserRound, label: 'Spécialiste', value: event.specialiste }] : []),
-    ...(event.depense !== undefined ? [{ icon: WalletCards, label: event.categoriedepense || 'Dépense', value: `${event.depense.toLocaleString('fr-FR')} €` }] : []),
+    ...(event.depense !== undefined ? [{ icon: WalletCards, label: formatExpenseCategory(event.categoriedepense), value: `${event.depense.toLocaleString('fr-FR')} €` }] : []),
     ...(event.frequencetype || event.idparent ? [{ icon: Repeat2, label: 'Répétition', value: formatRecurrence(event.frequencevalue) }] : []),
   ]
 
@@ -89,13 +136,14 @@ export const EventDrawer = ({ open, onClose, event, animals, onEdit, onDelete, o
     event.epreuve && ['Épreuve', event.epreuve],
     event.dossart && ['Dossard', event.dossart],
     event.placement && ['Classement', event.placement],
-    event.note !== undefined && ['Note', `${event.note}/5`],
+    event.note !== undefined && ['Note', String(event.note)],
     event.traitement && ['Traitement', event.traitement],
     event.datefinsoins && ['Fin des soins', formatDate(event.datefinsoins)],
     event.heuredebutbalade && ['Début de la balade', event.heuredebutbalade],
     event.datefinbalade && ['Fin de la balade', formatDate(event.datefinbalade)],
     event.heurefinbalade && ['Heure de fin', event.heurefinbalade],
-    event.rappelnotification && ['Rappel', event.rappelnotification],
+    walkDuration && ['Durée de la balade', walkDuration],
+    event.rappelnotification && ['Rappel', formatReminder(event.rappelnotification)],
     event.made_by?.name && ['Réalisé par', event.made_by.name],
     event.created_by?.name && ['Créé par', event.created_by.name],
   ].filter(Boolean) as string[][]
@@ -122,12 +170,12 @@ export const EventDrawer = ({ open, onClose, event, animals, onEdit, onDelete, o
       <SheetContent side="right" width="wide" closeLabel="Fermer le détail" overlayClassName="bg-black/25 backdrop-blur-[1px]" className={`gap-0 overflow-hidden border-l border-border/70 bg-background p-0 ${toneClass}`}>
         <SheetHeader className="event-detail-sheet-header relative gap-0 border-b px-5 pb-5 pt-6 pr-16 text-left sm:px-7 sm:pb-6 sm:pt-7 sm:pr-16">
           <div className="mb-5 flex items-center gap-2">
-            <span className="event-detail-type-icon grid size-10 place-items-center rounded-[14px]"><Icon aria-hidden="true" className="size-5" /></span>
+            <span className="event-detail-type-icon grid size-10 place-items-center rounded-[14px]"><Icon name={event.icon} className="size-5" /></span>
             <span className="event-detail-type-badge rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-[0.1em]">{event.titleType}</span>
-            <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">{event.state || 'En cours'}</span>
+            <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">{formatEventState(event.state)}</span>
           </div>
           <SheetTitle className="text-[clamp(1.65rem,4vw,2.25rem)] leading-[1.08] tracking-[-0.025em]">{event.nom}</SheetTitle>
-          <SheetDescription className="mt-2 max-w-[46ch] leading-5">Tous les éléments utiles de cet événement, sans quitter votre agenda.</SheetDescription>
+          <SheetDescription className="sr-only">Informations de l’événement.</SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -165,10 +213,10 @@ export const EventDrawer = ({ open, onClose, event, animals, onEdit, onDelete, o
             </section>
 
             {(detailRows.length > 0 || contextualDetails.length > 0) && <section aria-labelledby="event-details-title">
-              <SectionTitle id="event-details-title" icon={Icon}>Détails</SectionTitle>
+              <SectionTitle id="event-details-title" iconName={event.icon}>Détails</SectionTitle>
               <dl className="mt-3 divide-y rounded-[22px] border bg-card px-4 shadow-sm">
                 {detailRows.map((detail) => <DetailRow key={detail.label} detail={detail} />)}
-                {contextualDetails.map(([label, value]) => <div key={label} className="grid grid-cols-[minmax(105px,0.7fr)_minmax(0,1fr)] gap-3 py-3.5 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold leading-5">{value}</dd></div>)}
+                {contextualDetails.map(([label, value]) => <div key={label} className="grid grid-cols-[minmax(105px,0.7fr)_minmax(0,1fr)] gap-3 py-3.5 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold leading-5">{label === 'Note' && event.note !== undefined ? <RatingStars value={event.note} activeClassName="fill-[var(--event-color)] text-[var(--event-color)]" /> : value}</dd></div>)}
               </dl>
             </section>}
 

@@ -47,4 +47,17 @@ describe('LoginForm', () => {
     await waitFor(() => expect(mocks.establishSession).toHaveBeenCalledWith({ uid: 'user-1' }));
     expect(mocks.replace).toHaveBeenCalledWith('/dashboard');
   });
+
+  it('traduit une erreur Firebase en message métier compréhensible', async () => {
+    mocks.signIn.mockRejectedValue({ code: 'auth/wrong-password', message: 'Firebase: Error (auth/wrong-password).' });
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByLabelText('Adresse e-mail'), { target: { value: 'vasco@example.com' } });
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'mauvais-secret' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Mot de passe incorrect.');
+    expect(screen.getByRole('alert')).not.toHaveTextContent('auth/wrong-password');
+    expect(screen.getByRole('button', { name: 'Se connecter' })).toBeEnabled();
+  });
 });

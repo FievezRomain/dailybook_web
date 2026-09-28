@@ -5,6 +5,10 @@ const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const optionalDate = dateSchema.nullable().optional().transform((value) => value ?? undefined);
 const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
 const optionalNumber = z.number().nullable().optional().transform((value) => value ?? undefined);
+const optionalRating = z.preprocess(
+  (value) => value === 0 ? undefined : value,
+  z.number().min(1).max(5).nullable().optional(),
+).transform((value) => value ?? undefined);
 const requiredText = z.string().nullable().optional().transform((value) => value ?? '');
 const positiveId = z.number().int().positive();
 
@@ -37,7 +41,7 @@ export const eventSchema = z.object({
   datefinbalade: optionalDate,
   heurefinbalade: optionalText,
   discipline: optionalText,
-  note: z.number().min(1).max(5).nullable().optional().transform((value) => value ?? undefined),
+  note: optionalRating,
   epreuve: optionalText,
   dossart: optionalText,
   placement: optionalText,

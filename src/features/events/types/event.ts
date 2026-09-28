@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
 import type { z } from 'zod';
+import type { IconName } from '@/shared/components/ui/icons';
 import type {
   createEventSchema, eventHighlightSchema, eventSchema, patchEventSchema, recurrenceScopeSchema, updateEventSchema,
 } from '../schemas/event';
@@ -11,7 +11,7 @@ export type PatchEventInput = z.input<typeof patchEventSchema>;
 export type RecurrenceScope = z.infer<typeof recurrenceScopeSchema>;
 export type EventHighlight = z.infer<typeof eventHighlightSchema>;
 export type MappedEvent = Event & {
-  icon: ComponentType<{ className?: string }>;
+  icon: IconName;
   color: string;
   titleType: string;
   delay?: number;

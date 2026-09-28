@@ -39,7 +39,7 @@ import {
 import { useWishesQuery } from "../hooks/use-wishes";
 import type { Wish } from "../types/wish";
 
-type WishValues = {
+export type WishValues = {
   nom: string;
   url: string;
   prix: string;
@@ -47,6 +47,10 @@ type WishValues = {
   acquis: boolean;
   file?: File;
 };
+
+function recipientLabel(recipient: string) {
+  return recipient.trim().replace(/^pour\s+/i, "");
+}
 type WishFilter = "all" | "wanted" | "acquired";
 
 const ratios = [
@@ -77,7 +81,7 @@ function WishImage({
     return (
       <div
         className={cn(
-          "relative grid place-items-center overflow-hidden bg-gradient-to-br from-primary/[0.07] via-muted/70 to-[#ce9871]/15",
+          "relative grid place-items-center overflow-hidden bg-gradient-to-br from-primary/[0.07] via-muted/70 to-alezan/15",
           className,
         )}
       >
@@ -108,7 +112,7 @@ function WishImage({
   );
 }
 
-function WishForm({
+export function WishForm({
   wish,
   busy,
   onClose,
@@ -278,7 +282,7 @@ function WishDetail({
               className={cn(
                 "inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold",
                 wish.acquis
-                  ? "bg-emerald-500/10 text-emerald-700"
+                  ? "bg-success/10 text-success"
                   : "bg-primary/10 text-primary",
               )}
             >
@@ -295,7 +299,7 @@ function WishDetail({
           </h2>
           {wish.destinataire && (
             <p className="mt-2 text-sm text-muted-foreground">
-              Pour {wish.destinataire}
+              Pour {recipientLabel(wish.destinataire)}
             </p>
           )}
           <div className="my-7 border-y py-6">
@@ -313,7 +317,7 @@ function WishDetail({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Voir le lien marchand <ExternalLink className="size-4" />
+              Voir le lien <ExternalLink className="size-4" />
             </a>
           )}
           <div className="mt-auto flex flex-col-reverse gap-2 pt-8 sm:flex-row sm:justify-end">
@@ -363,7 +367,7 @@ function WishCard({
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-bold shadow-sm backdrop-blur-md",
               wish.acquis
-                ? "bg-emerald-50/95 text-emerald-800"
+                ? "bg-success/10 text-success"
                 : "bg-background/90 text-foreground",
             )}
           >
@@ -406,7 +410,7 @@ function WishCard({
           </h3>
           {wish.destinataire && (
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Pour {wish.destinataire}
+              Pour {recipientLabel(wish.destinataire)}
             </p>
           )}
         </button>
@@ -558,14 +562,14 @@ export default function WishesContent({
       <PageHeader className="items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-            Tableau d’inspiration
+            Liste de souhaits
           </p>
           <h2 className="mt-1 text-3xl font-semibold tracking-[-0.03em]">
-            Des envies qui prennent forme
+            Des envies qui prennent vie
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Rassemblez vos idées dans un tableau vivant, visuel et agréable à
-            parcourir.
+            Rassemblez vos idées ici pour ne pas les oublier et plus facilement
+            les partager.
           </p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold">

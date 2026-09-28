@@ -20,6 +20,13 @@ describe('WeatherCard', () => {
     Object.defineProperty(navigator, 'geolocation', { configurable: true, value: { getCurrentPosition: mocks.geolocation } });
   });
 
+  it('allège la variante compacte sans titre ni bordure de carte', () => {
+    render(<WeatherCard compact />);
+
+    expect(screen.queryByRole('heading', { name: 'Météo' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Vasco utilise votre position approximative/).closest('[data-slot="card"]')).toHaveClass('border-0', 'shadow-none');
+  });
+
   it('ne demande la position qu’après un consentement explicite puis affiche des valeurs textuelles', () => {
     mocks.geolocation.mockImplementation((success: PositionCallback) => success({ coords: { latitude: 48.8566, longitude: 2.3522 } } as GeolocationPosition));
     render(<WeatherCard />);

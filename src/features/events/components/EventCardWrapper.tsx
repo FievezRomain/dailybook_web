@@ -14,9 +14,10 @@ type EventCardWrapperProps = {
   onOpenDrawer: () => void;
   onDuplicate: () => void;
   onUpdateAnimalImage: (id: number, imageObj: ImageSigned) => void;
+  strikeCompleted?: boolean;
 };
 
-export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, onUpdateAnimalImage }: EventCardWrapperProps) {
+export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete, onOpenDrawer, onDuplicate, onUpdateAnimalImage, strikeCompleted = false }: EventCardWrapperProps) {
   const enrichedAnimals = animals ? filterAnimals(event, animals) : undefined;
 
   if (!enrichedAnimals) {
@@ -38,6 +39,7 @@ export function EventCardWrapper({ event, animals, onEdit, onDelete, onComplete,
       onUpdateAnimalImage={onUpdateAnimalImage}
       event={event}
       animals={enrichedAnimals}
+      strikeCompleted={strikeCompleted}
     />
   );
 }

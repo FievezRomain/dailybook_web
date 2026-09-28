@@ -23,7 +23,7 @@ export default function UpcomingTasksCard() {
         {isLoading && <div className="space-y-3" aria-label="Chargement des prochains événements"><Skeleton className="h-24 w-full rounded-xl" /><Skeleton className="h-24 w-full rounded-xl" /></div>}
         {isError && <div role="alert" className="space-y-3"><p className="font-medium">Les prochains événements sont indisponibles.</p><p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : "Le chargement a échoué."}</p><Button variant="outline" onClick={() => void refetch()}>Réessayer</Button></div>}
         {!isLoading && !isError && filteredEvents.length === 0 && <div className="grid min-h-24 place-items-center rounded-xl border border-dashed bg-muted/20 p-4 text-center"><p className="text-sm text-muted-foreground">Aucun événement prévu dans les prochains jours.</p></div>}
-        {!isLoading && !isError && filteredEvents.length > 0 && <EventList events={filteredEvents} />}
+        {!isLoading && !isError && filteredEvents.length > 0 && <EventList events={filteredEvents} strikeCompleted />}
       </CardContent>
     </Card>
   );

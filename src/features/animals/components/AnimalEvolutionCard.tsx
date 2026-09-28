@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Camera, Images, Trash2 } from "lucide-react";
+import { Camera, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { getValidAnimalImage } from "@/features/animals/utils/animals";
@@ -119,13 +119,9 @@ export function AnimalEvolutionCard({
   return (
     <Card className="h-full gap-0 overflow-hidden rounded-[24px] p-0 shadow-surface">
       <header className="border-b bg-muted/20 px-5 py-4">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 place-items-center rounded-[14px] bg-primary/10 text-primary">
-            <Images className="size-5" aria-hidden="true" />
-          </span>
-          <div>
+        <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-              Souvenirs
+              Suivi
             </p>
             <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em]">
               Évolution physique
@@ -133,7 +129,6 @@ export function AnimalEvolutionCard({
             <p className="mt-1 text-xs text-muted-foreground">
               Un repère photo par mois pour voir les changements.
             </p>
-          </div>
         </div>
       </header>
       <div className="p-5">
@@ -200,7 +195,7 @@ export function AnimalEvolutionCard({
             </div>
           )
         )}
-        {isLoading || isUploading ? (
+        {isPremium ? isLoading || isUploading ? (
           <Skeleton className="h-72 w-full rounded-[18px]" />
         ) : error ? (
           <div
@@ -286,7 +281,7 @@ export function AnimalEvolutionCard({
               </p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
       <ConfirmDialog
         open={pictureToDelete !== null}

@@ -12,6 +12,9 @@ vi.mock('@/features/animals/hooks/use-animals', () => ({
 vi.mock('@/features/animals/context/animal-form-drawer-context', () => ({
   useAnimalFormDrawer: () => ({ openDrawer: mocks.openAnimal }),
 }))
+vi.mock('@/features/user/hooks/use-current-user', () => ({
+  useCurrentUser: () => ({ user: { name: 'Camille Dupont' }, isLoading: false }),
+}))
 vi.mock('./GridCards', () => ({ default: () => <div>Grille Home</div> }))
 vi.mock('@/features/weather/components/WeatherCard', () => ({ WeatherCard: () => <div>Météo</div> }))
 vi.mock('@/features/groups/components/GroupOnboarding', () => ({ GroupOnboarding: () => <div>Onboarding groupe</div> }))
@@ -40,5 +43,7 @@ describe('DashboardContent', () => {
     expect(window.localStorage.getItem('vasco:onboarding-complete')).toBe('true')
     expect(screen.getByText('Grille Home')).toBeVisible()
     expect(screen.getByText('Onboarding groupe')).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Bonjour Camille' })).toBeVisible()
+    expect(screen.getByText('Météo')).toBeVisible()
   })
 })

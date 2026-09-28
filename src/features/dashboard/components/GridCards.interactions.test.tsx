@@ -16,7 +16,6 @@ vi.mock('react-grid-layout', () => ({
   ),
   WidthProvider: (Component: React.ComponentType<{ children: React.ReactNode }>) => Component,
 }));
-vi.mock('@/features/weather/components/WeatherCard', () => ({ WeatherCard: () => <article>Météo</article> }));
 vi.mock('./cards/TodayTasksCard', () => ({ default: () => <article>Aujourd’hui</article> }));
 vi.mock('./cards/UpcomingTasksCard', () => ({ default: () => <article>Prochains jours</article> }));
 vi.mock('./cards/GoalsCard', () => ({ default: () => <article>Objectifs</article> }));
@@ -28,7 +27,7 @@ describe('organisation des tuiles Home', () => {
     render(<GridCards />);
 
     const handles = screen.getAllByRole('button', { name: /par glisser-déposer/ });
-    expect(handles).toHaveLength(4);
+    expect(handles).toHaveLength(3);
     handles.forEach((handle) => expect(handle).toHaveClass('top-3', 'right-3'));
     expect(screen.queryByRole('button', { name: 'Organiser les tuiles' })).not.toBeInTheDocument();
     expect(screen.getByTestId('dashboard-grid')).toHaveAttribute('data-draggable', 'true');
@@ -37,13 +36,17 @@ describe('organisation des tuiles Home', () => {
   });
 
   it('restaure la disposition initiale depuis la page Home', () => {
-    window.localStorage.setItem('vasco:dashboard-layouts', JSON.stringify({ version: 2, layouts: { lg: [], md: [], sm: [], xs: [] } }));
+    window.localStorage.setItem('vasco:dashboard-layouts', JSON.stringify({ version: 6, layouts: { lg: [], md: [], sm: [], xs: [] } }));
     render(<GridCards />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Réinitialiser les tuiles' }));
 
     const saved = JSON.parse(window.localStorage.getItem('vasco:dashboard-layouts') ?? '{}');
-    expect(saved.layouts.lg.find((item: { i: string }) => item.i === 'objectives')).toMatchObject({ x: 0, y: 4, w: 4 });
-    expect(saved.layouts.lg.find((item: { i: string }) => item.i === 'upcoming')).toMatchObject({ x: 4, y: 3, h: 4 });
+    expect(saved.version).toBe(6);
+    expect(saved.layouts.lg.find((item: { i: string }) => item.i === 'objectives')).toMatchObject({ x: 0, y: 4, w: 6, h: 6 });
+    expect(saved.layouts.lg.find((item: { i: string }) => item.i === 'today')).toMatchObject({ x: 0, y: 0, w: 3, h: 4 });
+    expect(saved.layouts.lg.find((item: { i: string }) => item.i === 'upcoming')).toMatchObject({ x: 3, y: 0, w: 3, h: 4 });
+    expect(saved.layouts.sm.find((item: { i: string }) => item.i === 'today')).toMatchObject({ x: 0, y: 0, w: 3, h: 4 });
+    expect(saved.layouts.sm.find((item: { i: string }) => item.i === 'upcoming')).toMatchObject({ x: 3, y: 0, w: 3, h: 4 });
   });
 });
