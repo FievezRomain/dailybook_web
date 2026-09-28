@@ -85,7 +85,7 @@ Les détails ouverts en panneau desktop peuvent utiliser une route interceptée 
 
 ### Création globale
 
-Ordre : Événement, Animal, Objectif, Note, Contact, Souhait, Groupe. Groupe reste visible et Premium. L'IA et la voix restent hors périmètre web tant qu'une décision produit ne les active pas.
+Ordre : Événement, Animal, Objectif, Note, Contact, Souhait, Groupe. Groupe reste visible et Premium. La création intelligente et la voix restent hors périmètre web tant qu'une décision produit ne les active pas.
 
 - Desktop : palette ou popover enrichi depuis le CTA global.
 - Compact : drawer d'actions ou page courte.

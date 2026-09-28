@@ -16,7 +16,7 @@ En cas de conflit, respecter cet ordre :
 
 Le fichier Figma mobile partage l'identité Vasco et les règles produit mais n'est pas une référence géométrique ou interactionnelle pour le navigateur.
 
-Avant toute implémentation visuelle, identifier la décision applicable dans la revue produit, puis le frame web compatible, ses états, ses largeurs Compact/Medium/Wide, ses modes Light/Dark, son comportement Glass/Solid, sa variante Reduced Motion et son parcours complet. I12–I18 se valident dans le navigateur et ne demandent aucune modification Figma.
+Avant toute implémentation visuelle, identifier la décision applicable dans la revue produit, puis le frame web compatible, ses états, ses largeurs Compact/Medium/Wide, ses modes Light/Dark, son comportement Glass/Solid, sa variante Reduced Motion et son parcours complet. I12–I18 ont été validés dans le navigateur et ne doivent pas être rouverts sans régression démontrée ou nouvelle décision produit.
 
 ## Politique de rupture
 
@@ -35,7 +35,7 @@ Avant toute implémentation visuelle, identifier la décision applicable dans la
 
 ## Travail par conversation
 
-Lire `docs/README.md`, puis `docs/refactor-plan.md`. Pendant la phase 5, lire aussi intégralement `docs/web-implementation-plan.md`. La première recette I11 reste ouverte administrativement, mais sa clôture visuelle est suspendue jusqu'à I18 ; reprendre le lot correctif I12–I18 explicitement marqué actif. Ces lots correctifs sont des barrières strictes entre eux. Un travail déjà réalisé hors séquence reste documenté, mais n’autorise pas à poursuivre la suite.
+Lire `docs/README.md`, puis `docs/refactor-plan.md`. La phase 5, I11 et les lots I0–I18 sont clôturés depuis le 19 septembre 2026 ; `docs/web-implementation-plan.md` sert d’historique vérifié. Une nouvelle conversation traite une maintenance explicitement demandée ou, sur autorisation, une tranche bornée de la phase 6 — Industrialisation. Ne pas rouvrir spontanément le cycle correctif graphique.
 
 Dans la phase active, suivre également l’ordre des lots numérotés lorsqu’il existe. Mettre à jour les checkboxes de `docs/refactor-plan.md` et `docs/web-implementation-plan.md` immédiatement après implémentation et vérification. Les migrations restent découpées par domaine pour maîtriser le risque, mais chaque domaine est remplacé proprement sans période de coexistence avec son implémentation legacy.
 

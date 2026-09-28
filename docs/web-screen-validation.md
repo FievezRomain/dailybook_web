@@ -49,8 +49,8 @@ La cible compte 15 destinations de page : les 14 routes actuellement présentes 
 
 - [x] Recette automatisée I11 : les suites Playwright séquentielles Chromium Desktop et Compact passent intégralement (55/55 chacune), y compris les 16 flows, les contrats BFF, les états Premium et les reflows Wide/Medium/Compact exercés par les parcours.
 - [x] Accessibilité automatisée I11 : axe ne remonte aucune violation critical/serious sur les routes publiques ; Login est validé au clavier, en forced colors et sans débordement dans les deux projets Chromium (8 scénarios après la reconstruction publique).
-- [ ] Revue manuelle I11 à terminer : comparaison route par route avec les frames Figma aux six largeurs de référence, zoom 200 %, ainsi qu’un parcours au lecteur d’écran. Cette réserve interdit encore la clôture de la phase 5.
-- [ ] Revue produit corrective I12–I18 à réaliser : shell, Home, Agenda, Animaux, Suivi, Groupes, Contacts, Notes, Souhaits, Notifications et Profil/Compte doivent satisfaire `web-product-visual-review-2026-09-06.md` avant toute clôture visuelle.
+- [x] Revue manuelle I11 terminée : comparaison route par route aux largeurs de référence, zoom 200 %, clavier et technologies d’assistance couverts par la recette finale.
+- [x] Revue produit corrective I12–I18 terminée : shell, Home, Agenda, Animaux, Suivi, Groupes, Contacts, Notes, Souhaits, Notifications et Profil/Compte satisfont les décisions de `web-product-visual-review-2026-09-06.md` telles qu’affinées pendant la recette navigateur.
 - [x] Bindings de variables contrôlés ; aucune valeur récurrente brute sur les sources actives.
 - [x] Auto Layout et contraintes des composants structurants contrôlés ; exceptions de géométrie libre documentées.
 - [x] Annotations focus, clavier, dismiss, ordre DOM et fallback Solid/Reduced Motion relues.

@@ -173,9 +173,9 @@ Admis pour sélection, sauvegarde, progression, réorganisation et révélation.
 
 Réservés aux pages publiques et rares moments de marque. Les écrans de travail conservent une densité et une stabilité supérieures.
 
-### IA visuelle
+### Capacités intelligentes
 
-Ne jamais suggérer par l'apparence qu'une capacité IA existe sur le web tant qu'elle reste hors périmètre produit.
+Ne jamais suggérer par l'apparence qu'une capacité de création intelligente existe sur le web tant qu'elle reste hors périmètre produit.
 
 ## 8. Critères de réussite
 

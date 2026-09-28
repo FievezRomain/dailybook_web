@@ -16,7 +16,7 @@ Le backend est la source de vérité des droits, projections de dates, récurren
 
 ## Premium
 
-Sont Premium : statistiques, création et gestion des groupes, création assistée par IA et notes vocales. Les documents médicaux et le suivi corporel suivent les entitlements définis par le backend.
+Sont Premium : statistiques, création et gestion des groupes, création intelligente et notes vocales. Les documents médicaux et le suivi corporel suivent les entitlements définis par le backend.
 
 Un membre Gratuit d’un groupe actif peut accepter/refuser une invitation, consulter le groupe, proposer ses propres animaux et contribuer selon les permissions métier. La création et la gestion du groupe restent Premium.
 

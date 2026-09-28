@@ -4,7 +4,7 @@
 
 Le fichier séparé [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp) porte désormais les maquettes web et leurs prototypes. Le fichier mobile sert à partager l'identité Vasco, le slogan, les couleurs et l'iconographie, jamais à copier les dimensions ou les gestes du navigateur.
 
-Le backlog détaillé, les décisions produit et les identifiants de production sont définis dans `web-figma-mockup-plan.md`. Au 4 septembre 2026, les lots M0 à M10, les 17 overlays et les 16 flows sont produits et l'audit transversal de handoff est validé. Le fichier est gelé comme source de vérité pour l'implémentation.
+Le backlog détaillé, les décisions produit et les identifiants de production sont définis dans `web-figma-mockup-plan.md`. Au 4 septembre 2026, les lots M0 à M10, les 17 overlays et les 16 flows sont produits et l'audit transversal de handoff est validé. Le fichier reste la référence historique des maquettes ; la revue produit navigateur du 6 septembre et ses affinements acceptés jusqu’au 19 septembre 2026 priment lorsqu’ils la contredisent. Le cycle correctif I12–I18 est clôturé sans exiger une resynchronisation préalable de Figma.
 
 ## 2. Sources de vérité futures
 

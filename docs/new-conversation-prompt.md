@@ -1,8 +1,8 @@
 # Prompt de reprise de l’implémentation Vasco Web
 
-Copier le bloc ci-dessous dans une nouvelle conversation Codex. Par défaut, la conversation reprend le premier lot non clôturé de `web-implementation-plan.md`. Ne confier qu’un lot ou une tranche verticale cohérente par conversation.
+Copier le bloc ci-dessous dans une nouvelle conversation Codex. Le cycle UX/UI I0–I18 étant clôturé, une nouvelle conversation traite soit une demande de maintenance explicitement fournie, soit une tranche de la phase 6 — Industrialisation.
 
-État de reprise au 6 septembre 2026 : I12, I13 et I14 sont clôturés ; I15 — Animaux et Suivi — est le premier lot ouvert.
+État de reprise au 19 septembre 2026 : I0–I18, I11 et la phase 5 sont clôturés. Aucun lot correctif graphique n’est ouvert ; la phase 6 reste à planifier séparément.
 
 ```text
 Tu reprends l’implémentation de Vasco Web dans :
@@ -18,15 +18,15 @@ Le fichier Figma web validé est :
 https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp
 
 Objectif de cette conversation :
-reprendre le lot actif I12–I18 indiqué dans `docs/web-implementation-plan.md`. I11 reste administrativement ouvert mais sa clôture visuelle est suspendue jusqu'à I18 ; ne pas recommencer sa recette historique avant le cycle correctif.
+traiter la demande de maintenance fournie par l’utilisateur ou, sur demande explicite, une tranche bornée de la phase 6 indiquée dans `docs/refactor-plan.md`. Ne pas rouvrir I0–I18 sans nouvelle régression démontrée ou décision produit explicite.
 
-Si je fournis un objectif plus précis, il doit rester une tranche verticale du lot actif. Ne commence jamais un lot ultérieur simplement parce qu’une partie de son code existe déjà.
+Si je fournis un objectif plus précis, reste strictement dans ce périmètre. Ne lance pas spontanément un chantier d’industrialisation ou une nouvelle refonte visuelle.
 
 Avant toute modification :
 1. Lis complètement `AGENTS.md` et `docs/README.md`.
-2. Lis complètement `docs/refactor-plan.md` et confirme que la phase 5 est la première phase ouverte.
-3. Lis complètement `docs/web-implementation-plan.md` et identifie le lot correctif actif I12–I18.
-4. Lis complètement `docs/web-product-visual-review-2026-09-06.md` puis `docs/web-visual-correction-matrix.md`. Consulte ensuite Figma uniquement pour les comportements non contredits par cette revue ; aucune modification Figma n'est demandée dans I12–I18.
+2. Lis complètement `docs/refactor-plan.md` et confirme que la phase 5 est clôturée et que la phase 6 est la première phase éventuellement ouverte.
+3. Consulte `docs/web-implementation-plan.md` comme historique vérifié de la refonte I0–I18.
+4. Pour une régression graphique, lis `docs/web-product-visual-review-2026-09-06.md` puis `docs/web-visual-correction-matrix.md`. Consulte ensuite Figma uniquement pour les comportements non contredits par les décisions produit plus récentes.
 5. Lis seulement les autres documents routés ci-dessous nécessaires au lot ; ne charge pas toute la documentation ni tout le dépôt.
 6. Inspecte les fichiers de code et tests directement concernés. Utilise `rg` pour localiser les consommateurs.
 7. Vérifie l’état Git et préserve toutes les modifications existantes non liées.
@@ -87,7 +87,7 @@ Rappels produit importants :
 - Maquettes et flows : versions Web et Compact, grandes et lisibles, sans variante V1/V2 concurrente.
 
 Méthode attendue :
-1. Identifie le lot actif et résume uniquement ses cases encore ouvertes.
+1. Identifie la demande de maintenance ou la tranche d’industrialisation explicitement autorisée et résume son périmètre.
 2. Pour I0, établis la matrice Figma/code/tests et la baseline avant toute refonte visuelle.
 3. Pour I12–I18, pars du brief produit prioritaire, puis identifie les composants partagés et les éventuelles frames Figma encore compatibles.
 4. Établis un plan court pour la tranche courante et indique les fichiers probablement concernés.
@@ -98,7 +98,7 @@ Méthode attendue :
 9. Après chaque résultat entièrement vérifié, mets immédiatement à jour les cases de `docs/web-implementation-plan.md`.
 10. Mets aussi `docs/refactor-plan.md` à jour seulement lorsqu’un livrable de phase est réellement terminé.
 11. Ne coche jamais une clôture de lot tant que son critère de sortie n’est pas démontré.
-12. Termine par : résultat, cases cochées, fichiers modifiés, tests exécutés, écarts restant ouverts et prochaine case du lot actif.
+12. Termine par : résultat, documentation éventuellement mise à jour, fichiers modifiés, tests exécutés et écarts restant ouverts.
 
 Critères d’acceptation supplémentaires pour cette conversation :
 [OPTIONNEL — AJOUTER 3 À 8 CRITÈRES MESURABLES]
@@ -132,4 +132,4 @@ Hors périmètre supplémentaire :
 21. I17 — Notes/Souhaits puis Notifications/Profil.
 22. I18 — recette visuelle corrective et clôture I11/phase 5.
 
-Le lot actif prime toujours sur cette suggestion : ne jamais sauter une clôture encore décochée.
+Cette liste reste un historique de découpage. Aucun de ces lots ne doit être rejoué sans régression démontrée ou nouvelle décision produit.

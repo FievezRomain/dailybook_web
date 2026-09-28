@@ -1,8 +1,10 @@
 # 📘 Vasco - Application Web (Front-end)
 
+> Procédure opérationnelle actuelle : [lancement local, Docker et mise en production](docs/mise-en-service.md). Elle prévaut sur les anciennes commandes de ce README.
+
 Bienvenue ! Ce projet contient l'application web **Vasco**, développée avec **Next.js** pour le front-end.
 
-- **Back-end** : Node.js (repo séparé)
+- **Back-end** : Python/FastAPI (repo séparé)
 - **Base de données** : PostgreSQL (via Docker, repo séparé)
 - **Stockage** : S3 (AWS)
 - **Monitoring** : Sentry
@@ -38,10 +40,10 @@ npm install
 
 ### 3. Configuration des variables d'environnement
 
-Copie le fichier `.env.local.example` en `.env` et adapte les valeurs si besoin :
+Copie le fichier `.env.local.example` en `.env.local` et adapte les valeurs si besoin :
 
 ```bash
-cp .env.local.example .env
+cp .env.local.example .env.local
 ```
 
 Vérifie notamment :
@@ -101,9 +103,9 @@ Clône le dépôt back-end (contacte l'équipe si besoin d'accès) :
 ```bash
 git clone https://github.com/FievezRomain/dailybook_srv_javascript.git
 cd dailybook_srv_javascript
-npm install
-npm install -g nodemon
-nodemon
+python -m venv .venv
+pip install -e ".[dev]"
+python -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
 ---

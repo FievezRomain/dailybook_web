@@ -108,6 +108,13 @@ Le desktop peut exposer `Objectifs` et `Statistiques` sous `Suivi`, mais ne reno
 - `e2e/home-agenda-i14.spec.ts` vérifie la migration du stockage, le déplacement et le redimensionnement réels sans mode intermédiaire, la position des poignées, le parcours géolocalisation → météo affichée, la modale de filtres intégrée au calendrier, l'absence du total supérieur, le padding de recherche, leur remise à zéro, la sélection souris/clavier, l'absence des CTA Agenda redondants, les quatre largeurs de référence et Reduced Motion.
 - Barrière technique : Vitest 103 fichiers/312 tests, lint sans avertissement, typecheck, build Next 16.3.2 et Playwright Chromium I14 1/1 verts.
 
+## Clôture I15–I18
+
+- I15 : le workspace Animaux, le carnet de santé paginé et recherchable, les Objectifs et les Statistiques ont été recomposés et validés avec leurs états Gratuit/Premium et leurs visualisations métier.
+- I16 : Groupes et Contacts utilisent respectivement une exploration maître/détail et un répertoire alphabétique dense, avec permissions et navigation accessibles conservées.
+- I17 : Notes, Souhaits, Notifications et Profil/Compte ont été recomposés ; Markdown, masonry, activité, abonnement, sécurité du compte et préférences quotidiennes sont couverts.
+- I18 : la recette fonctionnelle et visuelle a été déclarée terminée par le produit le 19 septembre 2026. Les tests applicables sont terminés, le build de production Next 16.3.2 est vert et le nettoyage final a retiré les reliquats SCSS, assets d’exemple, dépendance Sass et dossiers vides identifiés par l’audit.
+
 ## Traçabilité retour → lot
 
 | Retour produit | Cible principale | Lot | Validation minimale |

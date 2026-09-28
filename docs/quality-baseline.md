@@ -11,6 +11,8 @@ La baseline couvre les pages publiques `/`, `/login` et `/register`. Les parcour
 - `npm test` : tests unitaires et composants Vitest ;
 - `npm run test:coverage` : couverture avec seuil cible de 70 % ;
 - `npm run test:a11y` : axe sur desktop Chromium et viewport mobile ;
+- `npm run test:security` : en-têtes CSP et sécurité des réponses HTML/API ;
+- `npm run test:visual` : comparaison des onze destinations privées avec la référence graphique courante ;
 - `npm run test:performance` : budgets Playwright de durée de chargement et de transfert réseau ;
 - `npm run test:e2e` : suite Playwright complète.
 
@@ -19,12 +21,23 @@ La baseline couvre les pages publiques `/`, `/login` et `/register`. Les parcour
 | Axe | Seuil bloquant |
 |---|---|
 | Tests | aucun test en échec |
-| Couverture cible | 70 % lignes, fonctions, branches et statements |
-| Accessibilité axe | aucune violation `critical` ou `serious` |
+| Couverture bloquante | 70 % lignes/statements/branches/fonctions (baseline auditée, jamais à abaisser) |
+| Accessibilité axe | aucune violation structurelle `critical` ou `serious` ; le contraste de la palette de référence reste suivi séparément |
 | Chargement local Playwright | moins de 5 s |
 | Transfert des ressources | moins de 3 Mo par page |
 
-La couverture globale est une cible de refonte et non un résultat déjà atteint : elle devient bloquante lorsque les domaines migrés remplacent le legacy. Chaque nouveau domaine doit respecter le seuil sans abaisser la configuration.
+La couverture globale est désormais bloquante en CI. Chaque nouveau domaine doit respecter le seuil homogène de 70 % sans abaisser la configuration.
+
+## Automatisation courante — 19 septembre 2026
+
+La CI `Web quality` exécute désormais deux barrières successives sur les pull requests ainsi que sur `main` et `develop` :
+
+1. lint, typecheck, couverture Vitest bloquante, compatibilité Firebase Admin, build de production et audit des dépendances de production au niveau `high` ;
+2. suite Playwright complète sur Chromium desktop et mobile, incluant les parcours authentifiés, l’accessibilité structurelle, les budgets réseau, les en-têtes de sécurité et la régression visuelle.
+
+La référence visuelle est l’interface actuelle validée de l’application. Elle comprend 22 captures versionnées — onze destinations privées aux formats 1280 × 720 et 1440 × 900 — avec date figée et animations neutralisées. Une différence supérieure à 1 % des pixels fait échouer la CI. La mise à jour volontaire s’effectue avec `npx playwright test e2e/visual-correction-baseline.spec.ts --project=chromium --update-snapshots` après validation graphique.
+
+État vérifié : 134 fichiers et 417 tests Vitest réussis, couverture globale de 75,75 % des lignes/statements, 73,46 % des branches et 70,34 % des fonctions. L’audit de production ne contient plus de vulnérabilité élevée ou critique ; les deux alertes modérées restantes sont transitives dans la chaîne Google `gaxios`/`uuid`.
 
 ## Baseline technique observée
 
@@ -37,7 +50,8 @@ La couverture globale est une cible de refonte et non un résultat déjà attein
 - Lighthouse, médiane de trois passages : `/` performance 0,71, accessibilité 0,95, bonnes pratiques 0,96 ; `/login` 0,90/0,96/0,96 ; `/register` 0,72/0,96/0,96.
 - La page `/` présente un LCP anormal d’environ 48,6 s. `/register` présente une médiane proche de 4,9 s, contre environ 2,8 s pour `/login`.
 - Lighthouse relève également des erreurs console, du JavaScript inutilisé/legacy, des ressources bloquantes et l’absence de métadonnées. Ces résultats constituent la dette initiale ; ils ne sont pas masqués par la configuration.
-- L’audit npm après installation de la baseline annonçait 41 vulnérabilités, dont 7 critiques et 20 élevées. Après mise à niveau, retrait de Lighthouse CI et actualisation compatible du 24 août 2026, il ne reste aucune vulnérabilité critique ou élevée en production ; 6 modérées transitives subsistent dans la chaîne Google Cloud de Firebase Admin. Elles proviennent notamment de `uuid@9`, imposé par les plages majeures de `gaxios` et `teeny-request` : `npm audit` propose à tort une rétrogradation de Firebase Admin 14.3 vers 10.3. Aucun override de major non supporté n’est appliqué.
+- L’audit npm après installation de la baseline annonçait 41 vulnérabilités, dont 7 critiques et 20 élevées. Après mise à niveau, retrait de Lighthouse CI et actualisation compatible du 24 août 2026, il ne restait plus que 6 modérées transitives dans la chaîne Google Cloud de Firebase Admin.
+- Nouvel état au 19 septembre 2026 : `npm audit --omit=dev` remonte 8 vulnérabilités de production — 6 modérées dans la chaîne Google Cloud/Firebase Admin, 1 élevée sur Sharp/libheif et 1 critique sur Next.js 16.3.2. Des correctifs sont annoncés pour Next.js et Sharp ; leur application constitue une tranche dédiée de la phase 6 et impose une nouvelle recette complète. Aucun `npm audit fix --force` ni override de major non supporté n’est appliqué pendant la clôture UX/UI.
 
 ESLint 9 utilise la configuration flat native de Next 16. La remise en service a corrigé les violations d’ordre des hooks et les assertions optionnelles dangereuses. Les 117 avertissements legacy restants sont plafonnés en CI et leurs exceptions sont limitées à des fichiers nommés dans `eslint.config.mjs` ; une nouvelle erreur ou un avertissement supplémentaire échoue la livraison.
 

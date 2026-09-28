@@ -156,12 +156,12 @@ Ordre recommandé :
    - [x] Fournir les hooks TanStack Query v5 pour lecture globale/individuelle, suppression, recalcul du badge et synchronisation de la préférence avec le cache utilisateur.
    - [x] Couvrir les contrats BFF par 10 tests ciblés et une suite web globale verte à 101 tests ; vérifier 8 scénarios backend Notifications/Préférences ciblés.
    - Aucun écran ou composant Notifications n’existe dans le shell web historique ; leur création visuelle, l’accès global et les états vide/erreur restent volontairement hors phase 2 et relèvent des phases Architecture frontend puis UX/UI web.
-8. [x] Statistiques ; IA et voix reportées par décision produit.
+8. [x] Statistiques ; création intelligente et voix reportées par décision produit.
    - [x] Aligner les sept types statistiques, la requête animaux/période et les deux familles de réponses FastAPI sur des schémas runtime stricts.
    - [x] Exposer `POST /api/statistics/[type]` avec validation du type, des identifiants, des dates, CSRF et préservation de l’erreur `PREMIUM_REQUIRED`.
    - [x] Fournir une API et un hook TanStack Query génériques, typés par type statistique, avec cache de dix minutes et requête désactivée sans animal.
    - [x] Corriger l’adaptateur backend mémoire pour qu’il respecte les formes PostgreSQL `statistic[]` ou `statistic/history`, puis vérifier autorisation animale et gate Premium.
-   - [x] Ne pas exposer l’IA de création ni les notes vocales/audio sur le web, conformément à la décision produit du 24 août 2026 ; leur éventuelle activation nécessitera un lot distinct.
+   - [x] Ne pas exposer la création intelligente ni les notes vocales/audio sur le web, conformément à la décision produit du 24 août 2026 ; leur éventuelle activation nécessitera un lot distinct.
    - [x] Couvrir le contrat BFF par 6 tests ciblés, vérifier 13 scénarios backend Statistiques/Premium, puis valider les suites globales à 106 tests web et 234 tests backend.
    - L’écran web Statistiques n’existe pas encore malgré son lien historique de navigation ; sa création et l’explication du gate Premium relèvent des phases Architecture frontend puis UX/UI web.
 
@@ -248,14 +248,14 @@ Critère de sortie : une feature peut être testée sans monter tous les provide
   - [x] Centraliser les libellés métier et le parcours en deux temps : explication contextualisée, puis comparatif Gratuit/Premium avec accès au profil.
   - [x] Remplacer les verrous masqués, inertes ou seulement colorés sur les groupes, documents médicaux et photos corporelles par des actions visibles et accessibles.
   - [x] Rafraîchir les entitlements après un refus backend `PREMIUM_REQUIRED`, puis ouvrir le parcours correspondant sans afficher l’erreur brute.
-  - [x] Conserver les exceptions d’un membre Gratuit dans un groupe actif et ne pas exposer sur le web les fonctions IA/voix encore hors périmètre produit.
+  - [x] Conserver les exceptions d’un membre Gratuit dans un groupe actif et ne pas exposer sur le web la création intelligente ou la voix, encore hors périmètre produit.
   - Vérifications : 2 tests Premium communs et 2 scénarios Groupes ciblés ; suite web globale à 155 tests, lint, typecheck et build Next de production sous Node 22.13.0.
 - [x] Notes modernes, voix, souhaits et statistiques.
   - [x] Ajouter les destinations privées `/notes` et `/wishes`, leurs états chargement/vide/erreur, recherche locale, formulaires réutilisant les hooks canoniques, actions `…` et confirmations de perte ou suppression.
   - [x] Conserver les notes en Markdown sous forme de texte sûr, permettre épinglage et tri, et brancher le raccourci global de création sur le vrai formulaire.
   - [x] Gérer les métadonnées et le statut des souhaits, valider les liens HTTP(S), afficher les images présignées et nettoyer un upload orphelin si la mutation métier échoue.
   - [x] Créer `/performances/statistics` avec sélection des animaux et de la période, sept indicateurs, gate Premium commun, états async et résultats accessibles sous forme de graphique accompagné de tables textuelles.
-  - [x] Maintenir la décision produit du 24 août 2026 : ne pas exposer sur le web la note vocale ni la création assistée par IA ; leur activation exigera un lot distinct et des contrats validés.
+  - [x] Maintenir la décision produit du 24 août 2026 : ne pas exposer sur le web la note vocale ni la création intelligente ; leur activation exigera un lot distinct et des contrats validés.
   - Vérifications : 4 scénarios de composants ciblés, suite web globale à 159 tests, lint, typecheck et build Next de production sous Node 22.13.0. Les trois routes privées répondent et redirigent correctement vers `/login` sans session locale ; la revue visuelle authentifiée complète reste rattachée à la phase 5.
 - [x] Météo web via BFF dédié, validée par décision produit du 25 août 2026.
   - [x] Exposer un endpoint privé Next.js `/api/weather` validé ; le navigateur ne contacte jamais directement MET Norway et ne connaît aucune clé météo.
@@ -270,7 +270,9 @@ Critère de sortie : matrice fonctionnelle web/backend documentée et couverte p
 
 ## Phase 5 — Refonte UX/UI web
 
-- [ ] **Clôture de la phase 5** — tous les livrables et le critère de sortie sont vérifiés.
+- [x] **Clôture de la phase 5** — tous les livrables et le critère de sortie sont vérifiés.
+
+État : **phase clôturée le 19 septembre 2026**. Le cycle correctif I12–I18 a été accepté, la recette fonctionnelle et visuelle est terminée et les reliquats de l’ancienne implémentation identifiés par l’audit final ont été supprimés.
 
 - [x] Produire ou valider les maquettes web Vasco.
   - [x] Auditer l'existant sans en faire une référence visuelle dans `docs/web-current-state-audit.md`.
@@ -284,20 +286,37 @@ Critère de sortie : matrice fonctionnelle web/backend documentée et couverte p
   - [x] Valider le corpus de direction web avant production graphique.
   - [x] Créer ou désigner le fichier Figma Web, renseigner son URL et obtenir la validation produit des macro-lots F0 à F5, exécutés par les lots MCP M0 à M10.
 - [x] Construire les fondations, tokens Light/Dark/Accessible et composants communs web dans Figma avant les écrans.
-- [ ] Concevoir puis implémenter le shell, la navigation et le responsive sans reprendre le shell legacy.
-- [ ] Implémenter le langage motion, le contrat Glass/Solid et leurs variantes Reduced Motion/Transparency.
-- [ ] Recomposer les formulaires complexes selon le contexte web.
+- [x] Concevoir puis implémenter le shell, la navigation et le responsive sans reprendre le shell legacy.
+- [x] Implémenter le langage motion, le contrat Glass/Solid et leurs variantes Reduced Motion/Transparency.
+- [x] Recomposer les formulaires complexes selon le contexte web.
   - [x] Recomposer le parcours public connexion, inscription et vérification e-mail avec les primitives partagées, labels programmatiques, erreurs annoncées et mise en page fluide.
     - Vérifications : 5 tests publics ciblés, suite globale à 174 tests, lint, typecheck et build Next 16.3.2 sous Node 22.13.0 ; contrôles visuels à 390, 1024 et 1440 px, dont Dark + Couleurs accessibles.
-- [ ] Standardiser overlays, confirmations et feedback async.
-- [ ] Concevoir et valider le bloc météo responsive : chargement, succès, permission refusée, localisation indisponible, erreur fournisseur et absence de configuration.
-- [ ] Réaliser l’audit WCAG 2.2 AA : clavier, lecteurs d’écran, focus non masqué, contrastes, forced colors, zoom et reflow.
+- [x] Standardiser overlays, confirmations et feedback async.
+- [x] Concevoir et valider le bloc météo responsive : chargement, succès, permission refusée, localisation indisponible, erreur fournisseur et absence de configuration.
+- [x] Réaliser l’audit WCAG 2.2 AA : clavier, lecteurs d’écran, focus non masqué, contrastes, forced colors, zoom et reflow.
 - [x] Consigner la revue produit visuelle post-recette du 6 septembre 2026 et ouvrir le cycle correctif I12–I18, sans modifier les maquettes Figma.
-- [ ] Exécuter I12–I18 : rebaseline, shell/identité, Home/Agenda, Animaux/Suivi, Groupes/Contacts, Notes/Souhaits/Notifications/Profil et recette corrective.
+- [x] Exécuter I12–I18 : rebaseline, shell/identité, Home/Agenda, Animaux/Suivi, Groupes/Contacts, Notes/Souhaits/Notifications/Profil et recette corrective.
+  - [x] Correctif I15 du 17 septembre 2026 : fallback du sélecteur animal aligné sur le mobile avec fond secondaire et initiale pour toute photo absente ou invalide.
+  - [x] Correctif transverse du 17 septembre 2026 : état coché harmonisé sur le marron Vasco `#956540` dans les formulaires, groupes, événements et objectifs.
+  - [x] Correctif transverse du 17 septembre 2026 : calendriers de saisie localisés en français, compactés et contraints aux dimensions du viewport.
+  - [x] Correctif Home du 17 septembre 2026 : événements passés non terminés réintégrés dans la tuile Aujourd’hui avec signalement du retard.
+  - [x] Correctif Home du 17 septembre 2026 : accueil aligné sur le mobile avec prénom et date française en texte libre à gauche, météo à droite, cartes métier empilées et progression sans contour sous Aujourd’hui, incluant les retards non terminés.
+  - [x] Finition Home du 17 septembre 2026 : salutation réduite et alignée sur les cartes, météo compacte sans titre ni bordure, barre de progression calée sur la largeur des cartes événement.
+  - [x] Finition Agenda du 17 septembre 2026 : note du détail événement représentée par cinq étoiles, avec le nombre correspondant à la note coloré comme sur mobile, sans notation textuelle `n/5`.
+  - [x] Finition Agenda du 17 septembre 2026 : croix d’effacement de recherche en couleur primaire marron et panneau latéral basculé en mode Recherche avec tous les événements correspondant aux filtres.
+  - [x] Finition détail événement du 17 septembre 2026 : sous-texte éditorial retiré et valeurs techniques d’état, répétition et rappel traduites en français avant affichage.
+  - [x] Finition filtres Agenda du 17 septembre 2026 : icône `tune` alignée sur le mobile et croix de réinitialisation immédiate affichée dès qu’un critère est actif.
+  - [x] Finition typographique du 17 septembre 2026 : mois et date sélectionnée de l’Agenda commencent par une majuscule ; marque `VASCO` du rail en graisse Medium et couleur Primary comme sur mobile.
+  - [x] Ajustement identité du 17 septembre 2026 : espacement logo–`VASCO` réduit et graisse de marque légèrement renforcée en Semibold.
+  - [x] Recomposition des cartes événement du 17 septembre 2026 : structure mobile avec accent vertical à gauche, date/heure, informations centrales et case de validation à droite.
+  - [x] Finition carte événement du 17 septembre 2026 : lorsqu’un seul animal est lié, son nom apparaît à côté de son avatar comme sur mobile.
+  - [x] Ajustement Home du 17 septembre 2026 : Aujourd’hui et Prochains jours occupent chacun une demi-largeur sur desktop ; Objectifs prend toute la ligne avec une hauteur suffisante pour une carte complète.
+  - [x] Correctif Home du 18 septembre 2026 : disposition 50/50 étendue au breakpoint intermédiaire réellement mesuré après chargement, avec migration des préférences pour éviter le retour visuel à l’empilement.
+  - [x] Alignement création globale du 18 septembre 2026 : menu web synchronisé avec le mobile sur les sept choix, leur ordre, leurs icônes, leurs noms et leurs descriptions.
 
 Critère de sortie : chaque écran validé possède tous ses états et passe la checklist de `web-ux-ui-standards.md`.
 
-Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I12 et I13 sont clôturés ; la barrière active est I14. L'automatisation de la première recette I11 reste acquise, mais l'acceptation visuelle de la phase dépend désormais de la clôture I18.
+Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I0 à I18, I11 et la phase 5 sont clôturés. La prochaine phase éventuelle est la phase 6 — Industrialisation ; elle n’est pas engagée par cette clôture UX/UI.
 
 ## Phase 6 — Industrialisation
 
@@ -307,6 +326,7 @@ Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I12
 - [ ] Monitoring frontend/BFF avec request ID corrélé au backend.
 - [ ] Budgets de performance et taille de bundle.
 - [ ] Revue régulière des dépendances et secrets.
+  - [ ] Traiter l’audit de production du 19 septembre 2026 : corriger l’avis critique Next.js 16.3.2 et l’avis élevé Sharp/libheif, puis rejouer lint, typecheck, tests, build et E2E ; réévaluer séparément les 6 modérées transitives Firebase Admin.
 - [ ] Runbooks de session, upload, indisponibilité backend et rollback.
 
 ## Lots de livraison suggérés
@@ -317,7 +337,7 @@ Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I12
 | B | Animaux, fichiers, événements | Élevé |
 | C | Objectifs, contacts, notes, souhaits | Moyen |
 | D | Groupes, notifications, Premium | Élevé |
-| E | Statistiques, IA, voix | Élevé |
+| E | Statistiques, création intelligente, voix | Élevé |
 | F | Design system et refonte responsive | Moyen |
 
 ## Definition of Done d’un domaine

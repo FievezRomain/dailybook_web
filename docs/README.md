@@ -1,5 +1,7 @@
 # Documentation Vasco Web
 
+État au 19 septembre 2026 : la refonte UX/UI web, la recette I11 et le cycle correctif I12–I18 sont clôturés. `web-implementation-plan.md` constitue désormais l’historique d’exécution ; les futurs travaux relèvent de la maintenance ou de la phase 6 — Industrialisation de `refactor-plan.md`.
+
 ## Ordre de lecture produit et technique
 
 1. [Règles métier](business-rules.md) — décisions communes à tous les clients Vasco.
@@ -9,6 +11,7 @@
 5. [Plan de refonte](refactor-plan.md) — phases, lots et critères de sortie.
 6. [Plan d’implémentation web](web-implementation-plan.md) — backlog exécutable de la phase UX/UI, avec lots, cases à cocher et critères de sortie.
 7. [Prompt de reprise](new-conversation-prompt.md) — modèle borné pour reprendre le premier lot d’implémentation encore ouvert.
+8. [Mise en service](mise-en-service.md) — lancement local, image Docker, déploiement, contrôles et retour arrière.
 
 ## Refonte graphique web
 

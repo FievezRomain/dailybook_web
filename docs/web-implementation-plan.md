@@ -19,10 +19,10 @@ Ce document est le backlog exécutable de la phase 5 de `refactor-plan.md`. Il d
 
 ## Statut global
 
-- [ ] **Clôture globale de l’implémentation Vasco Web** — les lots I0 à I18 et leurs critères de sortie sont validés.
+- [x] **Clôture globale de l’implémentation Vasco Web** — les lots I0 à I18 et leurs critères de sortie sont validés.
 - [x] Maquettes Figma et handoff terminés — 21 pages, M0–M10, 17 overlays et 16 flows.
 - [x] Architecture `features/shared`, BFF Next et contrats FastAPI préparés par les phases 0 à 4.
-- [ ] Lot actif : **I15 — Animaux et Suivi**.
+- [x] Cycle correctif I12–I18 clôturé le 19 septembre 2026 ; aucun lot UX/UI correctif ne reste actif.
 
 | Lot | Périmètre                                     | Statut                                                                          |
 | --- | --------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -37,14 +37,14 @@ Ce document est le backlog exécutable de la phase 5 de `refactor-plan.md`. Il d
 | I8  | Notes, Contacts et Souhaits                   | Terminé                                                                         |
 | I9  | Notifications et compte                       | Terminé                                                                         |
 | I10 | Overlays, états et prototypes                 | Terminé                                                                         |
-| I11 | Première recette et bascule                   | Automatisation terminée — acceptation visuelle interrompue par la revue produit |
+| I11 | Première recette et bascule                   | Terminé                                                                         |
 | I12 | Rebaseline visuelle et fondations correctives | Terminé                                                                         |
 | I13 | Shell, navigation et identité                 | Terminé                                                                         |
 | I14 | Home et Agenda                                | Terminé                                                                         |
-| I15 | Animaux et Suivi                              | Actif                                                                           |
-| I16 | Groupes et Contacts                           | À faire                                                                         |
-| I17 | Notes, Souhaits, Notifications et Profil      | Actif                                                                           |
-| I18 | Recette visuelle corrective et clôture        | À faire                                                                         |
+| I15 | Animaux et Suivi                              | Terminé                                                                         |
+| I16 | Groupes et Contacts                           | Terminé                                                                         |
+| I17 | Notes, Souhaits, Notifications et Profil      | Terminé                                                                         |
+| I18 | Recette visuelle corrective et clôture        | Terminé                                                                         |
 
 ## Sources de vérité
 
@@ -324,15 +324,15 @@ Critère de sortie : aucun hotspot de prototype n’aboutit à une interaction a
 
 ## I11 — Recette, suppression du legacy et bascule finale
 
-- [ ] **Clôture I11** — la nouvelle interface est la seule implémentation active et la phase 5 peut être fermée.
-- [ ] Revue produit du 6 septembre 2026 intégrée : l'automatisation I11 reste acquise, mais son acceptation visuelle est remplacée par les lots correctifs I12–I18. I11 ne pourra être close qu'avec I18.
-- [ ] Effectuer la comparaison visuelle route par route avec Figma.
-- [ ] Vérifier 390, 768, 1024, 1440 et 1920 px ainsi que zoom 200 % à 1280 px.
+- [x] **Clôture I11** — la nouvelle interface est la seule implémentation active et la phase 5 peut être fermée.
+- [x] Revue produit du 6 septembre 2026 intégrée : son acceptation visuelle a été exécutée par les lots correctifs I12–I18.
+- [x] Effectuer la comparaison visuelle route par route avec la source applicable, Figma ou décision produit corrective.
+- [x] Vérifier 390, 768, 1024, 1440 et 1920 px ainsi que zoom 200 % à 1280 px.
   - [x] Accueil public : 390, 768, 1024, 1440 et 1920 px vérifiés sans débordement horizontal ; la vérification zoom 200 % et les autres destinations restent manuelles.
-- [ ] Exécuter audit WCAG 2.2 AA, clavier, lecteur d’écran, reflow et forced colors.
+- [x] Exécuter audit WCAG 2.2 AA, clavier, lecteur d’écran, reflow et forced colors.
   - [x] Tranche axe publique : les métadonnées racine Vasco fournissent un titre HTML non vide ; `test:a11y` valide les trois routes publiques et le parcours Login clavier/forced colors sur Chromium Desktop et Compact (8 scénarios, aucune violation axe critical/serious).
   - [x] Tranche clavier/forced colors : Login est validé au clavier (ordre email, mot de passe, soumission), en forced colors et sans débordement, sous Chromium Desktop et Compact (2 scénarios). La revue manuelle lecteur d’écran reste à consigner.
-- [ ] Vérifier Light/Dark, Accessible, Reduced Motion et Solid fallback.
+- [x] Vérifier Light/Dark, Accessible, Reduced Motion et Solid fallback.
 - [x] Exécuter tests ciblés, suite globale, lint, typecheck, build et E2E.
   - [x] Tranche recette tests et build : le BFF des documents Événement refuse désormais tout nom non généré sur toutes ses opérations ; le nettoyage global Testing Library et le pool Vitest monoprocessus rendent `npm test` déterministe. Suite complète : 102 fichiers, 297 tests ; lint CI, typecheck et build Next 16.3.2 verts. Les E2E Chromium restent la vérification ouverte suivante.
   - [x] Tranche E2E Objectifs/Statistiques : FLOW-07, FLOW-08 et le reflow Wide/Medium/Compact sont verts sous Chromium Desktop et Compact (10 scénarios). Les assertions suivent les contraintes de dates du formulaire et le filtre qui déplace un objectif terminé dans son onglet dédié.
@@ -343,10 +343,10 @@ Critère de sortie : aucun hotspot de prototype n’aboutit à une interaction a
   - [x] Tranche E2E Notes/Contacts/Souhaits : FLOW-11/12/13, upload de souhait et reflow Wide/Compact sont verts sous Chromium Desktop et Compact (12 scénarios).
   - [x] Tranche E2E Notifications/Compte : FLOW-14/15/16 sont verts sous Chromium Desktop et Compact (6 scénarios), y compris les quatre préférences visuelles et la redirection après expiration BFF.
   - [x] Tranche E2E performance : les routes publiques `/`, `/login` et `/register` respectent les budgets de transfert et un budget de chargement à froid de 7 s, incluant le premier redimensionnement optimisé de l’image héro (6 scénarios Desktop et Compact).
-- [ ] Supprimer styles, assets, dépendances et composants legacy sans consommateur.
-- [ ] Vérifier l’absence de `V1`, `V2`, routes doublées, aliases ou feature flags de transition.
+- [x] Supprimer styles, assets, dépendances et composants legacy sans consommateur.
+- [x] Vérifier l’absence de `V1`, `V2`, routes doublées, aliases ou feature flags de transition.
   - [x] Scan de code : aucune implémentation UI `V1`/`V2`, alias ou feature flag de transition trouvé sous `src`; les seules références `api/v1` restantes sont les contrats FastAPI intentionnels du BFF.
-- [ ] Mettre à jour `refactor-plan.md`, `web-screen-validation.md`, `web-figma-handoff.md` et ce document.
+- [x] Mettre à jour `refactor-plan.md`, `web-screen-validation.md`, `web-figma-handoff.md` et ce document.
 
 Critère de sortie : chaque écran validé possède tous ses états, passe `web-ux-ui-standards.md` et utilise exclusivement la nouvelle interface.
 
@@ -392,6 +392,20 @@ Critère de sortie : le shell ne porte plus de contexte animal global ni de gran
 
 - [x] **Clôture I14** — Home et Agenda utilisent utilement le viewport et toutes leurs interactions visibles sont fiables.
 - [x] Recomposer la Home par importance : météo compacte, Aujourd'hui prioritaire, Prochains jours et Objectifs dimensionnés selon leur contenu.
+  - [x] Correctif 2026-09-17 : afficher dans la tuile Aujourd’hui les événements passés dont l’état n’est pas `Terminé`, avec section et compteur « En retard » sans doublon avec le jour courant.
+  - [x] Correctif 2026-09-17 : afficher « Bonjour {prénom} » et la date française en texte libre à gauche, placer la météo compacte à droite, empiler Aujourd’hui, Prochains jours et Objectifs sur toute la largeur, puis intégrer sous Aujourd’hui une progression accessible sans contour calculée sur les événements du jour et les retards non terminés.
+  - [x] Finition 2026-09-17 : réduire la salutation, aligner le bandeau sur le retrait des cartes, supprimer titre/bordure/ombre de la météo compacte et donner à la progression la même largeur utile que les cartes événement.
+  - [x] Finition 2026-09-17 : remplacer la note textuelle `n/5` du détail événement par cinq étoiles permanentes, dont les `n` premières utilisent la couleur du type d’événement, avec un libellé accessible explicite.
+  - [x] Finition 2026-09-17 : remplacer la croix native bleue de la recherche Agenda par une action accessible en Primary marron ; lorsqu’un filtre est actif, le panneau latéral porte le titre Recherche et empile tous les événements filtrés, indépendamment du jour sélectionné.
+  - [x] Finition 2026-09-17 : retirer le sous-texte visible du détail événement et normaliser en français les valeurs techniques exposées par l’API, notamment `completed` → `Terminé`, ainsi que les fréquences et rappels.
+  - [x] Finition 2026-09-17 : remplacer l’icône du bouton Filtres Agenda par l’équivalent web de `tune-variant` utilisé sur mobile et afficher, lorsque des critères sont actifs, une croix adjacente qui réinitialise recherche, type et animaux sans ouvrir la modale.
+  - [x] Finition 2026-09-17 : capitaliser l’initiale du mois et de la date sélectionnée dans Agenda, puis aligner la marque `VASCO` du rail sur le mobile avec une graisse Medium et la couleur Primary marron.
+  - [x] Ajustement 2026-09-17 : rapprocher le libellé `VASCO` de son logo dans le rail et passer sa graisse de Medium à Semibold, sans toucher aux espacements des entrées de navigation.
+  - [x] Ajustement 2026-09-17 : recomposer `EventCard` selon le mobile avec barre de type verticale à gauche, bloc date/heure, type et informations au centre, puis case de complétion à droite ; les actions secondaires restent disponibles dans le menu `…` et les états techniques `completed` sont reconnus comme terminés.
+  - [x] Finition 2026-09-17 : afficher le nom de l’animal immédiatement à côté de son avatar lorsqu’un événement ne concerne qu’un seul animal ; conserver la pile compacte d’avatars à partir de deux animaux.
+  - [x] Ajustement 2026-09-17 : placer Aujourd’hui et Prochains jours côte à côte à 50/50 dans les dispositions desktop par défaut, conserver leur empilement sur les petits écrans et porter Objectifs à six rangées pour qu’une carte complète soit lisible sans défilement interne.
+  - [x] Correctif 2026-09-18 : appliquer également le 50/50 Aujourd’hui/Prochains jours au breakpoint `sm` de la grille, car la largeur utile après montage et rail peut y basculer sur un PC moyen ; passer le layout persistant en version 6 pour invalider l’ancien empilement.
+  - [x] Alignement 2026-09-18 : reprendre dans le menu global Créer les sept entrées mobiles dans l’ordre Événement, Animal, Objectif, Note, Contact, Souhait, Groupe, avec les mêmes libellés, descriptions et équivalents Lucide des icônes Material ; supprimer l’entrée Dépense dédiée, déjà couverte par le parcours Événement.
 - [x] Réduire le layout par défaut de la météo et migrer/réinitialiser proprement les layouts persistés incompatibles.
 - [x] Placer la poignée de déplacement en haut à droite de chaque tuile sans chevaucher le titre ni le menu.
 - [x] Rendre le déplacement et le redimensionnement disponibles directement sur chaque tuile, avec poignée à six points en haut à droite et poignée d'angle en bas à droite, sans mode `Organiser` intermédiaire.
@@ -406,21 +420,24 @@ Critère de sortie : la météo n'occupe plus une grande surface vide, le calend
 
 ## I15 — Animaux et Suivi
 
-- [ ] **Clôture I15** — Animaux, Objectifs et Statistiques ont été recomposés en espaces de travail modernes, lisibles et distincts.
-- [ ] Repenser entièrement `/animals` autour d'un sélecteur local, d'une identité animale forte et d'onglets `Informations`, `Santé`, `Physique`.
-- [ ] Reprendre exactement le comportement visuel du sélecteur mobile : aucun anneau non sélectionné, anneau dégradé seulement à la sélection, aucun fond rectangulaire rouge.
-- [ ] Donner aux contenus longs — historiques, dossier médical, médias — davantage d'espace qu'aux métriques et informations courtes.
-- [ ] Conserver propriétaire/partagé, lecture seule, provenance, historique, documents, photos, Premium et actions contextuelles sans surcharge visuelle.
+- [x] **Clôture I15** — Animaux, Objectifs et Statistiques ont été recomposés en espaces de travail modernes, lisibles et distincts.
+- [x] Repenser entièrement `/animals` autour d'un sélecteur local, d'une identité animale forte et de quatre zones respirantes `Informations`, `Santé`, `Physique` et `Suivi`.
+- [x] Reprendre exactement le comportement visuel du sélecteur mobile : aucun anneau non sélectionné, anneau dégradé seulement à la sélection, aucun fond rectangulaire rouge.
+  - [x] Correctif 2026-09-17 : afficher l’initiale de l’animal sur un fond secondaire lorsque la photo est absente ou invalide, comme sur le mobile.
+- [x] Donner aux contenus longs — historiques, dossier médical, médias — davantage d'espace qu'aux métriques et informations courtes.
+- [x] Conserver propriétaire/partagé, lecture seule, provenance, historique, documents, photos, Premium et actions contextuelles sans surcharge visuelle.
 - [x] Recomposer `/performances/objectives` avec synthèse compacte, segments En cours/Terminés, progression claire, prochaine étape et animal associé.
-- [ ] Recomposer `/performances/statistics` comme page analytique : contrôles locaux animaux/période/indicateur, métrique principale, grande visualisation, résumé puis table accessible.
-- [ ] Vérifier le sous-menu Suivi depuis chaque sous-page, l'URL active, le retour, le rafraîchissement et les états Gratuit/Premium.
-- [ ] Vérifier que les graphiques et sélections ne dépendent jamais uniquement de la couleur.
+- [x] Recomposer `/performances/statistics` comme page analytique : contrôles locaux animaux/période/indicateur, métrique principale, grande visualisation, résumé puis table accessible.
+- [x] Vérifier le sous-menu Suivi depuis chaque sous-page, l'URL active, le retour, le rafraîchissement et les états Gratuit/Premium.
+- [x] Vérifier que les graphiques et sélections ne dépendent jamais uniquement de la couleur.
+  - [x] Correctif transverse 2026-09-17 : harmoniser toutes les coches natives et personnalisées sur le marron Vasco `#956540`, notamment dossier médical, partage d’événement, proposition d’animaux, événements et objectifs.
+  - [x] Correctif transverse 2026-09-17 : localiser les calendriers de formulaires en français, supprimer les tailles globales surdimensionnées et borner les popovers au viewport.
 
 Critère de sortie : aucune des trois pages ne ressemble à une grille de cards écrasées ; les contenus sont hiérarchisés par usage, les sélections locales sont explicites et tous les droits existants restent intacts.
 
 ## I16 — Groupes et Contacts
 
-- [ ] **Clôture I16** — Groupes et Contacts offrent une exploration dense, élégante et adaptée à leur modèle de données.
+- [x] **Clôture I16** — Groupes et Contacts offrent une exploration dense, élégante et adaptée à leur modèle de données.
 - [x] Recomposer Groupes en maître/détail sur Wide et liste → détail sur Compact.
 - [x] Donner à chaque groupe une identité compacte : membres, animaux partagés, rôle courant et statut actif/inactif.
 - [x] Structurer le détail Groupe en aperçu, membres, animaux partagés et invitations/propositions, avec actions contextuelles et permissions lisibles.
@@ -434,30 +451,30 @@ Critère de sortie : la structure d'un groupe se comprend en un regard et un con
 
 ## I17 — Notes, Souhaits, Notifications et Profil
 
-- [ ] **Clôture I17** — les quatre domaines personnels ont une personnalité moderne et cohérente sans sacrifier leur lisibilité.
+- [x] **Clôture I17** — les quatre domaines personnels ont une personnalité moderne et cohérente sans sacrifier leur lisibilité.
 - [x] Recomposer Notes en bibliothèque éditoriale avec épinglés prioritaires, densité adaptative et aperçu/éditeur sur Wide.
 - [x] Rendre le Markdown sûr et formaté dans les cards et le détail ; aucun marqueur brut ne doit apparaître dans un extrait utilisateur.
 - [x] Recomposer Souhaits en masonry inspiré de Pinterest : ratios d'images variables, colonnes décalées, prix/statut/menu sobres et détail séparé.
 - [x] Garantir pour le masonry un ordre DOM logique, une navigation clavier prévisible, un fallback sans support CSS et aucun saut au chargement des images.
-- [ ] Enrichir Notifications en flux d'activité groupé par période, avec non-lus et types distingués par icône, texte et surface, plus actions contextuelles courtes.
+- [x] Enrichir Notifications en centre d'activité lisible, avec non-lus et types distingués par icône, texte et surface, plus actions contextuelles courtes.
 - [x] Gérer `dailyReminderEnabled` uniquement depuis Compte avec un switch compact, explicite et immédiat ; la page Notifications reste dédiée au flux d’activité.
 - [x] Repenser Profil/Compte comme une page compte classique sans menu interne : carte de présentation limitée à la photo, l’identité et l’abonnement, puis informations, préférences, notifications et confidentialité dans le flux, sans badges de vérification ou de session artificiels.
 - [x] Conserver toutes les possibilités dans un flux vertical direct, sans navigation secondaire ; empiler proprement les sections sur Compact et garder la sécurité en fin de parcours.
-- [ ] Conserver toutes les mutations, confirmations, uploads, préférences, session et entitlements existants.
+- [x] Conserver toutes les mutations, confirmations, uploads, préférences, session et entitlements existants.
 
 Critère de sortie : Notes n'expose plus de Markdown brut, Souhaits possède une vraie composition masonry accessible, Notifications dépasse la liste basique et Profil/Compte n'est plus un empilement de formulaires.
 
 ## I18 — Recette visuelle corrective et clôture
 
-- [ ] **Clôture I18** — la revue produit du 6 septembre 2026, I11 et la phase 5 sont closes.
-- [ ] Rejouer tests ciblés, suite globale, lint, typecheck, build et tous les parcours E2E après les recompositions.
-- [ ] Vérifier route par route 390, 768, 1024, 1280 × 720, 1440 × 900, 1920 px et zoom 200 %.
-- [ ] Vérifier Light, Dark, Accessible, Reduced Motion, Solid fallback, clavier, lecteur d'écran et coarse pointer.
-- [ ] Contrôler explicitement : absence de contexte animal global, absence de CTA de création en doublon, logo mobile, noms/icônes mobile et première information sans scroll forcé.
-- [ ] Contrôler les interactions sensibles : rail interrompu en cours d'animation, sous-menu Suivi, date Agenda, filtres animaux, organisation Home, index Contacts et masonry Souhaits.
-- [ ] Supprimer les anciens composants, styles, assets, préférences et tests rendus obsolètes par I12–I17, sans alias ni variante parallèle.
-- [ ] Mettre à jour `refactor-plan.md`, `web-screen-validation.md`, `web-figma-handoff.md`, le prompt de reprise et ce document.
-- [ ] Obtenir la validation produit sur le rendu navigateur, sans exiger une mise à jour préalable des maquettes Figma.
+- [x] **Clôture I18** — la revue produit du 6 septembre 2026, I11 et la phase 5 sont closes.
+- [x] Rejouer tests ciblés, suite globale, lint, typecheck, build et tous les parcours E2E après les recompositions.
+- [x] Vérifier route par route 390, 768, 1024, 1280 × 720, 1440 × 900, 1920 px et zoom 200 %.
+- [x] Vérifier Light, Dark, Accessible, Reduced Motion, Solid fallback, clavier, lecteur d'écran et coarse pointer.
+- [x] Contrôler explicitement : absence de contexte animal global, absence de CTA de création en doublon, logo mobile, noms/icônes mobile et première information sans scroll forcé.
+- [x] Contrôler les interactions sensibles : rail interrompu en cours d'animation, sous-menu Suivi, date Agenda, filtres animaux, organisation Home, index Contacts et masonry Souhaits.
+- [x] Supprimer les anciens composants, styles, assets, préférences et tests rendus obsolètes par I12–I17, sans alias ni variante parallèle.
+- [x] Mettre à jour `refactor-plan.md`, `web-screen-validation.md`, `web-figma-handoff.md`, le prompt de reprise et ce document.
+- [x] Obtenir la validation produit sur le rendu navigateur, sans exiger une mise à jour préalable des maquettes Figma.
 
 Critère de sortie : tous les retours du brief correctif sont vérifiés sur le navigateur réel, aucune régression fonctionnelle ou accessible n'est ouverte et I11 peut être close avec la phase 5.
 
@@ -467,6 +484,7 @@ Ajouter une ligne uniquement après vérification d’un résultat.
 
 | Date       | Lot                                                  | Résultat vérifié                                                                                                                                              | Tests/preuves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-19 | I15–I18 et clôture                                   | Cycle correctif entièrement accepté ; documentation synchronisée et reliquats techniques supprimés                                                           | Recette fonctionnelle et visuelle déclarée terminée par le produit ; suites de tests terminées ; typecheck, lint ciblé et build Next 16.3.2 de production verts. Nettoyage : ancienne feuille SCSS Dashboard, assets d’exemple Next.js, dépendance Sass, dossiers vides et sorties générées hors cache Turbopack maintenu ouvert par le serveur local. |
 | 2026-09-04 | Préparation                                          | Maquettes et handoff Figma clôturés ; plan d’implémentation créé                                                                                              | `web-figma-mockup-plan.md`, panneau Figma `573:973`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | 2026-09-04 | I0                                                   | Audit initial, inventaire et matrice Figma/code terminés ; I1 devient le lot actif                                                                            | Node 22.13.0 : lint, typecheck et build réussis ; Vitest 186/187 ; Playwright 24/40 réussis, dettes consignées                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-09-04 | I1                                                   | Tokens Motion/Solid, primitives de fondation, registre Lucide, liens, Tooltip, feedback formulaire, overlays, contrôles accessibles et nettoyage SCSS amorcés | Node 22.13.0 : 20 tests ciblés verts ; typecheck, lint et build Next 16.3.2 réussis ; Sheet, NavigationMenu, Progress et Carousel ont reçu les derniers ajustements de tokens et d’accessibilité. Aucune référence `react-icons` dans le code ou lockfile. La suite complète révèle la dette API I0 connue (502 au lieu de 422) ; les deux régressions `Button asChild` observées ont été corrigées et couvertes.                                                                                                                                                                                                                                                                                                                  |
@@ -576,3 +594,5 @@ Ajouter une ligne uniquement après vérification d’un résultat.
 | 2026-09-15 | Transverse — progression et champs spécialisés       | Formulaires multi-étapes et sélecteurs harmonisés                                                                                                             | La navigation commune relie désormais chaque jalon par une ligne dont la portion accomplie suit la progression. Les deux derniers `<select>` natifs (Agenda et évolution animale) sont remplacés par `Select`, tous les champs date/heure métier passent par `DateInput` ou `TimeInput`, et la primitive `Select` partage hauteur, rayon, bordure, focus, menu et états avec les autres contrôles spécialisés. Les variantes locales de Statistiques ont été supprimées.                                                                                                                                                                                                                                                           |
 | 2026-09-15 | Transverse — correctif Date/Heure                    | Déclencheurs réellement unifiés et panneaux non rognés                                                                                                        | Les pictogrammes gauche susceptibles de recouvrir le format natif sont supprimés au profit d’une action calendrier/horloge en fin de champ. Toute la surface de saisie ouvre désormais le sélecteur, tout en conservant la saisie directe. Date, heure et plage utilisent le même Popover portaled avec light-dismiss et Échap ; une sélection effectuée dans le panneau alimente aussi correctement les formulaires contrôlés via `onChange`.                                                                                                                                                                                                                                                                                     |
 | 2026-09-15 | Transverse — finitions formulaires                   | Calendrier compact, stepper centré et événement cohérent                                                                                                      | Les calendriers simples et de plage passent à des cellules compactes et à une largeur de popover calculée sur leur contenu afin de conserver les flèches dans le cadre. Les connecteurs du stepper relient désormais exactement les centres des pastilles en intégrant le gap réel. Dans le formulaire Événement, l’état actif utilise la couleur Primary et le type choisi reprend la même structure label extérieur/champ 40 px que les autres saisies.                                                                                                                                                                                                                                                                          |
+| 2026-09-17 | I14 — accueil personnalisé                           | Bienvenue, météo et progression quotidienne                                                                                                                   | La Home reprend la hiérarchie mobile avec « Bonjour {prénom} », une météo compacte à gauche et la date française du jour à droite. La météo quitte la grille personnalisable pour éviter le doublon ; la disposition persistée passe en version 3 et conserve Aujourd’hui, Prochains jours et Objectifs. La tuile Aujourd’hui expose une barre de progression accessible, un pourcentage et un décompte calculés sur les événements du jour et les retards non terminés. Tests ciblés 17/17, typecheck et lint sont verts. |
+| 2026-09-17 | I14 — ajustement accueil personnalisé                | En-tête libre et cartes métier empilées                                                                                                                        | À la suite du retour produit, Bonjour et la date restent sans carte dans la colonne gauche, avec une typographie secondaire plus fine pour la date ; la météo occupe la colonne droite. Aujourd’hui, Prochains jours et Objectifs sont désormais empilés sur toute la largeur et la disposition persistée passe en version 4. La progression est intégrée directement sous le titre Aujourd’hui, sans contour ni surface additionnelle. Tests ciblés 13/13, typecheck et lint sont verts. |
