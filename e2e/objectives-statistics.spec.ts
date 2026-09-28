@@ -44,7 +44,7 @@ test.describe('parcours Objectifs et Statistiques', () => {
       await expect(page.getByText('Suivi poids')).toBeVisible()
     await page.getByText('Peser Moka').click()
     await page.getByRole('tab', { name: /Terminés/ }).click()
-    await expect(page.getByText('Toutes les étapes sont accomplies')).toBeVisible()
+    await expect(page.getByText('Objectif atteint')).toBeVisible()
     } finally { await user.cleanup() }
   })
 

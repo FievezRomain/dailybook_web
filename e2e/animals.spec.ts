@@ -73,7 +73,7 @@ test.describe('parcours Animaux', () => {
 
       await page.goto('/animals');
       await expect(page.getByRole('radio', { name: /Aria/ })).toBeChecked();
-      await expect(page.getByText('Vous êtes propriétaire')).toBeVisible();
+      await expect(page.getByLabel('Options animal')).toBeVisible();
       await page.getByLabel('Options animal').focus();
       await page.getByLabel('Options animal').press('Enter');
       await expect(page.getByRole('menuitem', { name: 'Modifier' })).toBeVisible();
@@ -94,7 +94,7 @@ test.describe('parcours Animaux', () => {
       await expect.poll(() => historyInput).toMatchObject({ value: 4.2, unity: 'kg' });
 
       await page.getByRole('radio', { name: /Nox/ }).click();
-      await expect(page.getByText('Partagé via un groupe · lecture seule')).toBeVisible();
+      await expect(page.getByText('Partagé', { exact: true })).toBeVisible();
       await expect(page.getByLabel('Options animal')).toHaveCount(0);
       await expect(page.getByText('Historique partagé en lecture seule.')).toBeVisible();
     } finally {
@@ -111,7 +111,7 @@ test.describe('parcours Animaux', () => {
 
       await page.goto('/animals');
       await page.getByRole('button', { name: 'Créer' }).click();
-      await page.getByRole('button', { name: /Animal.*Nouvelle fiche animale/ }).click();
+      await page.getByRole('button', { name: /^Animal\b/ }).click();
       await expect(page.getByRole('dialog', { name: 'Ajouter un animal' })).toBeVisible();
       await page.locator('input[name="nom"]').fill('Moka');
       await page.getByRole('combobox', { name: 'Espèce *' }).click();
@@ -125,7 +125,7 @@ test.describe('parcours Animaux', () => {
       await expect.poll(() => animals).toContainEqual(expect.objectContaining({
         nom: 'Moka', espece: 'Chat', datenaissance: '2022-05-06', provenance: 'owner',
       }));
-      await expect(page.getByText('Nom : Moka')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Moka', exact: true })).toBeVisible();
     } finally {
       await user.cleanup();
     }
@@ -151,7 +151,7 @@ test.describe('parcours Animaux', () => {
       await expect(page.getByRole('dialog', { name: 'Confirmer la suppression' })).toBeVisible();
       await page.getByRole('button', { name: 'Supprimer', exact: true }).last().click();
       await expect.poll(() => deleted).toBe(true);
-      await expect(page.getByRole('button', { name: 'Ajouter un animal' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Votre espace animaux est prêt' })).toBeVisible();
     } finally {
       await user.cleanup();
     }
@@ -225,7 +225,7 @@ test.describe('parcours Animaux', () => {
       await page.goto('/animals');
       await expect(page.getByRole('alert').filter({ has: page.getByRole('button', { name: 'Réessayer' }) })).toContainText('Indisponible');
       await page.getByRole('button', { name: 'Réessayer' }).click();
-      await expect(page.getByText('Nom : Aria')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Aria', exact: true })).toBeVisible();
       expect(animalRequests).toBeGreaterThanOrEqual(3);
     } finally {
       await user.cleanup();

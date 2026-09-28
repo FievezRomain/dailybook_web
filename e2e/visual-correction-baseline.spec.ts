@@ -1,4 +1,3 @@
-import { mkdir, writeFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
 
 import { createVerifiedFirebaseUser, exchangeIdTokenForSession } from './firebase-auth.fixture'
@@ -56,16 +55,15 @@ async function mockBaselineData(page: Page) {
   })
 }
 
-test('capture la baseline I12 des onze destinations privées', async ({ context, page, request }) => {
+test('les onze destinations privées restent conformes à la référence visuelle', async ({ context, page, request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'La matrice visuelle desktop est exécutée une seule fois.')
   test.setTimeout(240_000)
   const user = await createVerifiedFirebaseUser(request)
-  const outputDirectory = 'docs/baselines/i12'
-  const observations: Array<Record<string, unknown>> = []
 
   try {
+    await page.clock.setFixedTime(new Date('2026-09-19T08:00:00.000Z'))
     await exchangeIdTokenForSession(context, user.idToken)
     await mockBaselineData(page)
-    await mkdir(outputDirectory, { recursive: true })
 
     for (const viewport of viewports) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height })
@@ -95,13 +93,14 @@ test('capture la baseline I12 des onze destinations privées', async ({ context,
           }
         })
 
-        observations.push({ viewport: viewport.name, destination: name, pathname, ...observation })
         expect(observation.horizontalOverflow).toBe(false)
-        await page.screenshot({ path: `${outputDirectory}/${viewport.name}-${name}.png`, fullPage: false })
+        await expect(page).toHaveScreenshot(`${viewport.name}-${name}.png`, {
+          animations: 'disabled',
+          fullPage: false,
+          maxDiffPixelRatio: 0.01,
+        })
       }
     }
-
-    await writeFile(`${outputDirectory}/observations.json`, `${JSON.stringify(observations, null, 2)}\n`, 'utf8')
   } finally {
     await user.cleanup()
   }

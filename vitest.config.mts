@@ -25,6 +25,7 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       thresholds: {
         lines: 70,
+        // Audited baseline: keep this blocking and ratchet it upward as hook/API tests are added.
         functions: 70,
         branches: 70,
         statements: 70,

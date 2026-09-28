@@ -27,7 +27,7 @@ test('les pages reçoivent une CSP avec nonce sans bloquer le runtime Next', asy
   expect(csp).not.toContain("'unsafe-eval'");
   expect(csp).toContain("frame-ancestors 'none'");
   expect(csp).toContain("object-src 'none'");
-  await expect(page.getByRole('heading', { name: 'Content de vous revoir' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ravi de vous retrouver.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible();
   expect(cspViolations).toEqual([]);
 });

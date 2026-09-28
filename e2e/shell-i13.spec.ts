@@ -1,4 +1,3 @@
-import { mkdir, writeFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
 
 import { createVerifiedFirebaseUser, exchangeIdTokenForSession } from './firebase-auth.fixture'
@@ -30,20 +29,18 @@ async function mockShellData(page: Page) {
   })
 }
 
-test('valide le shell I13 sur toutes les destinations privées', async ({ context, page, request }) => {
+test('valide le shell I13 sur toutes les destinations privées', async ({ context, page, request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Ce scénario pilote explicitement tous les formats.')
   test.setTimeout(240_000)
   const user = await createVerifiedFirebaseUser(request)
-  const outputDirectory = 'docs/baselines/i13'
-  const observations: Array<Record<string, unknown>> = []
 
   try {
     await exchangeIdTokenForSession(context, user.idToken)
     await mockShellData(page)
-    await mkdir(outputDirectory, { recursive: true })
 
     for (const viewport of viewports) {
       await page.setViewportSize(viewport)
-      for (const [destination, pathname] of destinations) {
+      for (const [, pathname] of destinations) {
         await page.goto(pathname)
         await page.waitForLoadState('networkidle')
         const title = page.locator('[data-page-title]')
@@ -69,8 +66,6 @@ test('valide le shell I13 sur toutes les destinations privées', async ({ contex
         expect(observation.firstUsefulContentTop, `${viewport.name} ${pathname}`).not.toBeNull()
         expect(observation.firstUsefulContentTop!, `${viewport.name} ${pathname}`).toBeLessThan(viewport.height)
         expect(observation.horizontalOverflow).toBe(false)
-        observations.push({ viewport: viewport.name, destination, pathname, ...observation })
-        await page.screenshot({ path: `${outputDirectory}/${viewport.name}-${destination}.png`, fullPage: false })
       }
     }
 
@@ -103,7 +98,8 @@ test('valide le shell I13 sur toutes les destinations privées', async ({ contex
     const initialBox = await collapse.boundingBox()
     const tracking = page.locator('button[aria-haspopup="menu"]').filter({ hasText: 'Suivi' })
     await expect(tracking).toHaveAttribute('aria-expanded', 'false')
-    await expect(tracking.locator('svg').last()).toHaveClass(/lucide-chevron-right/)
+    await expect(tracking.locator('svg').last()).toHaveAttribute('data-icon-name', 'next')
+    await expect(tracking.locator('svg').last()).toHaveAttribute('data-icon-provider', 'material-community')
     await tracking.click()
     await expect(tracking).toHaveAttribute('aria-expanded', 'true')
     await expect(page.getByRole('menuitem', { name: 'Objectifs' })).toBeVisible()
@@ -136,7 +132,6 @@ test('valide le shell I13 sur toutes les destinations privées', async ({ contex
       return Math.round(rect.left + rect.width / 2)
     }))
     expect(Math.max(...itemCenters) - Math.min(...itemCenters)).toBeLessThanOrEqual(1)
-    await page.screenshot({ path: `${outputDirectory}/1440x900-rail-collapsed.png`, fullPage: false })
     await page.getByRole('button', { name: 'Développer la navigation' }).click()
     await expect(page.locator('aside[data-expanded="true"]')).toBeVisible()
 
@@ -145,9 +140,9 @@ test('valide le shell I13 sur toutes les destinations privées', async ({ contex
     await page.waitForLoadState('networkidle')
     const veryWideTracking = page.getByRole('button', { name: 'Suivi' })
     await expect(veryWideTracking).toHaveAttribute('aria-expanded', 'true')
-    await expect(veryWideTracking.locator('svg').last()).toHaveClass(/lucide-chevron-down/)
+    await expect(veryWideTracking.locator('svg').last()).toHaveAttribute('data-icon-name', 'expand')
+    await expect(veryWideTracking.locator('svg').last()).toHaveClass(/rotate-180/)
     await expect(page.locator('aside').getByRole('link', { name: 'Objectifs' })).toBeVisible()
-    await page.screenshot({ path: `${outputDirectory}/1600x900-objectives-inline-submenu.png`, fullPage: false })
 
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const reducedMotion = await page.locator('aside[data-expanded="true"]').evaluate((element) => {
@@ -157,7 +152,6 @@ test('valide le shell I13 sur toutes les destinations privées', async ({ contex
     expect(reducedMotion.property).not.toMatch(/width|transform/)
     expect(reducedMotion.duration).toBeLessThanOrEqual(0.1)
 
-    await writeFile(`${outputDirectory}/observations.json`, `${JSON.stringify(observations, null, 2)}\n`, 'utf8')
   } finally {
     await user.cleanup()
   }

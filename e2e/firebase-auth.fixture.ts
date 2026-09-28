@@ -1,4 +1,4 @@
-import { APIRequestContext, BrowserContext, expect } from '@playwright/test';
+import { APIRequestContext, BrowserContext, expect, type APIResponse } from '@playwright/test';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -10,13 +10,36 @@ process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 
 type EmulatorSignInResponse = { idToken: string; localId: string };
 
+async function postToAuthEmulator(
+  request: APIRequestContext,
+  endpoint: string,
+  data: Record<string, unknown>,
+) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response: APIResponse = await request.post(
+        `${AUTH_EMULATOR_ORIGIN}/identitytoolkit.googleapis.com/v1/${endpoint}?key=fake-api-key`,
+        { data },
+      );
+      if (response.ok() || attempt === 2) return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 2) throw error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+  }
+  throw lastError;
+}
+
 export async function createVerifiedFirebaseUser(request: APIRequestContext) {
   const email = `vasco-e2e-${crypto.randomUUID()}@example.test`;
   const password = `Vasco-${crypto.randomUUID()}-A1!`;
-  const signUp = await request.post(
-    `${AUTH_EMULATOR_ORIGIN}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key`,
-    { data: { email, password, returnSecureToken: true } },
-  );
+  const signUp = await postToAuthEmulator(request, 'accounts:signUp', {
+    email,
+    password,
+    returnSecureToken: true,
+  });
   expect(signUp.ok()).toBe(true);
   const created = (await signUp.json()) as EmulatorSignInResponse;
 
@@ -24,10 +47,11 @@ export async function createVerifiedFirebaseUser(request: APIRequestContext) {
   const auth = getAuth(app);
   await auth.updateUser(created.localId, { emailVerified: true });
 
-  const signIn = await request.post(
-    `${AUTH_EMULATOR_ORIGIN}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=fake-api-key`,
-    { data: { email, password, returnSecureToken: true } },
-  );
+  const signIn = await postToAuthEmulator(request, 'accounts:signInWithPassword', {
+    email,
+    password,
+    returnSecureToken: true,
+  });
   expect(signIn.ok()).toBe(true);
   const identity = (await signIn.json()) as EmulatorSignInResponse;
 

@@ -31,7 +31,7 @@ test.describe('I9 — compte et préférences d’apparence', () => {
       await stubAccountRequests(page);
       await page.emulateMedia({ colorScheme: 'light' });
       await page.goto('/profile');
-      await expect(page.getByRole('heading', { name: 'Compte', exact: true })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Mon compte', exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('data-color-vision', 'standard');
 
       const themeToggle = page.getByRole('button', { name: 'Changer de thème' });

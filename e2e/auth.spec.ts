@@ -90,12 +90,12 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.goto('/dashboard');
       await expect(page.getByRole('heading', { name: 'Bienvenue dans votre espace Vasco.' })).toBeVisible();
       await page.getByRole('button', { name: 'Passer cette étape' }).click();
-      await expect(page.getByRole('heading', { name: 'Météo locale' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Utiliser ma position' })).toBeVisible();
       await expect(page.evaluate(() => localStorage.getItem('vasco:onboarding-complete'))).resolves.toBe('true');
 
       await page.reload();
       await expect(page.getByRole('heading', { name: 'Bienvenue dans votre espace Vasco.' })).toHaveCount(0);
-      await expect(page.getByRole('heading', { name: 'Météo locale' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Utiliser ma position' })).toBeVisible();
     } finally {
       await user.cleanup();
     }
@@ -111,8 +111,9 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: 'Nouvel événement' }).click();
-      for (const type of ['Dépense', 'Balade', 'Soins', 'Concours', 'Entraînement', 'Autre', 'Rendez-vous']) {
+      await page.getByRole('button', { name: 'Créer' }).click();
+      await page.getByRole('button', { name: /^Événement\b/ }).click();
+      for (const type of ['Soins', 'Rendez-vous médical', 'Balade', 'Entraînement', 'Concours', 'Dépense', 'Autre']) {
         await expect(page.getByRole('button', { name: new RegExp(type) })).toBeVisible();
       }
     } finally {
@@ -159,9 +160,9 @@ test.describe('cycle de vie Firebase Auth', () => {
 
       await page.goto('/calendar');
       await page.getByRole('button', { name: /Vaccin annuel/ }).click();
-      await expect(page.getByRole('heading', { name: 'Informations générales' })).toBeVisible();
+      await expect(page.getByRole('dialog').getByRole('heading', { name: 'Vaccin annuel' })).toBeVisible();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
-      await expect(page.getByText("Modifier l'événement rendez-vous")).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Modifier rendez-vous médical' })).toBeVisible();
     } finally {
       await user.cleanup();
     }
@@ -190,12 +191,12 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: 'Nouvel événement' }).click();
+      await page.getByRole('button', { name: 'Créer' }).click();
+      await page.getByRole('button', { name: /^Événement\b/ }).click();
       await page.getByRole('button', { name: /Rendez-vous/ }).click();
       await page.locator('input[name="nom"]').fill('Rappel clinique');
       await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByRole('button', { name: 'Tous' }).click();
-      await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByRole('button', { name: 'Créer l’événement' }).click();
 
@@ -240,9 +241,11 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.goto('/calendar');
       await page.getByRole('button', { name: /Soin récurrent/ }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
-      await page.getByLabel('Cette occurrence et les suivantes').check();
       await page.locator('input[name="nom"]').fill('Soin ajusté');
-      await page.getByRole('button', { name: 'Enregistrer' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByLabel('Cette occurrence et les suivantes').check();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByRole('button', { name: 'Enregistrer les modifications' }).click();
 
       await expect.poll(() => updateInput).toMatchObject({
         nom: 'Soin ajusté',
@@ -290,9 +293,11 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.goto('/calendar');
       await page.getByRole('button', { name: /Soin partagé/ }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByLabel('Toute la série').check();
       await page.getByLabel('Écurie Vasco').check();
-      await page.getByRole('button', { name: 'Enregistrer' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByRole('button', { name: 'Enregistrer les modifications' }).click();
 
       await expect.poll(() => updateInput).toMatchObject({
         update_scope: 'series',
@@ -340,9 +345,11 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.goto('/calendar');
       await page.getByRole('button', { name: /Contrôle documenté/ }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
-      await page.getByRole('button', { name: 'Supprimer' }).click();
-      await page.getByRole('button', { name: 'Retirer' }).click();
-      await page.getByRole('button', { name: 'Enregistrer' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByRole('button', { name: 'Retirer' }).first().click();
+      await page.getByRole('dialog', { name: 'Retirer ce document médical ?' }).getByRole('button', { name: 'Retirer' }).click();
+      await page.getByRole('button', { name: 'Enregistrer les modifications' }).click();
 
       await expect.poll(() => updateInput?.documents).toEqual([]);
       await expect.poll(() => deletedDocument).toBe(true);
@@ -392,8 +399,10 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.goto('/calendar');
       await page.getByRole('button', { name: /Contrôle à joindre/ }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
+      await page.getByRole('button', { name: 'Continuer' }).click();
       await page.locator('input[name="documents"]').setInputFiles({ name: 'bilan.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4') });
-      await page.getByRole('button', { name: 'Enregistrer' }).click();
+      await page.getByRole('button', { name: 'Enregistrer les modifications' }).click();
 
       await expect.poll(() => updateInput?.documents).toEqual([filename]);
       await expect.poll(() => uploadCompleted).toBe(true);

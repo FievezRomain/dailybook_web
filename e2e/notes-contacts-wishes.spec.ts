@@ -34,7 +34,6 @@ test.describe('I8 — Notes, Contacts et Souhaits', () => {
       await page.getByRole('button', { name: /Contact/ }).click();
       await page.getByLabel('Nom').fill('Clinique Vasco'); await page.getByLabel('Téléphone').fill('0102030405'); await page.getByLabel('E-mail').fill('clinique@vasco.test');
       await page.getByRole('button', { name: 'Créer le contact' }).click();
-      await page.getByRole('button', { name: /^CV Clinique Vasco/ }).click();
       await expect(page.getByRole('link', { name: /0102030405/ })).toHaveAttribute('href', 'tel:0102030405');
     } finally { await user.cleanup(); }
   });
@@ -49,8 +48,8 @@ test.describe('I8 — Notes, Contacts et Souhaits', () => {
       await page.getByRole('button', { name: 'Créer', exact: true }).first().click();
       await page.getByRole('button', { name: /Souhait/ }).click();
       await page.getByLabel('Nom').fill('Selle'); await page.getByLabel('Lien').fill('https://example.com/selle'); await page.getByRole('button', { name: 'Créer le souhait' }).click();
-      await page.getByRole('button', { name: 'Selle', exact: true }).click();
-      await expect(page.getByRole('link', { name: /Voir le lien marchand/ })).toHaveAttribute('rel', 'noopener noreferrer');
+      await page.getByLabel('Selle', { exact: true }).click();
+      await expect(page.getByRole('link', { name: /Voir le lien/ })).toHaveAttribute('rel', 'noopener noreferrer');
     } finally { await user.cleanup(); }
   });
 

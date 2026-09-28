@@ -71,6 +71,7 @@ test.describe('parcours Groupes et invitations', () => {
       await page.route('**/api/invitations', route => route.fulfill({ json: [] }));
 
       await page.goto('/groups');
+      await page.getByRole('button', { name: /Écurie Vasco/ }).click();
       await expect(page.getByRole('status')).toContainText('Ce groupe est inactif');
       await expect(page.getByRole('status')).toContainText('invitations et partages sont suspendus');
       await expect(page.getByRole('button', { name: /Inviter/ })).toHaveCount(0);
