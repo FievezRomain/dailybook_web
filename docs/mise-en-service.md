@@ -125,6 +125,8 @@ curl -I http://localhost:3000
 
 L’orchestration globale se trouve dans le dépôt `dailybook-project`. Une mise en service complète suit cet ordre :
 
+La version publiée est celle de `package.json`. Après fusion sur `main`, le workflow `Auto Release` crée de manière idempotente le tag `v<version>` et la GitHub Release associée, sans écrire directement dans la branche protégée. Avant une nouvelle livraison, augmenter explicitement la version avec SemVer (`MAJEURE.MINEURE.CORRECTIF`) dans `package.json` et `package-lock.json`.
+
 1. valider les quality gates web et back ;
 2. sauvegarder PostgreSQL et vérifier le plan de restauration ;
 3. publier des images immuables avec un tag de version ou un digest ;
