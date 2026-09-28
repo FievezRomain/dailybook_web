@@ -190,13 +190,13 @@ test.describe('parcours Animaux', () => {
         return route.fulfill({ json: [] });
       });
       await page.route('**/api/files/upload-url', (route) => route.fulfill({ json: {
-        url: 'https://vascoandco-storage.s3.amazonaws.com/upload', fields: {}, filename,
+        url: 'https://storage.example/upload', fields: {}, filename,
       } }));
       await page.route('**/api/files/upload-complete', async (route) => {
         uploadCompleted = route.request().postDataJSON().filename === filename;
         await route.fulfill({ status: 204 });
       });
-      await page.route('https://vascoandco-storage.s3.amazonaws.com/**', (route) => route.fulfill({ status: 204 }));
+      await page.route('https://storage.example/**', (route) => route.fulfill({ status: 204 }));
 
       await page.goto('/animals');
       await page.locator('input[name="image"][accept="image/jpeg,image/png,image/webp"]').setInputFiles({

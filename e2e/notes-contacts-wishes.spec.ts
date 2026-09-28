@@ -61,8 +61,8 @@ test.describe('I8 — Notes, Contacts et Souhaits', () => {
     try {
       await exchangeIdTokenForSession(context, user.idToken); await mockCurrentUser(page);
       await page.route('**/api/wishes', route => route.fulfill({ json: wishes }));
-      await page.route('**/api/files/upload-url', route => route.fulfill({ json: { url: 'https://vascoandco-storage.s3.amazonaws.com/upload', fields: { key: filename }, filename } }));
-      await page.route('https://vascoandco-storage.s3.amazonaws.com/**', async route => { uploads.push({ method: route.request().method(), body: await route.request().postDataBuffer() }); await route.fulfill({ status: 204 }); });
+      await page.route('**/api/files/upload-url', route => route.fulfill({ json: { url: 'https://storage.example/upload', fields: { key: filename }, filename } }));
+      await page.route('https://storage.example/**', async route => { uploads.push({ method: route.request().method(), body: await route.request().postDataBuffer() }); await route.fulfill({ status: 204 }); });
       await page.route('**/api/files/upload-complete', route => route.fulfill({ json: {} }));
       await page.route('**/api/wishes/3', route => route.fulfill({ json: { ...wishes[0], ...(route.request().postDataJSON() as Record<string, unknown>) } }));
       await page.goto('/wishes');

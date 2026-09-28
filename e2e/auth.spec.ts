@@ -381,13 +381,13 @@ test.describe('cycle de vie Firebase Auth', () => {
         await route.fulfill({ json: [{ ...event, ...updateInput }] });
       });
       await page.route('**/api/files/upload-url', (route) => route.fulfill({ json: {
-        url: 'https://vascoandco-storage.s3.amazonaws.com/upload', fields: {}, filename,
+        url: 'https://storage.example/upload', fields: {}, filename,
       } }));
       await page.route('**/api/files/upload-complete', async (route) => {
         uploadCompleted = route.request().postDataJSON().filename === filename;
         await route.fulfill({ status: 204 });
       });
-      await page.route('https://vascoandco-storage.s3.amazonaws.com/**', (route) => route.fulfill({ status: 204 }));
+      await page.route('https://storage.example/**', (route) => route.fulfill({ status: 204 }));
       await page.route(/\/api\/events\/highlights/, (route) => route.fulfill({ json: [] }));
       await page.route('**/api/animals', (route) => route.fulfill({ json: [{ id: 3, nom: 'Aria', provenance: 'owner' }] }));
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
