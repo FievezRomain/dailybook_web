@@ -1,8 +1,18 @@
 name: Build & Push Docker Image
 
 on:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      version:
+        description: Semantic image version without the v prefix
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic image version without the v prefix
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -19,35 +29,33 @@ jobs:
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
       NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
       NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       NEXT_PUBLIC_BUCKET_HOSTNAME: ${{ secrets.NEXT_PUBLIC_BUCKET_HOSTNAME }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract version from tag
-        id: vars
+      - name: Validate version
+        id: version
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          # Le tag est de la forme vX.Y.Z ou vX.Y.Z-rc.N
-          TAG="${{ github.event.release.tag_name }}"
-          VERSION="${TAG#v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-          # Détecte si c'est une prerelease
-          if [[ "$TAG" == *"-rc."* ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+            echo "Invalid application version: $VERSION"
+            exit 1
           fi
 
-          echo "Version: $VERSION (prerelease: ${{ github.event.release.prerelease }})"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Normalize owner (lowercase)
+          if [[ "$VERSION" == *"-rc."* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize owner
         id: owner
-        run: |
-          echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -65,8 +73,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ steps.owner.outputs.owner }}/web-frontend-vasco-service:${{ steps.vars.outputs.version }}
-            ${{ steps.vars.outputs.is_prerelease == 'false' && format('ghcr.io/{0}/web-frontend-vasco-service:latest', steps.owner.outputs.owner) || '' }}
+            ghcr.io/${{ steps.owner.outputs.owner }}/web-frontend-vasco-service:${{ steps.version.outputs.value }}
+            ${{ steps.version.outputs.is_prerelease == 'false' && format('ghcr.io/{0}/web-frontend-vasco-service:latest', steps.owner.outputs.owner) || '' }}
           build-args: |
             NEXT_PUBLIC_FIREBASE_API_KEY=${{ env.NEXT_PUBLIC_FIREBASE_API_KEY }}
             NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
