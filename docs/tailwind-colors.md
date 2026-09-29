@@ -1,234 +1,62 @@
-# 🎨 Tailwind CSS & Gestion des couleurs
+# Thème et tokens web
 
-## Vue d'ensemble
+## Principe
 
-Le projet utilise **Tailwind CSS v4** avec **shadcn/ui** (style `new-york`). Le système de couleurs est entièrement basé sur des **variables CSS** définies dans `src/app/globals.css`, ce qui permet de gérer le **dark mode** et de maintenir une charte graphique cohérente.
+Vasco Web partage l’identité de marque et les rôles sémantiques avec le mobile, mais ses tokens sont implémentés en variables CSS adaptées au navigateur.
 
----
+Les noms historiques liés aux robes animales (`baie`, `rouan`, `isabelle`, etc.) ne doivent pas servir de contrat générique de design system.
 
-## Architecture des couleurs
-
-Le système repose sur **3 couches** de variables CSS qui se complètent :
-
-```
-Couche 1 : Variables "charte" (valeurs RGB brutes)
-    ↓
-Couche 2 : Variables "shadcn" (mappées vers la charte)
-    ↓
-Couche 3 : @theme inline (Tailwind consomme les variables shadcn)
-```
-
-### Couche 1 — Variables de la charte (`--color-*`)
-
-Définies en **valeurs RGB brutes** (sans `rgb()`), ce qui permet de les utiliser avec des opacités dynamiques via `rgba()`.
+## Tokens sémantiques
 
 ```css
 :root {
-    --color-primary: 206, 152, 113;
-    --color-baie: 149, 101, 64;
-    --color-alezan: 206, 152, 113;
-    --color-background: 255, 255, 255;
-    --color-error: 176, 113, 101;
-    /* ... */
-}
-```
-
-> 💡 Les noms de couleurs sont inspirés des **robes de chevaux** : baie, alezan, isabelle, rouan, aubère, palomino, baie-cerise, baie-brun.
-
-**Utilisation directe en CSS/SCSS :**
-
-```css
-color: rgb(var(--color-baie));
-background: rgba(var(--color-alezan), 0.5);
-```
-
-**Utilisation dans les classes Tailwind (valeurs arbitraires) :**
-
-```html
-<p class="text-[rgb(var(--color-baie))]">Texte baie</p>
-<div class="bg-[rgba(var(--color-error),0.08)]">Erreur</div>
-```
-
-### Couche 2 — Variables shadcn (`--background`, `--primary`, etc.)
-
-Ces variables sont mappées vers les couleurs de la charte et utilisent le format **oklch** pour les gris neutres shadcn :
-
-```css
-:root {
-    --background: rgb(var(--color-background-paper));
-    --primary: rgb(var(--color-baie));
-    --secondary: rgb(var(--color-secondary));
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --border: oklch(0.922 0 0);
-    /* ... */
-}
-```
-
-**Utilisation dans les classes Tailwind (via `@theme inline`) :**
-
-```html
-<div class="bg-background text-foreground">...</div>
-<button class="bg-primary text-primary-foreground">...</button>
-<p class="text-muted-foreground">Texte secondaire</p>
-```
-
-### Couche 3 — `@theme inline` (pont vers Tailwind)
-
-Le bloc `@theme inline` dans `globals.css` enregistre les variables CSS comme **couleurs Tailwind natives** :
-
-```css
-@theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-primary: var(--primary);
-    --color-card: var(--card);
-    --color-border: var(--border);
-    --color-baie: var(--baie);
-    --color-rouan: var(--rouan);
-    /* ... */
-}
-```
-
-Grâce à ça, on peut écrire directement :
-
-```html
-<div class="bg-card text-card-foreground border-border">...</div>
-<span class="text-baie">Couleur baie</span>
-```
-
----
-
-## Dark mode
-
-Le dark mode est géré par **`next-themes`** avec l'attribut `class` sur `<html>`.
-
-Le fichier `globals.css` définit un bloc `.dark` qui redéfinit les mêmes variables avec des valeurs adaptées :
-
-```css
-:root {
-    --background: rgb(var(--color-background-paper));  /* clair */
-    --card: oklch(1 0 0);                               /* blanc */
-    --foreground: oklch(0.145 0 0);                     /* quasi-noir */
+  --color-bg-page: ...;
+  --color-bg-surface: ...;
+  --color-bg-elevated: ...;
+  --color-text-primary: ...;
+  --color-text-secondary: ...;
+  --color-border-default: ...;
+  --color-action-primary: ...;
+  --color-action-primary-hover: ...;
+  --color-status-success: ...;
+  --color-status-warning: ...;
+  --color-status-danger: ...;
+  --color-focus-ring: ...;
 }
 
-.dark {
-    --background: rgb(var(--color-background-paper));  /* gris foncé */
-    --card: rgb(var(--color-background));               /* plus foncé */
-    --foreground: oklch(0.985 0 0);                     /* quasi-blanc */
-}
+.dark { /* mêmes rôles, valeurs Dark */ }
 ```
 
-> Les couleurs de la charte (baie, alezan, etc.) restent **identiques** en dark mode — seuls les fonds, textes et bordures changent.
+Les valeurs finales viennent des maquettes web validées. Les tokens mobiles peuvent guider l’identité, pas imposer automatiquement une valeur ou une géométrie au web.
 
-Le toggle est dans `src/components/ModeToggle.tsx` :
+## Modes d’apparence
 
-```tsx
-const { setTheme, resolvedTheme } = useTheme();
-// Bascule entre 'dark' et 'light'
-```
+Les dimensions d’apparence sont indépendantes et cumulables :
 
----
+- luminosité : `light`, `dark` ou préférence système via `next-themes` ;
+- vision des couleurs : `standard` ou `accessible` via `data-color-vision` sur l’élément `html`.
 
-## Comment utiliser les couleurs
+Le mode `accessible` emploie une palette catégorielle inspirée d’Okabe-Ito et renforce les contrastes des actions, statuts, focus et graphiques. La préférence est conservée localement sous la clé `vasco-color-vision` et appliquée avant l’hydratation. Une teinte ne remplace jamais un texte, une icône, une forme, une valeur ou un motif permettant de comprendre l’information.
 
-### ✅ Bonnes pratiques
+Les composants utilisent exclusivement les rôles `primary`, `destructive`, `success`, `warning`, `info`, `muted`, `border`, `ring` et `chart-*`. Ils ne testent jamais le mode accessible et ne choisissent jamais eux-mêmes une palette.
 
-```html
-<!-- Utiliser les variables shadcn via Tailwind -->
-<div class="bg-background text-foreground border-border">...</div>
-<button class="bg-primary text-primary-foreground">...</button>
+Les événements disposent en plus d’aliases métier dédiés, alignés sur l’app mobile : `event-soins` (isabelle), `event-rdv` (baie brun), `event-balade` (baie), `event-entrainement` (aubère), `event-concours` (alezan), `event-depense` (rouan) et `event-autre` (baie cerise). Ces aliases sont utilisés comme accents et surfaces légèrement teintées ; ils ne remplacent jamais le libellé ou l’icône du type. Le mode de vision accessible peut remapper leurs valeurs sans modifier les composants.
 
-<!-- Utiliser les couleurs de la charte avec des valeurs arbitraires -->
-<p class="text-[rgb(var(--color-baie))]">Texte baie</p>
-<div class="bg-[rgba(var(--color-error),0.08)]">Fond erreur léger</div>
+## Échelles communes
 
-<!-- Utiliser les couleurs enregistrées dans @theme inline -->
-<span class="text-baie">Direct via @theme</span>
-```
+- Espacement : `control`, `surface`, `section`, `page-gutter`.
+- Rayons : `control`, `surface`, `overlay`.
+- Élévation : `surface`, `overlay`.
+- Typographie structurante : `page-title`, `section-title`.
 
-### ❌ À éviter
+Les primitives partagées portent ces choix. Une feature ne doit pas recopier la géométrie d’un bouton, d’un champ, d’une carte ou d’un dialogue.
 
-```html
-<!-- Ne JAMAIS mettre de couleurs en dur -->
-<div class="bg-[#956540]">...</div>
-<p style="color: #333">...</p>
+## Règles
 
-<!-- Ne pas utiliser les variables oklch directement -->
-<div class="bg-[oklch(0.145 0 0)]">...</div>
-```
-
-### Utilisation en SCSS
-
-```scss
-// Utiliser les variables CSS
-.my-class {
-    color: var(--foreground);
-    background: var(--card);
-    border: 1px solid var(--border);
-}
-
-// Utiliser les variables charte avec rgb()
-.gradient {
-    background: linear-gradient(
-        135deg,
-        rgba(var(--color-baie), 1),
-        rgba(var(--color-alezan), 1)
-    );
-}
-```
-
----
-
-## Palette complète
-
-### Couleurs de la charte (robes de chevaux)
-
-| Variable | Couleur | RGB | Usage |
-|---|---|---|---|
-| `--color-primary` / `--color-alezan` | 🟫 Alezan | `206, 152, 113` | Couleur principale, accents |
-| `--color-baie` | 🟤 Baie | `149, 101, 64` | CTA, liens, primary shadcn |
-| `--color-baie-brun` | 🟫 Baie-brun | `105, 66, 51` | Titres foncés |
-| `--color-baie-cerise` | 🔴 Baie-cerise | `176, 113, 97` | Destructif léger |
-| `--color-isabelle` | 🟡 Isabelle | `201, 182, 159` | Accents doux |
-| `--color-rouan` | ⚪ Rouan | `211, 204, 201` | Fonds clairs, bordures |
-| `--color-aubere` | 🟠 Aubère | `186, 168, 155` | Info, secondaire |
-| `--color-palomino` | 🟡 Palomino | `246, 230, 206` | Warning |
-| `--color-gris` | ⚪ Gris | `248, 235, 232` | Placeholders |
-
-### Couleurs sémantiques
-
-| Variable | Mapping | Usage |
-|---|---|---|
-| `--color-success` | Alezan | Succès |
-| `--color-info` | Aubère | Information |
-| `--color-warning` | Palomino | Avertissement |
-| `--color-error` | `176, 113, 101` | Erreurs |
-
-### Variables shadcn/ui
-
-| Variable | Usage |
-|---|---|
-| `--background` | Fond de page |
-| `--foreground` | Texte principal |
-| `--card` / `--card-foreground` | Fond et texte des cartes |
-| `--primary` / `--primary-foreground` | Boutons principaux |
-| `--secondary` / `--secondary-foreground` | Boutons secondaires |
-| `--muted` / `--muted-foreground` | Texte discret, labels |
-| `--accent` / `--accent-foreground` | Hover, focus |
-| `--destructive` | Actions destructrices |
-| `--border` | Bordures |
-| `--input` | Bordures d'inputs |
-| `--ring` | Focus ring |
-
----
-
-## Fichiers clés
-
-| Fichier | Rôle |
-|---|---|
-| `src/app/globals.css` | Définition de toutes les variables CSS (light + dark) + `@theme inline` |
-| `tailwind.config.ts` | Enregistrement des couleurs Tailwind (hsl → variables) |
-| `components.json` | Configuration shadcn/ui (style, aliases, baseColor) |
-| `postcss.config.mjs` | Plugin `@tailwindcss/postcss` |
+- Utiliser un rôle sémantique, pas une couleur visuelle dans le nom.
+- Ne pas coder une couleur récurrente dans un composant métier.
+- Les couleurs de catégories d’événements passent par une table contrôlée, jamais par une chaîne utilisateur injectée dans `style`.
+- Vérifier les contrastes WCAG AA dans Light et Dark.
+- Le focus clavier doit être visible sur toutes les surfaces.
+- Un état n’est jamais communiqué uniquement par couleur.
+- Spacing, radius, ombres et typographie possèdent aussi des échelles de tokens.

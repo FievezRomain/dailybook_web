@@ -41,3 +41,10 @@ yarn-error.log*
 export/
 
 firebase-adminsdk.json
+
+# Test and quality reports
+coverage/
+playwright-report/
+test-results/
+.lighthouseci/
+firebase-debug.log

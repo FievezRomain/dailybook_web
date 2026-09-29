@@ -1,0 +1,81 @@
+@layer base {
+    :where(
+        a[href],
+        button:not(:disabled),
+        select:not(:disabled),
+        summary,
+        label[for],
+        label:has(input[type='checkbox']:not(:disabled)),
+        label:has(input[type='radio']:not(:disabled)),
+        [role='button']:not([aria-disabled='true']):not([data-disabled]),
+        [role='link']:not([aria-disabled='true']):not([data-disabled]),
+        [role='tab']:not([aria-disabled='true']):not([data-disabled]),
+        [role='menuitem']:not([aria-disabled='true']):not([data-disabled]),
+        [role='menuitemcheckbox']:not([aria-disabled='true']):not([data-disabled]),
+        [role='menuitemradio']:not([aria-disabled='true']):not([data-disabled]),
+        [role='option']:not([aria-disabled='true']):not([data-disabled]),
+        [role='switch']:not([aria-disabled='true']):not([data-disabled])
+    ) {
+        cursor: pointer;
+    }
+
+    :where(button:disabled, select:disabled, [aria-disabled='true'], [data-disabled]) {
+        cursor: not-allowed;
+    }
+
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    :focus-visible {
+        outline: 3px solid var(--ring);
+        outline-offset: 2px;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    input[type='checkbox'] {
+        accent-color: var(--checkbox-checked);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 100ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 100ms !important;
+        transition-property: opacity, color, background-color, border-color, box-shadow !important;
+    }
+}
+
+@media (forced-colors: active) {
+    * {
+        forced-color-adjust: auto;
+    }
+
+    :focus-visible {
+        outline-color: Highlight;
+    }
+
+    :where(button, input, textarea, select, [role='checkbox'], [role='combobox']) {
+        border-color: ButtonText;
+    }
+
+    [aria-invalid='true'] {
+        outline: 2px solid Mark;
+        outline-offset: 2px;
+    }
+}
+
+@media (prefers-contrast: more) {
+    :focus-visible {
+        outline-width: 4px;
+    }
+
+    :where(button, input, textarea, select, [role='checkbox'], [role='combobox']) {
+        border-width: 2px;
+    }
+}

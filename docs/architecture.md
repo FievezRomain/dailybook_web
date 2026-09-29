@@ -1,185 +1,129 @@
-# 🏗️ Architecture du projet
+# Architecture cible de Vasco Web
 
-## Vue d'ensemble
+## Objectif
 
-L'application **Vasco and co** est une Single Page Application (SPA) construite avec **Next.js 15** (App Router). Elle utilise un pattern **client/serveur hybride** : certaines routes sont des Server Components (layout, pages), d'autres des Client Components (formulaires, interactions).
+Vasco Web est un client du même produit que Vasco Mobile. Il partage avec le mobile les règles métier et le contrat backend, mais possède une architecture de présentation et des interactions adaptées au navigateur.
 
----
+Le front web utilise Next.js comme **Backend For Frontend (BFF)**. Le navigateur ne contacte jamais directement FastAPI : il appelle une route interne `/api/*`, qui authentifie et valide la requête avant de joindre `/api/v1/*` sur le backend Vasco.
 
-## Arborescence des dossiers
-
+```text
+Navigateur
+  -> feature / composant React
+  -> hook de requête
+  -> webApiClient (/api/*)
+  -> Route Handler Next.js (BFF)
+  -> backendApiClient serveur
+  -> FastAPI (/api/v1/*)
+  -> use case métier / repository
 ```
+
+Le BFF réduit l’exposition de l’infrastructure et protège les secrets serveur. Il ne remplace pas les contrôles d’autorisation du backend : toute règle métier sensible reste vérifiée par FastAPI.
+
+## Arborescence cible
+
+```text
 src/
-├── app/                          # App Router Next.js
-│   ├── globals.css               # Styles globaux + variables CSS (thème)
-│   ├── layout.tsx                # Layout racine (html, body, font, Sentry, ClientRoot)
-│   │
-│   ├── (public)/                 # Route group — pages accessibles sans auth
-│   │   ├── layout.tsx            # Layout public (minimal)
-│   │   ├── page.tsx              # Page d'accueil / landing
-│   │   ├── login/                # Page de connexion
-│   │   ├── register/             # Page d'inscription
-│   │   └── verify-email/         # Page de vérification d'e-mail
-│   │
-│   ├── (private)/                # Route group — pages protégées (auth requise)
-│   │   ├── layout.tsx            # Layout privé (providers, sidebar, navbar)
-│   │   ├── dashboard/            # Tableau de bord
-│   │   ├── animals/              # Gestion des animaux
-│   │   ├── calendar/             # Calendrier des événements
-│   │   ├── performances/         # Objectifs & performances
-│   │   │   └── objectives/
-│   │   └── profil/               # Profil utilisateur
-│   │
-│   └── api/                      # API Routes (Server-side)
-│       ├── animals/              # CRUD animaux (proxy vers le back)
-│       ├── contacts/             # CRUD contacts
-│       ├── events/               # CRUD événements
-│       ├── groups/               # CRUD groupes
-│       ├── notes/                # CRUD notes
-│       ├── objectives/           # CRUD objectifs
-│       ├── wishes/               # CRUD souhaits
-│       ├── me/                   # Info utilisateur courant
-│       ├── user/                 # Gestion utilisateur
-│       ├── storage/              # Upload / gestion fichiers S3
-│       └── session/              # Login / Logout (cookie session)
-│
-├── components/                   # Composants React réutilisables
-│   ├── ui/                       # Composants shadcn/ui (Button, Dialog, Drawer, etc.)
-│   ├── layout/                   # PrivateLayout (sidebar + navbar)
-│   ├── animals/                  # Composants liés aux animaux
-│   ├── events/                   # Composants liés aux événements
-│   ├── objectives/               # Composants liés aux objectifs
-│   ├── dashboard/                # Cartes du dashboard (GridCards)
-│   ├── ModeToggle.tsx            # Bascule dark/light mode
-│   ├── ResponsiveAppBar.tsx      # Barre de navigation responsive
-│   └── UserButton.tsx            # Bouton utilisateur (avatar, menu)
-│
-├── context/                      # React Context Providers
-│   ├── UserContext.tsx            # Utilisateur connecté
-│   ├── AnimalContext.tsx          # Liste des animaux
-│   ├── EventContext.tsx           # Liste des événements
-│   ├── ObjectiveContext.tsx       # Liste des objectifs
-│   ├── NoteContext.tsx            # Liste des notes
-│   ├── GroupContext.tsx           # Groupes
-│   ├── ContactContext.tsx         # Contacts
-│   ├── WishContext.tsx            # Souhaits
-│   └── *DeleteContext / *FormDrawerContext  # États UI (modales, drawers)
-│
-├── hooks/                        # Custom React Hooks
-│   ├── useCurrentUser.ts         # Hook pour l'utilisateur courant
-│   ├── useAnimalsData.ts         # Fetching + cache SWR pour les animaux
-│   ├── useEventsData.ts          # Fetching + cache SWR pour les événements
-│   ├── useObjectivesData.ts      # Fetching + cache SWR pour les objectifs
-│   ├── useAnimalForm.ts          # Logique formulaire animal
-│   ├── useEventForm.ts           # Logique formulaire événement
-│   ├── useObjectiveForm.ts       # Logique formulaire objectif
-│   └── ...                       # Autres hooks data (contacts, notes, groups, wishs)
-│
-├── services/                     # Couche service (appels API client-side)
-│   ├── animals.ts
-│   ├── events.ts
-│   ├── objectifs.ts
-│   ├── notes.ts
-│   ├── contacts.ts
-│   ├── groups.ts
-│   ├── wishs.ts
-│   ├── user.ts
-│   ├── user_picture.ts
-│   └── storage.ts
-│
-├── lib/                          # Librairies & utilitaires bas-niveau
-│   ├── firebase.ts               # Config Firebase (client-side)
-│   ├── firebase-admin.ts         # Config Firebase Admin (server-side)
-│   ├── firebaseService.ts        # Helpers Firebase (signIn, register, verifyEmail, etc.)
-│   ├── axios.ts                  # Instance Axios client (intercepteurs, cookie token)
-│   ├── apiBack.ts                # Helper fetch server-side (cookie → back-end)
-│   ├── apiClient.ts              # Instance Axios pour les API Routes internes
-│   ├── utils.ts                  # Utilitaires shadcn (cn, etc.)
-│   └── auth/                     # (réservé, à compléter)
-│
-├── types/                        # Types TypeScript
-│   ├── animal.ts
-│   ├── event.ts
-│   ├── objective.ts
-│   ├── note.ts
-│   ├── contact.ts
-│   ├── group.ts
-│   ├── user.ts
-│   ├── wish.ts
-│   ├── image.ts
-│   └── user_picture.ts
-│
-├── utils/                        # Utilitaires métier
-│   ├── animalsUtils.ts
-│   ├── eventsUtils.ts
-│   ├── goalsUtils.ts
-│   ├── datesUtils.ts
-│   ├── apiUtils.ts
-│   └── s3Utils.ts
-│
-├── styles/                       # Fichiers SCSS
-│   ├── base/                     # Variables & mixins SCSS globaux
-│   │   ├── _variables.scss
-│   │   └── _mixins.scss
-│   ├── components/               # Styles spécifiques aux composants
-│   │   └── dashboard.module.scss
-│   └── pages/                    # Styles spécifiques aux pages
-│       ├── login.module.scss
-│       ├── register.module.scss
-│       ├── dashboard.module.scss
-│       ├── calendar.css
-│       └── welcome.module.scss
-│
-├── theme/                        # Configuration du thème
-│   └── fonts.ts                  # Police Quicksand (Google Fonts)
-│
-├── constants/                    # Constantes globales
-│   └── cookies.ts                # Nom du cookie de session
-│
-└── features/                     # Feature modules (réservé, à compléter)
-    └── auth/
+  app/
+    (public)/
+      login/
+      register/
+      verify-email/
+    (protected)/
+      layout.tsx
+      dashboard/
+      agenda/
+      animals/
+      objectives/
+      statistics/
+      groups/
+      contacts/
+      notes/
+      wishes/
+      notifications/
+      settings/
+    api/
+      auth/
+      animals/
+      events/
+      objectives/
+      statistics/
+      groups/
+      contacts/
+      notes/
+      wishes/
+      notifications/
+      files/
+  features/
+    animals/
+      api/
+      components/
+      hooks/
+      schemas/
+      types/
+      utils/
+    events/
+    objectives/
+    groups/
+    contacts/
+    notes/
+    wishes/
+    notifications/
+    statistics/
+  shared/
+    api/
+      web-api-client.ts
+      backend-api-client.ts
+      api-error.ts
+    auth/
+    components/
+      ui/
+      feedback/
+      forms/
+      layout/
+    config/
+    hooks/
+    schemas/
+    theme/
+    types/
+    utils/
+  test/
+    factories/
+    fixtures/
+    msw/
 ```
 
----
+## Règles de dépendance
 
-## Patterns & conventions
+- `app/` compose les pages, layouts et Route Handlers. Il ne contient pas de logique métier réutilisable.
+- `features/<domaine>` contient l’interface, les hooks et les adaptateurs propres à un domaine.
+- Une feature ne doit pas importer les détails internes d’une autre feature. Les éléments communs passent dans `shared/`.
+- `shared/api/backend-api-client.ts` est exclusivement serveur et porte `import 'server-only'`.
+- Le navigateur ne connaît ni l’URL FastAPI, ni un secret Firebase Admin, ni un credential AWS.
+- Les décisions de droit, de propriété, de Premium et de visibilité restent dans FastAPI.
+- Les données serveur sont gérées exclusivement par TanStack Query v5, pas dupliquées dans des Contexts. Les hooks SWR existants seront supprimés domaine par domaine sans adaptateur de compatibilité.
+- Un store client est réservé aux brouillons, préférences d’interface ou états transverses non serveur.
 
-### Route Groups
+## Responsabilités du BFF
 
-Next.js App Router utilise des **Route Groups** `(public)` et `(private)` :
+Chaque Route Handler doit :
 
-- `(public)` : pages accessibles sans authentification (login, register, verify-email)
-- `(private)` : pages protégées par le middleware d'authentification
+1. vérifier la session web ;
+2. appliquer la protection CSRF sur les mutations ;
+3. valider paramètres et payload avec un schéma ;
+4. appeler une route backend explicitement déclarée ;
+5. transmettre seulement l’identité attendue par FastAPI ;
+6. convertir l’erreur backend vers un format web stable ;
+7. filtrer les champs de réponse si nécessaire ;
+8. ne jamais accepter une URL backend fournie par le client.
 
-Le middleware (`middleware.ts` à la racine) intercepte les requêtes et vérifie le token Firebase dans le cookie de session.
+## Rendu serveur et rendu client
 
-### Couche API (proxy pattern)
+- Utiliser les Server Components pour les pages, layouts et données initiales qui n’exigent pas d’interaction navigateur.
+- Ajouter `use client` au plus près du composant interactif.
+- Les formulaires, drawers, calendriers et mises à jour optimistes sont des composants client.
+- L’accès aux cookies et à Firebase Admin reste côté serveur.
+- Une page protégée vérifie la session dans le layout serveur, indépendamment du middleware.
 
-Le front **ne communique jamais directement avec le back-end**. Il passe par les **API Routes Next.js** (`src/app/api/`) qui servent de proxy :
+## Migration depuis l’existant
 
-```
-Client (React) → API Route Next.js → Back-end Node.js → PostgreSQL
-```
-
-Côté client, les `services/` appellent les API Routes via `apiClient.ts` (Axios, base `/api`).
-Côté serveur (API Routes), `apiBack.ts` forward les requêtes vers le back-end avec le token extrait du cookie.
-
-### State Management
-
-- **Context API** : un provider par entité métier (Animal, Event, Objective, Note, etc.)
-- **SWR** : utilisé dans les hooks (`useAnimalsData`, `useEventsData`, etc.) pour le cache, la revalidation et le fetching déclaratif
-- **UI State** : des contextes dédiés pour les drawers et modales de suppression (`*FormDrawerContext`, `*DeleteContext`)
-
-### Composants UI
-
-- **shadcn/ui** (style `new-york`) : composants de base (Button, Dialog, Drawer, Sheet, Select, etc.)
-- **Tailwind CSS 4** : classes utilitaires pour le layout et le responsive
-- **SCSS Modules** : utilisés uniquement pour les layouts complexes (login, dashboard grid)
-- **Lucide React** : icônes
-
-### Thème & Design System
-
-- Police : **Quicksand** (Google Fonts)
-- Palette de couleurs inspirée des robes de chevaux (baie, alezan, isabelle, rouan, aubère)
-- Variables CSS dans `globals.css` (light + dark mode)
-- Dark mode via `next-themes` (classe `dark` sur `<html>`)
+La migration se fait verticalement par domaine : route BFF, client, schémas, hooks, UI et tests. Les dossiers `context/`, les services historiques et les anciens handlers ne sont supprimés qu’après migration complète du domaine concerné.

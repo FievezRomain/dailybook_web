@@ -1,0 +1,222 @@
+[
+  {
+    "viewport": "1280x720",
+    "destination": "dashboard",
+    "pathname": "/dashboard",
+    "title": "Accueil",
+    "firstUsefulContent": "Coordonner un suivi à plusieursUtilisez Créer pour inviter les personnes de confiance et proposer les animaux dont vous êtes propriétaire. Météo localeVasco uti",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "agenda",
+    "pathname": "/calendar",
+    "title": "Agenda",
+    "firstUsefulContent": "septembre 2026FiltresAujourd’huiLMMJVSD311234567891011121314151617181920212223242526272829301234mercredi 9 septembre0 élémentAucun événement ce jourUtilisez Cré",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "animals",
+    "pathname": "/animals",
+    "title": "Animaux",
+    "firstUsefulContent": "AriaInformations généralesVous êtes propriétaireNom : AriaEspèce : ChatDate de naissance : 2020-01-02Race : Date d’arrivée : Date de départ : Informations suppl",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "objectives",
+    "pathname": "/performances/objectives",
+    "title": "Objectifs",
+    "firstUsefulContent": "SuiviObjectifsDes étapes claires pour avancer avec vos animaux.Créer un objectifEn cours0Progression globale0 %Terminés0En coursTerminésAucun objectif en coursC",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "statistics",
+    "pathname": "/performances/statistics",
+    "title": "Statistiques",
+    "firstUsefulContent": "Analysez les tendances du suivi de vos animaux sur une période choisie. Premium FiltresIndicateurDépensesEntraînementsBaladesPoidsTailleAlimentationConcoursDuAu",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "groups",
+    "pathname": "/groups",
+    "title": "Groupes",
+    "firstUsefulContent": "Partagez le suivi de vos animaux avec les personnes de confiance.Aucun groupe actifVous pouvez accepter une invitation quel que soit votre abonnement.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "contacts",
+    "pathname": "/contacts",
+    "title": "Contacts",
+    "firstUsefulContent": "Votre carnet de professionnels et de contacts utiles. Créer un contactRechercher un contactAucun contactCréez votre premier contact pour commencer.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "notes",
+    "pathname": "/notes",
+    "title": "Notes",
+    "firstUsefulContent": "Capturez vos informations utiles et retrouvez-les rapidement.Rechercher dans les notesAucune noteCréez votre première note pour commencer.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "wishes",
+    "pathname": "/wishes",
+    "title": "Souhaits",
+    "firstUsefulContent": "Centralisez vos idées et marquez celles qui sont réalisées. Nouveau souhaitRechercher dans les souhaitsAucun souhaitAjoutez votre première idée.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "notifications",
+    "pathname": "/notifications",
+    "title": "Notifications",
+    "firstUsefulContent": "0 non lueAucune notificationLes nouvelles invitations et informations apparaîtront ici.PréférencesRappel quotidienRecevoir le récapitulatif quotidien calculé pa",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1280x720",
+    "destination": "profile",
+    "pathname": "/profile",
+    "title": "Profil",
+    "firstUsefulContent": "Profil, préférences et informations de votre espace Vasco.ProfilVotre identité est synchronisée avec votre session sécurisée.CChoisir une photoJPEG, PNG ou WebP",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "dashboard",
+    "pathname": "/dashboard",
+    "title": "Accueil",
+    "firstUsefulContent": "Coordonner un suivi à plusieursUtilisez Créer pour inviter les personnes de confiance et proposer les animaux dont vous êtes propriétaire. Météo localeVasco uti",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "agenda",
+    "pathname": "/calendar",
+    "title": "Agenda",
+    "firstUsefulContent": "septembre 2026FiltresAujourd’huiLMMJVSD311234567891011121314151617181920212223242526272829301234mercredi 9 septembre0 élémentAucun événement ce jourUtilisez Cré",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "animals",
+    "pathname": "/animals",
+    "title": "Animaux",
+    "firstUsefulContent": "AriaInformations généralesVous êtes propriétaireNom : AriaEspèce : ChatDate de naissance : 2020-01-02Race : Date d’arrivée : Date de départ : Informations suppl",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "objectives",
+    "pathname": "/performances/objectives",
+    "title": "Objectifs",
+    "firstUsefulContent": "SuiviObjectifsDes étapes claires pour avancer avec vos animaux.Créer un objectifEn cours0Progression globale0 %Terminés0En coursTerminésAucun objectif en coursC",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "statistics",
+    "pathname": "/performances/statistics",
+    "title": "Statistiques",
+    "firstUsefulContent": "Analysez les tendances du suivi de vos animaux sur une période choisie. Premium FiltresIndicateurDépensesEntraînementsBaladesPoidsTailleAlimentationConcoursDuAu",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "groups",
+    "pathname": "/groups",
+    "title": "Groupes",
+    "firstUsefulContent": "Partagez le suivi de vos animaux avec les personnes de confiance.Aucun groupe actifVous pouvez accepter une invitation quel que soit votre abonnement.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "contacts",
+    "pathname": "/contacts",
+    "title": "Contacts",
+    "firstUsefulContent": "Votre carnet de professionnels et de contacts utiles. Créer un contactRechercher un contactAucun contactCréez votre premier contact pour commencer.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "notes",
+    "pathname": "/notes",
+    "title": "Notes",
+    "firstUsefulContent": "Capturez vos informations utiles et retrouvez-les rapidement.Rechercher dans les notesAucune noteCréez votre première note pour commencer.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "wishes",
+    "pathname": "/wishes",
+    "title": "Souhaits",
+    "firstUsefulContent": "Centralisez vos idées et marquez celles qui sont réalisées. Nouveau souhaitRechercher dans les souhaitsAucun souhaitAjoutez votre première idée.",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "notifications",
+    "pathname": "/notifications",
+    "title": "Notifications",
+    "firstUsefulContent": "0 non lueAucune notificationLes nouvelles invitations et informations apparaîtront ici.PréférencesRappel quotidienRecevoir le récapitulatif quotidien calculé pa",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  },
+  {
+    "viewport": "1440x900",
+    "destination": "profile",
+    "pathname": "/profile",
+    "title": "Profil",
+    "firstUsefulContent": "Profil, préférences et informations de votre espace Vasco.ProfilVotre identité est synchronisée avec votre session sécurisée.CChoisir une photoJPEG, PNG ou WebP",
+    "firstUsefulContentTop": 64,
+    "mainTop": 64,
+    "horizontalOverflow": false
+  }
+]

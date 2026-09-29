@@ -1,0 +1,25 @@
+.event-tone-soins { --event-color: var(--event-soins); --event-on-color: #2f2924; }
+.event-tone-rdv { --event-color: var(--event-rdv); --event-on-color: #ffffff; }
+.event-tone-balade { --event-color: var(--event-balade); --event-on-color: #ffffff; }
+.event-tone-entrainement { --event-color: var(--event-entrainement); --event-on-color: #2f2924; }
+.event-tone-concours { --event-color: var(--event-concours); --event-on-color: #2f2924; }
+.event-tone-depense { --event-color: var(--event-depense); --event-on-color: #2f2924; }
+.event-tone-autre { --event-color: var(--event-autre); --event-on-color: #ffffff; }
+
+.event-card-surface { background: var(--card); }
+.event-card-accent { background-color: var(--event-color); }
+.event-card-label { color: color-mix(in oklab, var(--event-color) 72%, var(--foreground)); }
+.event-card-icon { background-color: color-mix(in oklab, var(--event-color) 18%, transparent); }
+.event-card-chip { background-color: color-mix(in oklab, var(--event-color) 16%, var(--card)); }
+.event-detail-sheet-header { background: linear-gradient(135deg, color-mix(in oklab, var(--event-color) 14%, var(--background)), var(--background) 72%); }
+.event-detail-type-icon { background-color: var(--event-color); color: var(--event-on-color); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22); }
+.event-detail-type-badge { background-color: color-mix(in oklab, var(--event-color) 18%, var(--background)); color: color-mix(in oklab, var(--event-color) 72%, var(--foreground)); }
+.event-detail-date { background: linear-gradient(145deg, var(--event-color), color-mix(in oklab, var(--event-color) 78%, var(--card))); color: var(--event-on-color); }
+.event-detail-note { border-left-color: var(--event-color); background-color: color-mix(in oklab, var(--event-color) 9%, var(--card)); }
+
+.event-calendar-pill {
+    border: 1px solid color-mix(in oklab, var(--event-color) 82%, black);
+    background-color: var(--event-color);
+    color: var(--event-on-color);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
