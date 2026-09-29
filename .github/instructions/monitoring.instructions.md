@@ -224,8 +224,8 @@ export async function POST(request: Request) {
 NEXT_PUBLIC_SENTRY_DSN=       # DSN public (client-side)
 SENTRY_DSN=                   # DSN serveur (server-side, non exposé)
 NEXT_PUBLIC_APP_ENV=staging   # development | staging | production
-NEXT_PUBLIC_APP_VERSION=1.0.0
-APP_VERSION=1.0.0
+NEXT_PUBLIC_APP_VERSION=2.0.0
+APP_VERSION=2.0.0
 SENTRY_ORG=mydailybook
 SENTRY_PROJECT=mydailybook-web
 SENTRY_AUTH_TOKEN=            # Pour l'upload des source maps (CI uniquement)
