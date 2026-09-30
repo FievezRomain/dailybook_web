@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   ExternalLink,
@@ -33,7 +32,6 @@ import { SearchField } from "@/shared/components/ui/search-field";
 import { cn } from "@/lib/utils";
 import {
   deleteOrphanWishImage,
-  getWishImageUrl,
   uploadWishImage,
 } from "../api/wish-files";
 import { useWishesQuery } from "../hooks/use-wishes";
@@ -65,17 +63,13 @@ function WishImage({
   wish,
   ratio = "aspect-[4/5]",
   detail = false,
+  onErrorRefresh,
 }: {
   wish: Wish;
   ratio?: string;
   detail?: boolean;
+  onErrorRefresh: () => void;
 }) {
-  const imageQuery = useQuery({
-    queryKey: ["wish-image", wish.id, wish.image],
-    queryFn: () => getWishImageUrl(wish.image ?? "", wish.id),
-    enabled: Boolean(wish.image),
-    staleTime: 4 * 60_000,
-  });
   const className = detail ? "min-h-80 h-full" : ratio;
   if (!wish.image)
     return (
@@ -97,16 +91,12 @@ function WishImage({
   return (
     <div className={cn("overflow-hidden bg-muted", className)}>
       <SignedImage
-        imageSigned={
-          imageQuery.data
-            ? { url: imageQuery.data, expiresAt: Number.MAX_SAFE_INTEGER }
-            : undefined
-        }
+        imageSigned={wish.imageSigned}
         alt={wish.nom || "Souhait"}
         width={720}
         height={900}
         classNames="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none"
-        onErrorRefresh={() => void imageQuery.refetch()}
+        onErrorRefresh={onErrorRefresh}
       />
     </div>
   );
@@ -267,15 +257,17 @@ function WishDetail({
   wish,
   onClose,
   onEdit,
+  onImageError,
 }: {
   wish: Wish;
   onClose: () => void;
   onEdit: () => void;
+  onImageError: () => void;
 }) {
   return (
     <article className="group mx-auto max-w-5xl overflow-hidden rounded-[28px] border bg-card shadow-surface">
       <div className="grid min-h-[520px] lg:grid-cols-[minmax(0,1.15fr)_minmax(330px,0.85fr)]">
-        <WishImage wish={wish} detail />
+        <WishImage wish={wish} detail onErrorRefresh={onImageError} />
         <div className="flex min-w-0 flex-col p-6 sm:p-8">
           <div className="flex items-center justify-between gap-3">
             <span
@@ -339,6 +331,7 @@ function WishCard({
   onEdit,
   onToggle,
   onDelete,
+  onImageError,
 }: {
   wish: Wish;
   index: number;
@@ -346,6 +339,7 @@ function WishCard({
   onEdit: () => void;
   onToggle: () => void;
   onDelete: () => void;
+  onImageError: () => void;
 }) {
   return (
     <article
@@ -360,7 +354,7 @@ function WishCard({
           onClick={onOpen}
           aria-label={wish.nom || "Souhait sans nom"}
         >
-          <WishImage wish={wish} ratio={ratios[index % ratios.length]} />
+          <WishImage wish={wish} ratio={ratios[index % ratios.length]} onErrorRefresh={onImageError} />
         </button>
         <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
           <span
@@ -587,6 +581,7 @@ export default function WishesContent({
             setDetailWish(null);
             setFormWish(detailWish);
           }}
+          onImageError={() => void query.refetch()}
         />
       ) : (
         <>
@@ -684,6 +679,7 @@ export default function WishesContent({
                     onEdit={() => setFormWish(wish)}
                     onToggle={() => void toggleAcquired(wish)}
                     onDelete={() => setWishToDelete(wish)}
+                    onImageError={() => void query.refetch()}
                   />
                 </div>
               ))}

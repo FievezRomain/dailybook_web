@@ -2,19 +2,29 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageSigned } from '@/types/image';
+import { fileDownloadKey, type FileDownloadRequest } from '@/shared/api/file-download-contract';
+import { getFileDownloadUrls } from '@/shared/api/file-downloads';
 import { createAnimal, deleteAnimal, getAnimals, updateAnimal } from '../api/animals-api';
-import { deleteAnimalFile, getAnimalFileUrl, uploadAnimalFile } from '../api/animal-files';
+import { deleteAnimalFile, uploadAnimalFile } from '../api/animal-files';
 import type { Animal, CreateAnimalInput, UpdateAnimalInput } from '../types/animal';
 
 export const animalsQueryKey = ['animals'] as const;
 
-async function withPicture(animal: Animal): Promise<Animal> {
-  if (!animal.image) return animal;
+async function withPictures(animals: Animal[]): Promise<Animal[]> {
+  const requests = animals.flatMap((animal): FileDownloadRequest[] => animal.image ? [{
+    fileName: animal.image, resourceType: 'animal', resourceId: animal.id,
+  }] : []);
+  if (!requests.length) return animals;
   try {
-    const url = await getAnimalFileUrl(animal.image, 'animal', animal.id);
-    return { ...animal, imageSigned: { url, expiresAt: Date.now() + 4.5 * 60_000 } };
+    const urls = await getFileDownloadUrls(requests);
+    const expiresAt = Date.now() + 4.5 * 60_000;
+    return animals.map((animal) => {
+      if (!animal.image) return animal;
+      const url = urls.get(fileDownloadKey({ fileName: animal.image, resourceType: 'animal', resourceId: animal.id }));
+      return url ? { ...animal, imageSigned: { url, expiresAt } } : animal;
+    });
   } catch {
-    return animal;
+    return animals;
   }
 }
 
@@ -22,7 +32,7 @@ export function useAnimalsQuery() {
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: animalsQueryKey,
-    queryFn: async () => Promise.all((await getAnimals()).map(withPicture)),
+    queryFn: async () => withPictures(await getAnimals()),
     staleTime: 60_000,
   });
   const create = useMutation({ mutationFn: createAnimal, onSuccess: () => queryClient.invalidateQueries({ queryKey: animalsQueryKey }) });

@@ -2,18 +2,28 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageSigned } from '@/types/image';
+import { fileDownloadKey, type FileDownloadRequest } from '@/shared/api/file-download-contract';
+import { getFileDownloadUrls } from '@/shared/api/file-downloads';
 import { createBodyPicture, deleteBodyPicture, getBodyPictures } from '../api/animals-api';
-import { deleteAnimalFile, getAnimalFileUrl, uploadAnimalFile } from '../api/animal-files';
+import { deleteAnimalFile, uploadAnimalFile } from '../api/animal-files';
 import type { AnimalBodyPicture } from '../types/animal';
 
 export const bodyPicturesQueryKey = (animalId: number) => ['animals', animalId, 'body-pictures'] as const;
 
-async function withUrl(picture: AnimalBodyPicture) {
+async function withUrls(pictures: AnimalBodyPicture[]) {
+  const requests: FileDownloadRequest[] = pictures.map((picture) => ({
+    fileName: picture.filename, resourceType: 'body', resourceId: picture.idanimal,
+  }));
+  if (!requests.length) return pictures;
   try {
-    const url = await getAnimalFileUrl(picture.filename, 'body', picture.idanimal);
-    return { ...picture, imageSigned: { url, expiresAt: Date.now() + 4.5 * 60_000 } };
+    const urls = await getFileDownloadUrls(requests);
+    const expiresAt = Date.now() + 4.5 * 60_000;
+    return pictures.map((picture) => {
+      const url = urls.get(fileDownloadKey({ fileName: picture.filename, resourceType: 'body', resourceId: picture.idanimal }));
+      return url ? { ...picture, imageSigned: { url, expiresAt } } : picture;
+    });
   } catch {
-    return picture;
+    return pictures;
   }
 }
 
@@ -22,7 +32,7 @@ export function useBodyPictures(animalId: number | undefined, enabled: boolean) 
   const id = animalId ?? 0;
   const query = useQuery({
     queryKey: bodyPicturesQueryKey(id),
-    queryFn: async () => Promise.all((await getBodyPictures(id)).map(withUrl)),
+    queryFn: async () => withUrls(await getBodyPictures(id)),
     enabled: enabled && id > 0,
     staleTime: 60_000,
   });
