@@ -4,35 +4,6 @@ import { getAnimalFileUrl } from "@/features/animals/api/animal-files";
 import type { ImageSigned } from "@/types/image";
 import type { Objective } from "@/features/objectives/types/objective";
 
-// Cache local pour les URLs signées
-const signedUrlCache: { [key: string]: { url: string; expiresAt: number } } = {};
-
-export function clearAnimalSignedUrlCache() {
-  Object.keys(signedUrlCache).forEach((key) => delete signedUrlCache[key]);
-}
-
-export async function enrichAnimal(animal: Animal): Promise<Animal> {
-  if (!animal.image) return animal;
-
-  const cacheKey = `${animal.id}_${animal.image}`;
-  const now = Date.now();
-
-  // Si l'URL signée est en cache et encore valide, on la retourne
-  if (signedUrlCache[cacheKey] && signedUrlCache[cacheKey].expiresAt > now) {
-    return { ...animal, imageSigned: signedUrlCache[cacheKey] };
-  }
-
-  // Sinon, on demande une nouvelle URL signée
-  const url = await getAnimalFileUrl(animal.image, "animal", animal.id);
-  signedUrlCache[cacheKey] = { url, expiresAt: now + 4.5 * 60 * 1000 }; // 4.5 min
-  return { ...animal, imageSigned: signedUrlCache[cacheKey] };
-}
-
-// Pour enrichir une liste d'animaux
-export async function enrichAnimals(animals: Animal[]): Promise<Animal[]> {
-  return Promise.all(animals.map(enrichAnimal));
-}
-
 // Pour enrichir les animaux liés à un event ou un objectif
 export function filterAnimals(obj: MappedEvent | Objective, animals: Animal[]): Animal[] {
   const animalIds = new Set(obj.animaux);

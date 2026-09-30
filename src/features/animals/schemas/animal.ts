@@ -82,7 +82,9 @@ export const animalHistoryMutationSchema = z.object({
 
 export const bodyPictureSchema = z.object({
   id: z.number().int().positive(),
-  filename: animalFilenameSchema,
+  // Existing accounts may contain safe legacy filenames. New writes remain
+  // restricted to generated 32-character names by createBodyPictureSchema.
+  filename: storedFilenameSchema,
   date_enregistrement: dateSchema.nullable(),
   idanimal: z.number().int().positive(),
 });
