@@ -88,8 +88,8 @@ Les headers globaux sont `Strict-Transport-Security: max-age=31536000; includeSu
 - Les noms S3 sont générés côté serveur.
 - Les téléchargements sont signés uniquement après contrôle de l’accès à la ressource.
 - Les PDF sont servis avec `Content-Disposition: attachment` plutôt qu’exécutés inline dans le navigateur.
-- Toute URL présignée renvoyée par le backend est validée par le BFF puis à nouveau avant son utilisation dans le navigateur : schéma HTTPS, hostname exact `NEXT_PUBLIC_BUCKET_HOSTNAME`, port standard, sans credentials ni fragment.
-- `NEXT_PUBLIC_BUCKET_HOSTNAME` doit correspondre au hostname réellement produit par boto3, qui peut employer le endpoint virtuel global même lorsque la signature AWS reste régionale.
+- Toute URL présignée renvoyée par le backend est validée par le BFF puis à nouveau avant son utilisation dans le navigateur : schéma HTTPS, bucket configuré via `NEXT_PUBLIC_BUCKET_HOSTNAME`, port standard, sans credentials ni fragment.
+- Lorsque `NEXT_PUBLIC_BUCKET_HOSTNAME` désigne l’endpoint régional `bucket.s3.<région>.amazonaws.com`, seul son alias global AWS `bucket.s3.amazonaws.com` est également accepté. Les autres buckets et régions restent refusés. Cette compatibilité couvre boto3, qui peut employer l’endpoint virtuel global même lorsque la signature AWS reste régionale.
 - Les ouvertures dans un nouvel onglet utilisent systématiquement `noopener,noreferrer` et neutralisent `window.opener`.
 - Les erreurs ne révèlent ni bucket, clé interne, credential ni policy AWS.
 
