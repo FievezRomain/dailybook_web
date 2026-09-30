@@ -1,11 +1,8 @@
-import { ArrowLeft, CalendarDays, Check, CloudSun, Target } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-const previewEvents = [
-  ['08:30', 'Balade matinale', 'var(--event-balade)'],
-  ['14:00', 'Rendez-vous vétérinaire', 'var(--event-rdv)'],
-] as const
+import { AuthProductPreview } from '@/features/auth/components/AuthProductPreview'
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -49,22 +46,8 @@ export function AuthShell({ children, variant = 'login' }: { children: React.Rea
           <h2 className="mt-4 max-w-xl text-[clamp(2.5rem,4vw,4.7rem)] font-semibold leading-[0.98] tracking-[-0.045em]">{copy.title}</h2>
           <p className="mt-5 max-w-lg text-sm leading-6 opacity-70 xl:text-base xl:leading-7">{copy.description}</p>
 
-          <section className="relative mt-9 max-w-[520px] rounded-[26px] border border-primary-foreground/15 bg-primary-foreground/[0.08] p-4 backdrop-blur-sm" aria-label="Aperçu de votre journée">
-            <div className="flex items-center justify-between gap-4 px-1 pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] opacity-60">Aujourd’hui</p><p className="mt-1 font-semibold">Deux moments à venir</p></div><CalendarDays aria-hidden="true" className="size-5 opacity-70" /></div>
-            <ol className="grid gap-2">
-              {previewEvents.map(([time, title, tone]) => (
-                <li key={time} className="relative flex items-center gap-3 overflow-hidden rounded-[16px] bg-background px-4 py-3 text-foreground shadow-sm">
-                  <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-r-full" style={{ backgroundColor: tone }} />
-                  <time className="text-xs font-semibold text-muted-foreground">{time}</time>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold">{title}</span>
-                  <span className="grid size-7 place-items-center rounded-full bg-muted"><Check aria-hidden="true" className="size-3.5 text-primary" /></span>
-                </li>
-              ))}
-            </ol>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-[16px] bg-primary-foreground/10 p-3"><div className="flex items-center gap-2 text-xs font-semibold"><CloudSun aria-hidden="true" className="size-4" />Météo locale</div><p className="mt-1 text-[11px] opacity-60">18° · Éclaircies</p></div>
-              <div className="rounded-[16px] bg-primary-foreground/10 p-3"><div className="flex items-center gap-2 text-xs font-semibold"><Target aria-hidden="true" className="size-4" />Objectif à 68 %</div><p className="mt-1 text-[11px] opacity-60">Reprise en douceur</p></div>
-            </div>
+          <section className="relative mt-9 max-w-[540px] rounded-[26px] bg-background/95 p-4 shadow-overlay backdrop-blur-sm" aria-label="Aperçu de votre journée">
+            <AuthProductPreview compact />
           </section>
         </div>
 
