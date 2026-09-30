@@ -6,9 +6,12 @@ import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 
 import { AuthShell } from '@/shared/components/layout/AuthShell'
+import { GoogleAuthButton } from '@/features/auth/components/GoogleAuthButton'
+import { establishAuthenticatedSession } from '@/features/user/api/user-api'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
-import { registerUser } from '@/lib/firebaseService'
+import { registerUser, signInWithGoogle } from '@/lib/firebaseService'
+import { getLoginErrorMessage } from '@/features/auth/utils/login-error-message'
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -40,6 +43,19 @@ export default function RegisterForm() {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const credential = await signInWithGoogle()
+      await establishAuthenticatedSession(credential.user)
+      router.replace('/')
+    } catch (caughtError) {
+      setError(getLoginErrorMessage(caughtError))
+      setLoading(false)
+    }
+  }
+
   return (
     <AuthShell variant="register">
       <div className="w-full max-w-[600px]">
@@ -48,6 +64,9 @@ export default function RegisterForm() {
           <h1 className="mt-3 text-[clamp(2.5rem,5vw,3.75rem)] font-semibold leading-[0.98] tracking-[-0.045em]">Créons votre<br />espace.</h1>
           <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">Quatre informations suffisent. Vous pourrez personnaliser le reste tranquillement ensuite.</p>
         </div>
+
+        <GoogleAuthButton onClick={() => void handleGoogleSignIn()} disabled={loading} />
+        <div className="my-6 flex items-center gap-3" aria-hidden="true"><span className="h-px flex-1 bg-border" /><span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">ou avec votre e-mail</span><span className="h-px flex-1 bg-border" /></div>
 
         <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
           <div className="grid gap-4 sm:grid-cols-2">
