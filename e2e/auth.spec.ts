@@ -84,7 +84,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     try {
       await exchangeIdTokenForSession(context, user.idToken);
       await page.route('**/api/animals', (route) => route.fulfill({ json: [] }));
-      await page.route('**/api/events', (route) => route.fulfill({ json: [] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [] }));
       await page.route('**/api/objectives', (route) => route.fulfill({ json: [] }));
 
       await page.goto('/dashboard');
@@ -105,7 +105,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const user = await createVerifiedFirebaseUser(request);
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [] }));
       await page.route(/\/api\/events\/highlights/, (route) => route.fulfill({ json: [] }));
       await page.route('**/api/animals', (route) => route.fulfill({ json: [] }));
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
@@ -126,7 +126,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     try {
       await exchangeIdTokenForSession(context, user.idToken);
       await page.setViewportSize({ width: 1024, height: 768 });
-      await page.route('**/api/events', (route) => route.fulfill({ json: [] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [] }));
       await page.route(/\/api\/events\/highlights/, (route) => route.fulfill({ json: [] }));
       await page.route('**/api/animals', (route) => route.fulfill({ json: [] }));
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
@@ -144,7 +144,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const user = await createVerifiedFirebaseUser(request);
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [{
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [{
         id: 8,
         nom: 'Vaccin annuel',
         dateevent: '2026-09-05',
@@ -173,7 +173,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     let createdEvent: Record<string, unknown> | undefined;
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', async (route) => {
+      await page.route(/\/api\/events(?:\?.*)?$/, async (route) => {
         if (route.request().method() === 'POST') {
           createdEvent = route.request().postDataJSON() as Record<string, unknown>;
           await route.fulfill({ json: {
@@ -229,7 +229,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     };
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [recurringEvent] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [recurringEvent] }));
       await page.route('**/api/events/8', async (route) => {
         updateInput = route.request().postDataJSON() as Record<string, unknown>;
         await route.fulfill({ json: [{ ...recurringEvent, ...updateInput }] });
@@ -276,7 +276,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     };
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [recurringEvent] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [recurringEvent] }));
       await page.route('**/api/events/8', async (route) => {
         updateInput = route.request().postDataJSON() as Record<string, unknown>;
         await route.fulfill({ json: [{ ...recurringEvent, ...updateInput }] });
@@ -325,7 +325,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     };
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [event] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [event] }));
       await page.route('**/api/events/8', async (route) => {
         updateInput = route.request().postDataJSON() as Record<string, unknown>;
         await route.fulfill({ json: [{ ...event, ...updateInput }] });
@@ -375,7 +375,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     };
     try {
       await exchangeIdTokenForSession(context, user.idToken);
-      await page.route('**/api/events', (route) => route.fulfill({ json: [event] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [event] }));
       await page.route('**/api/events/8', async (route) => {
         updateInput = route.request().postDataJSON() as Record<string, unknown>;
         await route.fulfill({ json: [{ ...event, ...updateInput }] });

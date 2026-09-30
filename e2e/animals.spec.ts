@@ -19,7 +19,7 @@ const sharedAnimal = {
 
 async function mockAnimalWorkspace(page: Page, animals: Array<Record<string, unknown>>) {
   await page.route('**/api/me', (route) => route.fulfill({ json: currentUser }));
-  await page.route('**/api/events', (route) => route.fulfill({ json: [] }));
+  await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [] }));
   await page.route('**/api/animals/*', async (route) => {
     const request = route.request();
     const id = Number(request.url().split('/').pop());
@@ -215,7 +215,7 @@ test.describe('parcours Animaux', () => {
     try {
       await exchangeIdTokenForSession(context, user.idToken);
       await page.route('**/api/me', (route) => route.fulfill({ json: currentUser }));
-      await page.route('**/api/events', (route) => route.fulfill({ json: [] }));
+      await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [] }));
       await page.route('**/api/animals', async (route) => {
         animalRequests += 1;
         if (animalRequests <= 2) return route.fulfill({ status: 500, json: { message: 'Indisponible' } });

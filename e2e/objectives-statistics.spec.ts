@@ -7,7 +7,7 @@ const animals = [{ id: 1, nom: 'Moka', espece: 'Chat', provenance: 'owner', date
 async function mockSharedData(page: Page) {
   await page.route('**/api/me', route => route.fulfill({ json: premiumUser }))
   await page.route('**/api/animals', route => route.fulfill({ json: animals }))
-  await page.route('**/api/events', route => route.fulfill({ json: [] }))
+  await page.route(/\/api\/events(?:\?.*)?$/, route => route.fulfill({ json: [] }))
 }
 
 test.describe('parcours Objectifs et Statistiques', () => {
