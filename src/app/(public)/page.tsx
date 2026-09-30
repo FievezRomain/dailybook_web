@@ -2,13 +2,9 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  CloudSun,
-  Heart,
   Minus,
   ShieldCheck,
   Sparkles,
-  Stethoscope,
-  Target,
   UsersRound,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -16,12 +12,7 @@ import Link from 'next/link'
 
 import { withGuestPage } from '@/lib/auth/server/withGuestPage'
 import { Button } from '@/shared/components/ui'
-
-const dayEvents = [
-  { time: '08:30', title: 'Balade matinale', detail: 'Nala', icon: Heart, tone: 'var(--event-balade)' },
-  { time: '14:00', title: 'Rendez-vous vétérinaire', detail: 'Oscar', icon: Stethoscope, tone: 'var(--event-rdv)' },
-  { time: '19:00', title: 'Traitement du soir', detail: 'Nala', icon: Check, tone: 'var(--event-soins)' },
-] as const
+import { AuthProductPreview } from '@/features/auth/components/AuthProductPreview'
 
 const pillars = [
   { icon: CalendarDays, title: 'Tout retrouve sa place', description: 'Soins, rendez-vous et souvenirs s’organisent dans un quotidien lisible.' },
@@ -69,8 +60,8 @@ export default async function HomePage() {
             Retrouvez simplement le quotidien de vos animaux.
           </div>
           <h1 className="text-[clamp(3rem,6.7vw,6.5rem)] font-semibold leading-[0.94] tracking-[-0.055em]">
-            Leur quotidien,
-            <span className="mt-1 block font-normal italic text-primary">orchestré avec soin.</span>
+            Moins de charge mentale,
+            <span className="mt-1 block font-normal italic text-primary">plus de moments pour votre animal.</span>
           </h1>
           <p className="mt-8 max-w-[590px] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             Vasco réunit les soins, les rendez-vous, les objectifs et les personnes qui comptent dans un espace aussi simple à consulter qu’agréable à utiliser.
@@ -92,46 +83,10 @@ export default async function HomePage() {
 
         <div className="relative z-10 mx-auto w-full max-w-[680px] lg:mx-0">
           <div aria-hidden="true" className="absolute -right-28 -top-24 size-80 rounded-full bg-[var(--event-concours)]/20 blur-3xl" />
-          <div className="relative min-h-[560px] sm:min-h-[610px]">
-            <section className="absolute inset-x-0 top-5 overflow-hidden rounded-[32px] border bg-card/95 p-4 shadow-[0_32px_90px_-38px_color-mix(in_srgb,var(--primary)_45%,transparent)] backdrop-blur sm:left-0 sm:right-16 sm:p-6" aria-labelledby="product-preview-title">
-              <div className="flex items-start justify-between gap-4 border-b pb-5">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Mercredi 10 septembre</p>
-                  <h2 id="product-preview-title" className="mt-1 text-2xl font-semibold tracking-tight">Une journée bien entourée</h2>
-                </div>
-                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent text-primary"><CalendarDays aria-hidden="true" className="size-5" /></span>
-              </div>
-              <ol className="mt-4 grid gap-3">
-                {dayEvents.map(({ time, title, detail, icon: Icon, tone }) => (
-                  <li key={`${time}-${title}`} className="group relative grid grid-cols-[auto_1fr_auto] items-center gap-3 overflow-hidden rounded-[20px] border bg-background p-3.5 shadow-xs transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-surface motion-reduce:transition-none sm:gap-4 sm:p-4">
-                    <span aria-hidden="true" className="absolute inset-y-3 left-0 w-1 rounded-r-full" style={{ backgroundColor: tone }} />
-                    <time className="pl-1 text-xs font-semibold text-muted-foreground sm:text-sm">{time}</time>
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold sm:text-base">{title}</span>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span>
-                    </span>
-                    <span className="grid size-9 place-items-center rounded-full" style={{ backgroundColor: `color-mix(in srgb, ${tone} 18%, transparent)` }}><Icon aria-hidden="true" className="size-4" /></span>
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-5 grid grid-cols-3 gap-2 rounded-[20px] bg-muted/70 p-2 text-center">
-                <span className="rounded-control bg-card px-2 py-3"><strong className="block text-lg">3</strong><span className="text-[11px] text-muted-foreground">moments</span></span>
-                <span className="px-2 py-3"><strong className="block text-lg">2</strong><span className="text-[11px] text-muted-foreground">animaux</span></span>
-                <span className="px-2 py-3"><strong className="block text-lg">1</strong><span className="text-[11px] text-muted-foreground">équipe</span></span>
-              </div>
+          <div className="relative min-h-[700px] sm:min-h-[670px]">
+            <section className="absolute inset-x-0 top-0 overflow-hidden rounded-[32px] border bg-background/95 p-4 shadow-[0_32px_90px_-38px_color-mix(in_srgb,var(--primary)_45%,transparent)] backdrop-blur sm:p-6" aria-label="Aperçu de Vasco">
+              <AuthProductPreview showWeather />
             </section>
-
-            <aside className="absolute -right-1 top-[330px] w-[210px] rounded-[24px] border bg-card p-4 shadow-overlay sm:right-0 sm:top-24 sm:w-[225px]" aria-label="Météo locale">
-              <div className="flex items-center justify-between"><span className="text-xs font-semibold text-muted-foreground">Votre météo</span><CloudSun aria-hidden="true" className="size-5 text-primary" /></div>
-              <p className="mt-3 text-3xl font-semibold tracking-tight">18°</p>
-              <p className="mt-1 text-xs text-muted-foreground">Éclaircies · une sortie se prépare</p>
-            </aside>
-
-            <aside className="absolute bottom-0 left-3 w-[280px] rounded-[24px] bg-primary p-5 text-primary-foreground shadow-overlay sm:left-auto sm:right-3 sm:w-[330px]" aria-label="Objectif en cours">
-              <div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-primary-foreground/15"><Target aria-hidden="true" className="size-5" /></span><div><p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-70">Objectif en cours</p><p className="font-semibold">Reprise en douceur</p></div></div>
-              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-primary-foreground/20"><div className="h-full w-[68%] rounded-full bg-primary-foreground" /></div>
-              <div className="mt-2 flex justify-between text-xs opacity-75"><span>4 étapes sur 6</span><span>68 %</span></div>
-            </aside>
           </div>
         </div>
       </section>

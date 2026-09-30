@@ -3,16 +3,29 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import RegisterForm from './RegisterForm';
 
-const mocks = vi.hoisted(() => ({ register: vi.fn(), replace: vi.fn() }));
+const mocks = vi.hoisted(() => ({ register: vi.fn(), signInWithGoogle: vi.fn(), establishSession: vi.fn(), replace: vi.fn() }));
 
-vi.mock('@/lib/firebaseService', () => ({ registerUser: mocks.register }));
+vi.mock('@/lib/firebaseService', () => ({ registerUser: mocks.register, signInWithGoogle: mocks.signInWithGoogle }));
+vi.mock('@/features/user/api/user-api', () => ({ establishAuthenticatedSession: mocks.establishSession }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: mocks.replace }) }));
 
 describe('RegisterForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.register.mockResolvedValue(undefined);
+    mocks.signInWithGoogle.mockResolvedValue({ user: { uid: 'google-user' } });
+    mocks.establishSession.mockResolvedValue(undefined);
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  it('propose Google et ouvre directement la session Vasco', async () => {
+    render(<RegisterForm />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuer avec Google' }));
+
+    await waitFor(() => expect(mocks.signInWithGoogle).toHaveBeenCalledTimes(1));
+    expect(mocks.establishSession).toHaveBeenCalledWith({ uid: 'google-user' });
+    expect(mocks.replace).toHaveBeenCalledWith('/');
   });
 
   it('associe les quatre champs à leurs libellés et autocomplétions', () => {

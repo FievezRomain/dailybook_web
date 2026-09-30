@@ -5,6 +5,7 @@ import LoginForm from './LoginForm';
 
 const mocks = vi.hoisted(() => ({
   signIn: vi.fn(),
+  signInWithGoogle: vi.fn(),
   verified: vi.fn(),
   establishSession: vi.fn(),
   replace: vi.fn(),
@@ -12,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/firebaseService', () => ({
   signInUser: mocks.signIn,
+  signInWithGoogle: mocks.signInWithGoogle,
   isEmailVerified: mocks.verified,
 }));
 vi.mock('@/features/user/api/user-api', () => ({ establishAuthenticatedSession: mocks.establishSession }));
@@ -21,8 +23,19 @@ describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.signIn.mockResolvedValue({ user: { uid: 'user-1' } });
+    mocks.signInWithGoogle.mockResolvedValue({ user: { uid: 'google-user' } });
     mocks.verified.mockResolvedValue(true);
     mocks.establishSession.mockResolvedValue(undefined);
+  });
+
+  it('ouvre une session Vasco après une connexion Google', async () => {
+    render(<LoginForm />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuer avec Google' }));
+
+    await waitFor(() => expect(mocks.signInWithGoogle).toHaveBeenCalledTimes(1));
+    expect(mocks.establishSession).toHaveBeenCalledWith({ uid: 'google-user' });
+    expect(mocks.replace).toHaveBeenCalledWith('/dashboard');
   });
 
   it('expose un formulaire libellé et une navigation d’inscription', () => {

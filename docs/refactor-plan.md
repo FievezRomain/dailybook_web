@@ -313,6 +313,7 @@ Critère de sortie : matrice fonctionnelle web/backend documentée et couverte p
   - [x] Ajustement Home du 17 septembre 2026 : Aujourd’hui et Prochains jours occupent chacun une demi-largeur sur desktop ; Objectifs prend toute la ligne avec une hauteur suffisante pour une carte complète.
   - [x] Correctif Home du 18 septembre 2026 : disposition 50/50 étendue au breakpoint intermédiaire réellement mesuré après chargement, avec migration des préférences pour éviter le retour visuel à l’empilement.
   - [x] Alignement création globale du 18 septembre 2026 : menu web synchronisé avec le mobile sur les sept choix, leur ordre, leurs icônes, leurs noms et leurs descriptions.
+  - [x] Maintenance Auth du 30 septembre 2026 : slogan public repris mot pour mot du mobile, aperçus accueil/connexion/inscription alignés sur les cartes Événement, Objectif et Météo réellement utilisées, bloc de métriques décoratif supprimé et connexion Google proposée sur les parcours de connexion et d’inscription avec ouverture complète de la session Vasco.
 
 Critère de sortie : chaque écran validé possède tous ses états et passe la checklist de `web-ux-ui-standards.md`.
 
