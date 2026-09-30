@@ -5,16 +5,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({
   getAnimals: vi.fn(), createAnimal: vi.fn(), updateAnimal: vi.fn(), deleteAnimal: vi.fn(),
-  getAnimalFileUrl: vi.fn(), uploadAnimalFile: vi.fn(), deleteAnimalFile: vi.fn(),
+  getFileDownloadUrls: vi.fn(), uploadAnimalFile: vi.fn(), deleteAnimalFile: vi.fn(),
 }));
 vi.mock('../api/animals-api', () => ({
   getAnimals: api.getAnimals, createAnimal: api.createAnimal,
   updateAnimal: api.updateAnimal, deleteAnimal: api.deleteAnimal,
 }));
 vi.mock('../api/animal-files', () => ({
-  getAnimalFileUrl: api.getAnimalFileUrl, uploadAnimalFile: api.uploadAnimalFile,
-  deleteAnimalFile: api.deleteAnimalFile,
+  uploadAnimalFile: api.uploadAnimalFile, deleteAnimalFile: api.deleteAnimalFile,
 }));
+vi.mock('@/shared/api/file-downloads', () => ({ getFileDownloadUrls: api.getFileDownloadUrls }));
 
 import { animalsQueryKey, useAnimalsQuery } from './use-animals';
 
@@ -35,6 +35,7 @@ describe('use-animals', () => {
     api.createAnimal.mockResolvedValue(animal);
     api.updateAnimal.mockResolvedValue(animal);
     api.deleteAnimal.mockResolvedValue(undefined);
+    api.getFileDownloadUrls.mockResolvedValue(new Map());
   });
 
   it('signe les photos disponibles sans bloquer la liste en cas d’échec', async () => {
@@ -43,15 +44,16 @@ describe('use-animals', () => {
       { ...animal, id: 4, image: 'portrait.jpg' },
       { ...animal, id: 5, image: 'indisponible.jpg' },
     ]);
-    api.getAnimalFileUrl
-      .mockResolvedValueOnce('https://storage.example/portrait.jpg')
-      .mockRejectedValueOnce(new Error('signature expirée'));
+    api.getFileDownloadUrls.mockResolvedValue(new Map([
+      ['animal:4:portrait.jpg', 'https://storage.example/portrait.jpg'],
+    ]));
     const { wrapper } = setup();
     const { result } = renderHook(() => useAnimalsQuery(), { wrapper });
 
     await waitFor(() => expect(result.current.animals).toHaveLength(3));
     expect(result.current.animals?.[1].imageSigned?.url).toContain('storage.example');
     expect(result.current.animals?.[2].imageSigned).toBeUndefined();
+    expect(api.getFileDownloadUrls).toHaveBeenCalledTimes(1);
   });
 
   it('crée, modifie et supprime un animal avec sa photo', async () => {

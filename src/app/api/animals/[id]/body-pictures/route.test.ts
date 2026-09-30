@@ -26,6 +26,23 @@ describe('/api/animals/[id]/body-pictures', () => {
     expect(backendApiClient).toHaveBeenCalledWith('api/v1/animals/4/body-pictures');
   });
 
+  it('accepte un nom historique sûr en lecture sans l’autoriser en écriture', async () => {
+    backendApiClient.mockResolvedValueOnce([{
+      ...picture,
+      filename: 'suivi-2024-06.jpg',
+    }]);
+    const response = await GET(new Request('http://localhost'), context);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual([
+      expect.objectContaining({ filename: 'suivi-2024-06.jpg' }),
+    ]);
+
+    const mutation = await POST(postRequest({ filename: 'suivi-2024-06.jpg' }), context);
+    expect(mutation.status).toBe(422);
+    expect(backendApiClient).toHaveBeenCalledTimes(1);
+  });
+
   it('lie la photo validée à l’animal du chemin', async () => {
     backendApiClient.mockResolvedValue(picture);
     const response = await POST(postRequest({ filename, date_enregistrement: '2026-06-01' }), context);
