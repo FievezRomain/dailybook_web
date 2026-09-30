@@ -16,6 +16,23 @@ describe('presigned URL security', () => {
       .toBe('https://vasco-files.example.com/user/file.jpg?X-Signature=abc');
   });
 
+  it('accepte l’endpoint S3 global du même bucket lorsque l’endpoint régional est configuré', () => {
+    vi.stubEnv('NEXT_PUBLIC_BUCKET_HOSTNAME', 'vascoandco-storage.s3.eu-north-1.amazonaws.com');
+
+    expect(validatePresignedUrl('https://vascoandco-storage.s3.eu-north-1.amazonaws.com/file.jpg'))
+      .toBe('https://vascoandco-storage.s3.eu-north-1.amazonaws.com/file.jpg');
+    expect(validatePresignedUrl('https://vascoandco-storage.s3.amazonaws.com/file.jpg'))
+      .toBe('https://vascoandco-storage.s3.amazonaws.com/file.jpg');
+  });
+
+  it.each([
+    'https://other-bucket.s3.amazonaws.com/file.jpg',
+    'https://vascoandco-storage.s3.eu-west-1.amazonaws.com/file.jpg',
+  ])('refuse une autre destination S3 malgré l’alias global autorisé : %s', (url) => {
+    vi.stubEnv('NEXT_PUBLIC_BUCKET_HOSTNAME', 'vascoandco-storage.s3.eu-north-1.amazonaws.com');
+    expect(() => validatePresignedUrl(url)).toThrow('refusée');
+  });
+
   it.each([
     'http://vasco-files.example.com/file.jpg',
     'https://evil.example.com/file.jpg',
