@@ -125,7 +125,9 @@ curl -I http://localhost:3000
 
 L’orchestration globale se trouve dans le dépôt `dailybook-project`. Une mise en service complète suit cet ordre :
 
-La version publiée est celle de `package.json`. Après fusion sur `main`, le workflow `Auto Release` crée de manière idempotente le tag `v<version>` et la GitHub Release associée, sans écrire directement dans la branche protégée. Avant une nouvelle livraison, augmenter explicitement la version avec SemVer (`MAJEURE.MINEURE.CORRECTIF`) dans `package.json` et `package-lock.json`.
+Après fusion sur `main`, Semantic Release analyse automatiquement les commits depuis le dernier tag : `fix:` produit un correctif, `feat:` une version mineure, et `!` ou `BREAKING CHANGE:` une version majeure. Le workflow crée le tag et la GitHub Release, puis publie l’image GHCR versionnée et `latest`. Aucun numéro de version ni aucune PR de release ne sont à saisir manuellement. Les autres préfixes (`docs:`, `test:`, `ci:`, `chore:`…) ne publient pas de version à eux seuls.
+
+Le titre d’une PR doit suivre cette convention afin que son squash sur `main` reste exploitable, par exemple `feat: ajouter la vue planning`. Pour une PR de promotion de `develop` vers `main`, choisir le préfixe correspondant au changement le plus important qu’elle contient.
 
 1. valider les quality gates web et back ;
 2. sauvegarder PostgreSQL et vérifier le plan de restauration ;
