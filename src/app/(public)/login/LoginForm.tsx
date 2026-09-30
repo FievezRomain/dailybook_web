@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { AlertCircle, ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
-import { signInUser, isEmailVerified } from '@/lib/firebaseService';
+import { signInUser, isEmailVerified, signInWithGoogle } from '@/lib/firebaseService';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthShell } from '@/shared/components/layout/AuthShell';
 import { safeReturnPath } from '@/shared/security/safe-return-path';
 import { getLoginErrorMessage } from '@/features/auth/utils/login-error-message';
+import { GoogleAuthButton } from '@/features/auth/components/GoogleAuthButton';
 
 export default function LoginForm() {
         const router = useRouter();
@@ -50,6 +51,19 @@ export default function LoginForm() {
                 }
         };
 
+        const handleGoogleSignIn = async () => {
+                setError(null);
+                setLoading(true);
+                try {
+                        const credential = await signInWithGoogle();
+                        await establishAuthenticatedSession(credential.user);
+                        router.replace(safeReturnPath(searchParams.get('returnTo')));
+                } catch (err) {
+                        setError(getLoginErrorMessage(err));
+                        setLoading(false);
+                }
+        };
+
         return (
           <AuthShell>
             <div className="w-full max-w-[460px]">
@@ -58,6 +72,8 @@ export default function LoginForm() {
                 <h1 className="mt-3 text-[clamp(2.5rem,5vw,4rem)] font-semibold leading-[0.98] tracking-[-0.045em]">Ravi de vous<br />retrouver.</h1>
                 <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base">Connectez-vous pour reprendre le fil du quotidien de vos animaux.</p>
               </div>
+              <GoogleAuthButton onClick={() => void handleGoogleSignIn()} disabled={loading} />
+              <div className="my-6 flex items-center gap-3" aria-hidden="true"><span className="h-px flex-1 bg-border" /><span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">ou avec votre e-mail</span><span className="h-px flex-1 bg-border" /></div>
               <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
                   <div className="space-y-2">
                     <label htmlFor="login-email" className="text-sm font-semibold">Adresse e-mail</label>

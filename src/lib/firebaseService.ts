@@ -4,11 +4,19 @@ import {
   sendEmailVerification,
   updateProfile,
   AuthError,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth } from './firebase';
 
 export const signInUser = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const signInWithGoogle = () => {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return signInWithPopup(auth, provider);
 };
 
 export const registerUser = async (email: string, password: string, firstName: string) => {
