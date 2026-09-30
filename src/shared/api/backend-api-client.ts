@@ -7,6 +7,7 @@ import { SESSION_COOKIE_NAME } from '@/constants/cookies';
 import { getAdminAuth } from '@/lib/firebase-admin';
 import { WebApiError } from './api-error';
 import { resolveBackendApiUrl } from './backend-url';
+import { normalizeUpstreamRoute, writeBffLog } from './bff-logger';
 
 export type BackendApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -57,6 +58,7 @@ export async function backendApiClient<T = unknown>(
   }
 
   const apiUrl = resolveBackendApiUrl(process.env.VASCO_API_URL, requestId);
+  const startedAt = performance.now();
 
   try {
     const response = await axios.request<BackendSuccessEnvelope<T>>({
@@ -73,9 +75,29 @@ export async function backendApiClient<T = unknown>(
       maxContentLength: 2_000_000,
       maxBodyLength: 2_000_000,
     });
+    const durationMs = performance.now() - startedAt;
+    if (durationMs >= 1_000) {
+      writeBffLog('info', 'bff_upstream_slow', {
+        requestId,
+        method,
+        route: normalizeUpstreamRoute(path),
+        status: response.status,
+        durationMs: Math.round(durationMs),
+      });
+    }
     return unwrapEnvelope(response.data);
   } catch (error) {
-    throw normalizeBackendError(error, requestId);
+    const normalized = normalizeBackendError(error, requestId);
+    writeBffLog(normalized.status >= 500 ? 'error' : 'warn', 'bff_upstream_failed', {
+      requestId,
+      method,
+      route: normalizeUpstreamRoute(path),
+      status: normalized.status,
+      errorCode: normalized.code,
+      durationMs: Math.round(performance.now() - startedAt),
+      timeoutMs: 10_000,
+    });
+    throw normalized;
   }
 }
 
@@ -155,16 +177,6 @@ function normalizeBackendError(error: unknown, requestId: string): WebApiError {
   const axiosError = error as AxiosError<BackendErrorEnvelope>;
   const status = axiosError.response?.status ?? 502;
   const body = axiosError.response?.data;
-  if (status === 422) {
-    console.error(JSON.stringify({
-      event: 'backend_contract_rejected',
-      requestId,
-      code: body?.error?.code ?? 'VALIDATION_ERROR',
-      fields: body?.error?.details?.map((detail) =>
-        detail.field ?? detail.loc?.filter((part) => part !== 'body').join('.'),
-      ).filter(Boolean),
-    }));
-  }
   return new WebApiError({
     code: body?.error?.code ?? statusToCode(status),
     message: publicMessage(status, body?.error?.message),

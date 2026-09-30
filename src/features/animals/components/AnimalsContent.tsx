@@ -40,7 +40,6 @@ export default function AnimalsContent() {
     updateAnimalImage,
     deleteAnimal,
   } = useAnimalsQuery();
-  const { events, isLoading: isLoadingEvents } = useEventsQuery();
   const { isPremium } = useCurrentUser();
 
   const [animalId, setAnimalId] = useState<number | null>(null);
@@ -50,6 +49,12 @@ export default function AnimalsContent() {
   const { openDrawer: openDrawerForm } = useAnimalFormDrawer();
 
   const effectiveSelectedId = animalId ?? animals?.[0]?.id;
+  const { events, isLoading: isLoadingEvents } = useEventsQuery(
+    effectiveSelectedId === undefined
+      ? {}
+      : { animalIds: [effectiveSelectedId], eventTypes: ['soins', 'rdv'] },
+    effectiveSelectedId !== undefined,
+  );
 
   const selectedAnimal = useMemo(
     () => (animals && effectiveSelectedId !== undefined ? animals.find((a) => a.id === effectiveSelectedId) : undefined),

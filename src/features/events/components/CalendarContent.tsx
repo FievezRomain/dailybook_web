@@ -227,15 +227,21 @@ function AgendaFilters({
 }
 
 export default function CalendarContent() {
-  const { events, isLoading, isError, isRefetchError, error, refetch } =
-    useEventsQuery();
-  const animalsQuery = useAnimalsQuery();
-  const { openDrawer: openEventDrawer } = useEventDrawer();
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [type, setType] = useState("all");
   const [selectedAnimalIds, setSelectedAnimalIds] = useState<number[]>([]);
+  const days = calendarDays(month);
+  const { events, isLoading, isError, isRefetchError, error, refetch } =
+    useEventsQuery({
+      dateFrom: format(days[0], 'yyyy-MM-dd'),
+      dateTo: format(days.at(-1)!, 'yyyy-MM-dd'),
+      animalIds: selectedAnimalIds,
+      eventTypes: type === 'all' ? undefined : [type],
+    });
+  const animalsQuery = useAnimalsQuery();
+  const { openDrawer: openEventDrawer } = useEventDrawer();
   const highlights = useEventHighlights(month.getFullYear());
   const filteredEvents = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("fr-FR");
@@ -253,7 +259,6 @@ export default function CalendarContent() {
             .includes(query)),
     );
   }, [events, search, selectedAnimalIds, type]);
-  const days = calendarDays(month);
   const eventsByDay = useMemo(() => {
     const mapped = new Map<string, Event[]>(
       days.map((day) => [dayKey(day), []]),

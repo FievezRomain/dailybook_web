@@ -60,6 +60,19 @@ export const eventSchema = z.object({
   todisplay: z.boolean().nullable().optional().transform((value) => value ?? true),
 });
 export const eventListSchema = z.array(eventSchema);
+export const eventListQuerySchema = z.object({
+  date_from: dateSchema.optional(),
+  date_to: dateSchema.optional(),
+  animal_ids: z.array(z.coerce.number().int().positive()).max(100).default([]),
+  event_types: z.array(z.string().trim().min(1).max(100)).max(20).default([]),
+  states: z.array(z.string().trim().min(1).max(100)).max(20).default([]),
+  include_overdue_open: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
+  limit: z.coerce.number().int().min(1).max(500).optional(),
+  offset: z.coerce.number().int().min(0).default(0),
+}).strict().refine(
+  ({ date_from, date_to }) => !date_from || !date_to || date_from <= date_to,
+  { message: 'La date de début doit précéder la date de fin.', path: ['date_to'] },
+);
 
 const eventMutationFields = {
   nom: z.string().trim().min(1).max(255),

@@ -5,8 +5,29 @@ import type {
   CreateEventInput, PatchEventInput, RecurrenceScope, UpdateEventInput,
 } from '../types/event';
 
-export async function getEvents() {
-  return eventListSchema.parse((await webApiClient.get('/events')).data);
+export type EventListQuery = {
+  dateFrom?: string;
+  dateTo?: string;
+  animalIds?: number[];
+  eventTypes?: string[];
+  states?: string[];
+  includeOverdueOpen?: boolean;
+  limit?: number;
+  offset?: number;
+};
+
+export async function getEvents(filters: EventListQuery = {}) {
+  const query = new URLSearchParams();
+  if (filters.dateFrom) query.set('date_from', filters.dateFrom);
+  if (filters.dateTo) query.set('date_to', filters.dateTo);
+  filters.animalIds?.forEach((id) => query.append('animal_ids', String(id)));
+  filters.eventTypes?.forEach((type) => query.append('event_types', type));
+  filters.states?.forEach((state) => query.append('states', state));
+  if (filters.includeOverdueOpen) query.set('include_overdue_open', 'true');
+  if (filters.limit) query.set('limit', String(filters.limit));
+  if (filters.offset) query.set('offset', String(filters.offset));
+  const suffix = query.size ? `?${query}` : '';
+  return eventListSchema.parse((await webApiClient.get(`/events${suffix}`)).data);
 }
 
 export async function getEventHighlights(year: number) {

@@ -14,7 +14,7 @@ const api = vi.hoisted(() => ({
 
 vi.mock('../api/events-api', () => api);
 
-import { eventsQueryKey, useEventHighlights, useEventsQuery } from './use-events';
+import { useEventHighlights, useEventsQuery } from './use-events';
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
@@ -30,8 +30,8 @@ describe('use-events', () => {
     api.getEvents.mockResolvedValue([]);
   });
 
-  it('synchronise le cache après chaque mutation', async () => {
-    const { client, wrapper } = setup();
+  it('invalide les listes filtrées après chaque mutation', async () => {
+    const { wrapper } = setup();
     const event = { id: 8, nom: 'Vaccin' };
     api.createEvent.mockResolvedValue([event]);
     api.updateEvent.mockResolvedValue([{ ...event, nom: 'Rappel' }]);
@@ -41,7 +41,6 @@ describe('use-events', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => { await result.current.createEvent({ nom: 'Vaccin' } as never); });
-    expect(client.getQueryData(eventsQueryKey)).toEqual([event]);
     await act(async () => { await result.current.updateEvent(8, { nom: 'Rappel' } as never); });
     await act(async () => { await result.current.patchEvent(8, { state: 'Terminé' } as never); });
     await act(async () => { await result.current.deleteEvent(8, 'series'); });
@@ -49,7 +48,7 @@ describe('use-events', () => {
     expect(api.updateEvent).toHaveBeenCalledWith(8, { nom: 'Rappel' });
     expect(api.patchEvent).toHaveBeenCalledWith(8, { state: 'Terminé' });
     expect(api.deleteEvent).toHaveBeenCalledWith(8, 'series');
-    expect(client.getQueryData(eventsQueryKey)).toEqual([]);
+    expect(api.getEvents.mock.calls.length).toBeGreaterThan(1);
   });
 
   it('charge les temps forts pour l’année demandée', async () => {
