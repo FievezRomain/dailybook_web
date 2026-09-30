@@ -3,6 +3,7 @@ import 'server-only';
 import { timingSafeEqual } from 'node:crypto';
 import type { NextResponse } from 'next/server';
 import { z, type ZodType } from 'zod';
+import { isSameOriginRequest } from '@/shared/security/same-origin-request';
 import { WebApiError } from './api-error';
 import { bffError } from './bff-response';
 
@@ -19,8 +20,7 @@ export async function parseJson<T>(request: Request, schema: ZodType<T>): Promis
 }
 
 export function assertCsrf(request: Request): void {
-  const origin = request.headers.get('origin');
-  if (!origin || !isSameOrigin(origin, new URL(request.url).origin)) {
+  if (!isSameOriginRequest(request)) {
     throw new WebApiError({ code: 'INVALID_ORIGIN', message: 'Origine de requête refusée.', status: 403 });
   }
 
@@ -37,14 +37,6 @@ export function validateMutationRequest(request: Request): NextResponse | null {
     return null;
   } catch (error) {
     return bffError(error);
-  }
-}
-
-function isSameOrigin(value: string, expected: string): boolean {
-  try {
-    return new URL(value).origin === expected;
-  } catch {
-    return false;
   }
 }
 
