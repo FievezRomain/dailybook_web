@@ -18,7 +18,7 @@ const EventDeleteContext = createContext<EventDeleteContextType | undefined>(und
 export function EventDeleteProvider({ children }: { children: ReactNode }) {
   const [eventToDelete, setEventToDelete] = useState<MappedEvent | null>(null);
   const [deleteScope, setDeleteScope] = useState<RecurrenceScope>('occurrence');
-  const { deleteEvent } = useEventsQuery();
+  const { deleteEvent } = useEventsQuery({}, false);
 
   const openDelete = (event: MappedEvent) => {
     setDeleteScope('occurrence');

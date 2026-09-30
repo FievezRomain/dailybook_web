@@ -75,4 +75,17 @@ describe("getEventDocumentUrl", () => {
     expect(mocks.post).toHaveBeenCalledWith('/events/8/documents/bilan%20%C3%A9t%C3%A9.pdf');
     expect(mocks.delete).toHaveBeenCalledWith('/events/8/documents/bilan%20%C3%A9t%C3%A9.pdf');
   });
+
+  it('encode les filtres de collection sans envoyer de données inutiles', async () => {
+    mocks.get.mockResolvedValueOnce({ data: [event] });
+
+    await getEvents({
+      dateFrom: '2026-09-01', dateTo: '2026-09-30', animalIds: [3],
+      eventTypes: ['soins', 'rdv'], includeOverdueOpen: true, limit: 100,
+    });
+
+    expect(mocks.get).toHaveBeenCalledWith(
+      '/events?date_from=2026-09-01&date_to=2026-09-30&animal_ids=3&event_types=soins&event_types=rdv&include_overdue_open=true&limit=100',
+    );
+  });
 });

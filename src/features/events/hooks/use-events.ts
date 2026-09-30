@@ -4,26 +4,29 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createEvent, deleteEvent, getEventHighlights, getEvents, patchEvent, updateEvent,
 } from '../api/events-api';
+import type { EventListQuery } from '../api/events-api';
 import type {
   CreateEventInput, PatchEventInput, RecurrenceScope, UpdateEventInput,
 } from '../types/event';
 
 export const eventsQueryKey = ['events'] as const;
+export const eventListQueryKey = (filters: EventListQuery = {}) => [...eventsQueryKey, 'list', filters] as const;
 export const eventHighlightsQueryKey = (year: number) => ['events', 'highlights', year] as const;
 
-export function useEventsQuery() {
+export function useEventsQuery(filters: EventListQuery = {}, enabled = true) {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: eventsQueryKey, queryFn: getEvents, staleTime: 30_000 });
-  const setEvents = (events: Awaited<ReturnType<typeof getEvents>>) => queryClient.setQueryData(eventsQueryKey, events);
-  const create = useMutation({ mutationFn: createEvent, onSuccess: setEvents });
+  const queryKey = eventListQueryKey(filters);
+  const query = useQuery({ queryKey, queryFn: () => getEvents(filters), staleTime: 30_000, enabled });
+  const refreshEventLists = () => queryClient.invalidateQueries({ queryKey: eventsQueryKey });
+  const create = useMutation({ mutationFn: createEvent, onSuccess: refreshEventLists });
   const update = useMutation({
-    mutationFn: ({ id, input }: { id: number; input: UpdateEventInput }) => updateEvent(id, input), onSuccess: setEvents,
+    mutationFn: ({ id, input }: { id: number; input: UpdateEventInput }) => updateEvent(id, input), onSuccess: refreshEventLists,
   });
   const patch = useMutation({
-    mutationFn: ({ id, input }: { id: number; input: PatchEventInput }) => patchEvent(id, input), onSuccess: setEvents,
+    mutationFn: ({ id, input }: { id: number; input: PatchEventInput }) => patchEvent(id, input), onSuccess: refreshEventLists,
   });
   const remove = useMutation({
-    mutationFn: ({ id, scope }: { id: number; scope?: RecurrenceScope }) => deleteEvent(id, scope), onSuccess: setEvents,
+    mutationFn: ({ id, scope }: { id: number; scope?: RecurrenceScope }) => deleteEvent(id, scope), onSuccess: refreshEventLists,
   });
 
   return {
@@ -37,6 +40,7 @@ export function useEventsQuery() {
     patchEvent: (id: number, input: PatchEventInput) => patch.mutateAsync({ id, input }),
     deleteEvent: (id: number, scope?: RecurrenceScope) => remove.mutateAsync({ id, scope }),
     refetch: query.refetch,
+    refreshEventLists,
     isMutating: create.isPending || update.isPending || patch.isPending || remove.isPending,
   };
 }

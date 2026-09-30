@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { format } from 'date-fns';
 import { CalendarCheck2, TriangleAlert } from "lucide-react";
 import { EventList } from "@/features/events/components/EventList";
 import { useEventsQuery } from "@/features/events/hooks/use-events";
@@ -10,7 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function TodayTasksCard() {
-  const { events, isLoading, isError, error, refetch } = useEventsQuery();
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { events, isLoading, isError, error, refetch } = useEventsQuery({
+    dateFrom: today,
+    dateTo: today,
+    includeOverdueOpen: true,
+  });
   const todayEvents = useMemo(() => filterToday(events ?? []), [events]);
   const lateEvents = useMemo(() => filterLate(events ?? []), [events]);
   const hasEvents = todayEvents.length > 0 || lateEvents.length > 0;

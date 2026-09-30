@@ -16,7 +16,7 @@ export const EventList = ({ events, strikeCompleted = false }: { events: Event[]
   const { animals, updateAnimalImage } = useAnimalsQuery();
 
   // Récupération des fonctions du context
-  const { patchEvent } = useEventsQuery();
+  const { patchEvent } = useEventsQuery({}, false);
 
   // Gestion de l'ouverture du drawer de visualisation d'event
   const { openDrawer: openDrawerDetail } = useEventDrawer();

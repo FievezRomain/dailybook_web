@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { addDays, format } from 'date-fns';
 import { CalendarRange } from "lucide-react";
 import { EventList } from "@/features/events/components/EventList";
 import { useEventsQuery } from "@/features/events/hooks/use-events";
@@ -10,7 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function UpcomingTasksCard() {
-  const { events, isLoading, isError, error, refetch } = useEventsQuery();
+  const { events, isLoading, isError, error, refetch } = useEventsQuery({
+    dateFrom: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
+    limit: 100,
+  });
   const filteredEvents = useMemo(() => filterUpcoming(events ?? []), [events]);
 
   return (

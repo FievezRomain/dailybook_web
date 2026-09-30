@@ -34,7 +34,7 @@ function eventInput(data: Partial<Event>) {
 
 export function EventFormDrawerWrapper() {
   const { drawer, closeDrawer } = useEventFormDrawer();
-  const { createEvent, updateEvent, refetch, isMutating } = useEventsQuery();
+  const { createEvent, updateEvent, refreshEventLists, isMutating } = useEventsQuery({}, false);
   const { user, isPremium } = useCurrentUser();
   const { animals, isLoading: isLoadingAnimals, updateAnimalImage } = useAnimalsQuery();
   const { groups, isLoading: isLoadingGroups } = useGroupsQuery();
@@ -53,7 +53,7 @@ export function EventFormDrawerWrapper() {
         const addedDocuments = input.documents.filter((filename) => !initialDocuments.has(filename));
         await Promise.all(addedDocuments.map((filename) => attachEventDocument(eventId, filename)));
         await Promise.all(removedDocuments.map((filename) => deleteEventDocument(eventId, filename)));
-        if (removedDocuments.length) await refetch();
+        if (removedDocuments.length) await refreshEventLists();
         toast.success("Événement mis à jour avec succès.");
       }
       closeDrawer();

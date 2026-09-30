@@ -38,6 +38,17 @@ describe('/api/events', () => {
     expect(events).toHaveLength(19);
     expect(events[18]).not.toHaveProperty('note');
   });
+  it('valide et transmet les filtres de lecture au backend', async () => {
+    backendApiClient.mockResolvedValueOnce([event]);
+    const response = await GET(new Request(
+      'http://localhost/api/events?date_from=2026-09-01&date_to=2026-09-30&animal_ids=2&event_types=soins&include_overdue_open=true&limit=100',
+    ));
+
+    expect(response.status).toBe(200);
+    expect(backendApiClient).toHaveBeenCalledWith(
+      'api/v1/events?date_from=2026-09-01&date_to=2026-09-30&animal_ids=2&event_types=soins&include_overdue_open=true&limit=100',
+    );
+  });
   it('valide la création', async () => {
     backendApiClient.mockResolvedValue([event]);
     const response = await POST(request({
