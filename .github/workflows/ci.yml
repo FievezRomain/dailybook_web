@@ -13,6 +13,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  conventional-title:
+    name: Conventional PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release-compatible title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          title = os.environ["PR_TITLE"]
+          pattern = r"^(feat|fix|perf|refactor|docs|test|build|ci|chore|revert)(\([A-Za-z0-9._/-]+\))?(!)?: .+"
+          if not re.fullmatch(pattern, title):
+              print("PR title must follow Conventional Commits, for example: fix: correct event loading")
+              sys.exit(1)
+          PY
+
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -103,3 +124,51 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  release:
+    name: Semantic release
+    needs: [quality, browser-quality]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.semantic.outputs.new_release_published }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
+      revision: ${{ steps.semantic.outputs.new_release_git_head }}
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up release runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+
+      - name: Calculate and publish release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@b12c8f6015dc215fe37bc154d4ad456dd3833c90 # v6.0.0
+        with:
+          semantic_version: 24.2.9
+          branches: |
+            ["main"]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-image:
+    name: Publish versioned image
+    needs: release
+    if: needs.release.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/frontend-build.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+      revision: ${{ needs.release.outputs.revision }}
+    secrets: inherit

@@ -7,10 +7,18 @@ on:
         description: Semantic image version without the v prefix
         required: true
         type: string
+      revision:
+        description: Git commit tagged by Semantic Release
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       version:
         description: Semantic image version without the v prefix
+        required: true
+        type: string
+      revision:
+        description: Git commit or ref to package
         required: true
         type: string
 
@@ -34,6 +42,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.revision }}
 
       - name: Validate version
         id: version
@@ -52,6 +62,9 @@ jobs:
           else
             echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Stamp package metadata
+        run: npm version "${{ steps.version.outputs.value }}" --no-git-tag-version --allow-same-version
 
       - name: Normalize owner
         id: owner
@@ -75,7 +88,11 @@ jobs:
           tags: |
             ghcr.io/${{ steps.owner.outputs.owner }}/web-frontend-vasco-service:${{ steps.version.outputs.value }}
             ${{ steps.version.outputs.is_prerelease == 'false' && format('ghcr.io/{0}/web-frontend-vasco-service:latest', steps.owner.outputs.owner) || '' }}
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+            org.opencontainers.image.revision=${{ inputs.revision }}
           build-args: |
+            NEXT_PUBLIC_APP_VERSION=${{ steps.version.outputs.value }}
             NEXT_PUBLIC_FIREBASE_API_KEY=${{ env.NEXT_PUBLIC_FIREBASE_API_KEY }}
             NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
             NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
