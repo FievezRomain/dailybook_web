@@ -68,6 +68,7 @@ describe("EventFormDrawer", () => {
     expect(
       stepNavigation.querySelector('[data-complete="true"]'),
     ).toBeInTheDocument();
+
   });
   it("bloque la soumission et annonce la création en cours", () => {
     render(
