@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { WebApiError, type WebApiErrorPayload } from './api-error';
+import { writeBffLog } from './bff-logger';
 
 export function bffSuccess<T>(data: T, init?: ResponseInit, requestId = randomUUID()): NextResponse<T> {
   const response = NextResponse.json(data, init);
@@ -24,11 +25,18 @@ export function bffError(
   requestId = error instanceof WebApiError && error.requestId ? error.requestId : randomUUID(),
 ): NextResponse<WebApiErrorPayload> {
   if (error instanceof ZodError) {
-    console.error(JSON.stringify({
-      event: 'bff_contract_validation_failed',
+    writeBffLog('warn', 'bff_contract_validation_failed', {
       requestId,
-      issues: error.issues.map(({ path, message }) => ({ path: path.join('.'), message })),
-    }));
+      issueCount: error.issues.length,
+    });
+  } else if (error instanceof WebApiError && !error.requestId) {
+    writeBffLog(error.status >= 500 ? 'error' : 'warn', 'bff_request_rejected', {
+      requestId,
+      status: error.status,
+      errorCode: error.code,
+    });
+  } else if (!(error instanceof WebApiError)) {
+    writeBffLog('error', 'bff_unexpected_error', { requestId, status: 500 });
   }
   const payload = normalizeError(error, requestId);
   const response = NextResponse.json(payload, { status: payload.status });
