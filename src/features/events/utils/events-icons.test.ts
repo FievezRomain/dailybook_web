@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { colorsMap, eventTypeOptions, filterLate, formatWalkDuration, iconsMap, mapEventData } from './events'
+import { colorsMap, eventTypeOptions, filterLate, formatWalkDuration, getEventTypeRecurrenceDefaults, iconsMap, mapEventData } from './events'
 import type { Event } from '../types/event'
 
 const event = (id: number, dateevent: string, state: string): Event => ({
@@ -13,6 +13,14 @@ const event = (id: number, dateevent: string, state: string): Event => ({
   documents: [],
   shared_groups: [],
   todisplay: true,
+})
+
+describe('event recurrence defaults', () => {
+  it('defaults recurring care and walk events to a daily recurrence', () => {
+    expect(getEventTypeRecurrenceDefaults('soins')).toEqual({ frequencetype: 'recurring', frequencevalue: 'daily' })
+    expect(getEventTypeRecurrenceDefaults('balade')).toEqual({ frequencetype: 'recurring', frequencevalue: 'daily' })
+    expect(getEventTypeRecurrenceDefaults('rdv')).toEqual({ frequencetype: undefined, frequencevalue: undefined })
+  })
 })
 
 describe('registre d’icônes des événements', () => {

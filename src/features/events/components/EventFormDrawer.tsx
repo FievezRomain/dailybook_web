@@ -19,6 +19,7 @@ import type { Event, RecurrenceScope } from "@/features/events/types/event";
 import {
   eventToneClasses,
   eventTypeOptions,
+  getEventTypeRecurrenceDefaults,
   iconsMap,
   titleMap,
 } from "@/features/events/utils/events";
@@ -277,6 +278,7 @@ export const EventFormDrawer = ({
                               setValues((previous) => ({
                                 ...previous,
                                 eventtype: value,
+                                ...getEventTypeRecurrenceDefaults(value),
                               }));
                               advance();
                             }}
