@@ -2,6 +2,12 @@ import type { Event, MappedEvent } from '@/features/events/types/event';
 import { differenceInCalendarDays, isAfter, isBefore, isSameDay, parseISO, startOfDay } from 'date-fns';
 import type { IconName } from '@/shared/components/ui/icons';
 
+export function getEventTypeRecurrenceDefaults(eventType: string) {
+  return eventType === 'soins' || eventType === 'balade'
+    ? { frequencetype: 'recurring', frequencevalue: 'daily' }
+    : { frequencetype: undefined, frequencevalue: undefined };
+}
+
 const eventDate = (event: Event) => startOfDay(parseISO(event.dateevent));
 export const hasCompletedState = (event: Event) =>
   ['completed', 'done', 'termine', 'true'].includes(
