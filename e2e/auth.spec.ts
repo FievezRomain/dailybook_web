@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { format } from 'date-fns';
 import {
   createVerifiedFirebaseUser,
   exchangeIdTokenForSession,
@@ -147,7 +148,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [{
         id: 8,
         nom: 'Vaccin annuel',
-        dateevent: '2026-09-05',
+        dateevent: format(new Date(), 'yyyy-MM-dd'),
         animaux: [],
         eventtype: 'rdv',
         state: 'À faire',
@@ -159,7 +160,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: /Vaccin annuel/ }).click();
+      await page.getByRole('button', { name: 'Ouvrir Vaccin annuel', exact: true }).click();
       await expect(page.getByRole('dialog').getByRole('heading', { name: 'Vaccin annuel' })).toBeVisible();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
       await expect(page.getByRole('dialog', { name: 'Modifier rendez-vous médical' })).toBeVisible();
