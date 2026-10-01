@@ -70,3 +70,11 @@ Tests ciblés : export protégé/désactivé, normalisation, absence de données
 timeouts, HTTP 500, erreur réseau, tolérance aux erreurs du collecteur et passage
 réel par les helpers JSON/PDF. La collecte dans Prometheus et les panneaux Grafana
 restent à raccorder et à vérifier avant clôture de US-017. Aucun déploiement production.
+
+Recette HTTP locale du 01/10 : `scripts/start-metrics-recipe.mjs` et
+`scripts/test-metrics-recipe.mjs`, avec Firebase émulé sur 9099 et la fixture
+FastAPI dédiée sur 8008, vérifient les vrais Route Handlers Next en développement.
+Succès, erreur API 500 et timeout réel à 10 s passent et sont visibles depuis
+l'export (registre partagé entre routes). Prometheus les collecte ; les secrets
+de test sont absents des métriques. Le build de production reste à qualifier.
+Le compte émulé créé par la recette est supprimé dans un `finally`.
