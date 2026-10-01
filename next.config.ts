@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { SECURITY_HEADERS } from './src/shared/security/headers';
+import { createStorageRemotePatterns } from './src/shared/security/storage-hostnames';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -11,14 +12,7 @@ const nextConfig: NextConfig = {
   },
   
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_BUCKET_HOSTNAME || '',
-        port: '',
-        pathname: '/**', // autorise toutes les images de ce domaine
-      },
-    ],
+    remotePatterns: createStorageRemotePatterns(process.env.NEXT_PUBLIC_BUCKET_HOSTNAME),
   },
 };
 

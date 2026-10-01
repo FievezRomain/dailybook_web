@@ -1,3 +1,6 @@
+import { WebApiError } from '@/shared/api/api-error';
+import { resolveStorageHostnames } from './storage-hostnames';
+
 const MAX_PRESIGNED_URL_LENGTH = 8_192;
 
 export function validatePresignedUrl(value: unknown): string {
@@ -31,22 +34,15 @@ export function openPresignedUrl(value: unknown): void {
 }
 
 function configuredStorageHostnames(): ReadonlySet<string> {
-  const hostname = process.env.NEXT_PUBLIC_BUCKET_HOSTNAME?.trim().toLowerCase();
-  if (!hostname || !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(hostname)) {
+  try {
+    return new Set(resolveStorageHostnames(process.env.NEXT_PUBLIC_BUCKET_HOSTNAME));
+  } catch {
     throw new WebApiError({
       code: 'BFF_MISCONFIGURED', message: 'Le stockage Vasco est mal configuré.', status: 500,
     });
   }
-
-  const hostnames = new Set([hostname]);
-  const regionalAwsHostname = hostname.match(/^(.+)\.s3\.([a-z0-9-]+)\.amazonaws\.com$/);
-  if (regionalAwsHostname) {
-    hostnames.add(`${regionalAwsHostname[1]}.s3.amazonaws.com`);
-  }
-  return hostnames;
 }
 
 function invalidStorageUrl(message: string): WebApiError {
   return new WebApiError({ code: 'INVALID_STORAGE_URL', message, status: 502 });
 }
-import { WebApiError } from '@/shared/api/api-error';
