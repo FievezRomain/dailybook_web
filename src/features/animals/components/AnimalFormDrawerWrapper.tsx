@@ -53,7 +53,11 @@ export function AnimalFormDrawerWrapper() {
         if (Object.keys(changed).length > 0 || imageFile) {
           await updateAnimal(drawer.initialAnimal.id, changed, imageFile);
         }
-        toast.success("Animal modifié avec succès.");
+        toast.success(
+          changed.datedeces
+            ? "Toutes nos condoléances. La date de décès a bien été enregistrée."
+            : "Animal modifié avec succès.",
+        );
       } else {
         const createInput = { ...input };
         delete createInput.datedeces;

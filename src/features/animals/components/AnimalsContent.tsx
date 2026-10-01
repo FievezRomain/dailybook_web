@@ -19,7 +19,22 @@ import { getAnimalMedicalEvents } from '../utils/animal-medical';
 import { PageShell } from '@/shared/components/layout/PageShell';
 import { SystemState } from '@/shared/components/ui/system-state';
 import { AnimalAvatar } from './AnimalAvatar';
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui';
+import { getLocalDateString } from '@/shared/utils/dates';
+import {
+  Button,
+  DateInput,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/components/ui';
 
 function ageLabel(date?: string | null) {
   if (!date) return 'Âge inconnu';
@@ -38,12 +53,17 @@ export default function AnimalsContent() {
     error: animalsError,
     refetch,
     updateAnimalImage,
+    updateAnimal,
     deleteAnimal,
+    isMutating,
   } = useAnimalsQuery();
   const { isPremium } = useCurrentUser();
 
   const [animalId, setAnimalId] = useState<number | null>(null);
   const [animalToDelete, setAnimalToDelete] = useState<Animal | null>(null);
+  const [animalToMarkDeceased, setAnimalToMarkDeceased] = useState<Animal | null>(null);
+  const [deathDate, setDeathDate] = useState("");
+  const [deathError, setDeathError] = useState<string>();
 
   // Utilise le context pour ouvrir le formulaire
   const { openDrawer: openDrawerForm } = useAnimalFormDrawer();
@@ -91,6 +111,32 @@ export default function AnimalsContent() {
     }
   };
 
+  const closeDeathDialog = () => {
+    setAnimalToMarkDeceased(null);
+    setDeathDate("");
+    setDeathError(undefined);
+  };
+
+  const handleConfirmDeath = async () => {
+    if (!animalToMarkDeceased || !deathDate) {
+      setDeathError("La date de décès est obligatoire.");
+      return;
+    }
+    if (deathDate > getLocalDateString()) {
+      setDeathError("La date de décès ne peut pas être future.");
+      return;
+    }
+    try {
+      setDeathError(undefined);
+      await updateAnimal(animalToMarkDeceased.id, { datedeces: deathDate });
+      toast.success("Toutes nos condoléances. La date de décès a bien été enregistrée.");
+      closeDeathDialog();
+    } catch (error) {
+      Sentry.captureException(error, { extra: { animalId: animalToMarkDeceased.id, action: 'record_death' } });
+      setDeathError("La date de décès n’a pas pu être enregistrée. Réessayez.");
+    }
+  };
+
   if (isAnimalsError) {
     return (
       <PageShell><SystemState state="error" density="page" title="Impossible de charger vos animaux" description={animalsError instanceof Error ? animalsError.message : 'Vos fiches animales sont temporairement indisponibles.'} primaryAction={{ label: 'Réessayer', onClick: () => void refetch() }} /></PageShell>
@@ -133,6 +179,15 @@ export default function AnimalsContent() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleEdit}>Modifier</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setDeathDate(selectedAnimal.datedeces ?? "");
+                    setDeathError(undefined);
+                    setAnimalToMarkDeceased(selectedAnimal);
+                  }}
+                >
+                  {selectedAnimal.datedeces ? "Modifier la date de décès" : "Signaler un décès"}
+                </DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={() => setAnimalToDelete(selectedAnimal)}>Supprimer</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -184,6 +239,39 @@ export default function AnimalsContent() {
         onConfirm={() => void handleConfirmDelete()}
         confirmLabel="Supprimer"
       />
+      <Dialog
+        open={animalToMarkDeceased !== null}
+        onOpenChange={(open) => {
+          if (!open) closeDeathDialog();
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Signaler le décès de {animalToMarkDeceased?.nom}</DialogTitle>
+            <DialogDescription>
+              L’animal sera déplacé dans l’historique. Son carnet et ses informations resteront accessibles.
+            </DialogDescription>
+          </DialogHeader>
+          <label className="grid gap-2 text-sm font-medium">
+            Date de décès
+            <DateInput
+              value={deathDate}
+              max={getLocalDateString()}
+              onValueChange={setDeathDate}
+              aria-invalid={Boolean(deathError)}
+            />
+          </label>
+          {deathError ? <p role="alert" className="text-sm text-destructive">{deathError}</p> : null}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="ghost">Annuler</Button>
+            </DialogClose>
+            <Button disabled={!deathDate || isMutating} onClick={() => void handleConfirmDeath()}>
+              {isMutating ? "Enregistrement…" : "Enregistrer la date"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageShell>
   );
 }
