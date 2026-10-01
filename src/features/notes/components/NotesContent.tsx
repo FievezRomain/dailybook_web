@@ -265,9 +265,6 @@ function NoteCard({
         <button className="mt-4 block w-full text-left" onClick={onOpen}>
           <Markdown compact>{note.note}</Markdown>
         </button>
-        <p className="mt-5 border-t pt-3 text-[11px] font-medium text-muted-foreground">
-          {formatDate(note)}
-        </p>
       </div>
     </Card>
   );

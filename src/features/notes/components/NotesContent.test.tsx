@@ -25,4 +25,10 @@ describe('NotesContent', () => {
     fireEvent.click(screen.getByRole('button', { name: 'À retenir' }));
     expect(screen.getByRole('main')).toHaveTextContent('<script>inactif</script>');
   });
+
+  it('n’affiche pas de date inconnue sur les cartes', () => {
+    mocks.query.mockReturnValue({ notes: [{ id: 8, titre: 'Sans date', note: 'Contenu', is_pinned: false }], isLoading: false, isError: false, isMutating: false, createNote: mocks.create, updateNote: vi.fn(), deleteNote: vi.fn(), refetch: vi.fn() });
+    render(<NotesContent />);
+    expect(screen.queryByText('Date inconnue')).not.toBeInTheDocument();
+  });
 });

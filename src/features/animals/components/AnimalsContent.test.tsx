@@ -16,7 +16,9 @@ vi.mock('@/features/animals/hooks/use-animals', () => ({
     isError: false,
     error: null,
     updateAnimalImage: vi.fn(),
+    updateAnimal: vi.fn(),
     deleteAnimal: vi.fn(),
+    isMutating: false,
   }),
 }));
 vi.mock('@/features/animals/context/animal-form-drawer-context', () => ({ useAnimalFormDrawer: () => ({ openDrawer: vi.fn() }) }));

@@ -18,7 +18,7 @@ export default function UpcomingTasksCard() {
   const filteredEvents = useMemo(() => filterUpcoming(events ?? []), [events]);
 
   return (
-    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 py-0 shadow-sm">
+    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 p-0 shadow-sm">
       <CardHeader className="flex flex-row items-center gap-3 space-y-0 border-b border-border/60 bg-muted/25 px-4 py-3 pr-14">
         <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarRange className="size-5" aria-hidden="true" /></span>
         <div className="min-w-0 flex-1"><CardTitle role="heading" aria-level={2}>Prochains jours</CardTitle><p className="mt-0.5 text-xs text-muted-foreground">{filteredEvents.length} à venir</p></div>
