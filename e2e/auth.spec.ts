@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { format } from 'date-fns';
+import { addMonths, format } from 'date-fns';
 import {
   createVerifiedFirebaseUser,
   exchangeIdTokenForSession,
@@ -8,6 +8,8 @@ import {
 
 const PRIVATE_ROUTES = ['/dashboard', '/animals', '/calendar', '/profile', '/performances/objectives'];
 const SESSION_COOKIE_NAME = '__Secure-vasco-session';
+const currentCalendarDate = () => format(new Date(), 'yyyy-MM-dd');
+const recurrenceEndDate = () => format(addMonths(new Date(), 3), 'yyyy-MM-dd');
 
 test.describe('protection anonyme', () => {
   for (const route of PRIVATE_ROUTES) {
@@ -148,7 +150,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route(/\/api\/events(?:\?.*)?$/, (route) => route.fulfill({ json: [{
         id: 8,
         nom: 'Vaccin annuel',
-        dateevent: format(new Date(), 'yyyy-MM-dd'),
+        dateevent: currentCalendarDate(),
         animaux: [],
         eventtype: 'rdv',
         state: 'À faire',
@@ -217,7 +219,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const recurringEvent = {
       id: 8,
       nom: 'Soin récurrent',
-      dateevent: '2026-09-05',
+      dateevent: currentCalendarDate(),
       animaux: [3],
       eventtype: 'soins',
       state: 'À faire',
@@ -225,7 +227,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       shared_groups: [],
       frequencetype: 'recurring',
       frequencevalue: 'weekly',
-      datefinsoins: '2026-12-31',
+      datefinsoins: recurrenceEndDate(),
       idparent: 5,
     };
     try {
@@ -240,7 +242,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       await page.route('**/api/groups', (route) => route.fulfill({ json: [] }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: /Soin récurrent/ }).click();
+      await page.getByRole('button', { name: 'Ouvrir Soin récurrent', exact: true }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
       await page.locator('input[name="nom"]').fill('Soin ajusté');
       await page.getByRole('button', { name: 'Continuer' }).click();
@@ -264,7 +266,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const recurringEvent = {
       id: 8,
       nom: 'Soin partagé',
-      dateevent: '2026-09-05',
+      dateevent: currentCalendarDate(),
       animaux: [3],
       eventtype: 'soins',
       state: 'À faire',
@@ -272,7 +274,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       shared_groups: [],
       frequencetype: 'recurring',
       frequencevalue: 'weekly',
-      datefinsoins: '2026-12-31',
+      datefinsoins: recurrenceEndDate(),
       idparent: 5,
     };
     try {
@@ -292,7 +294,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       }] }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: /Soin partagé/ }).click();
+      await page.getByRole('button', { name: 'Ouvrir Soin partagé', exact: true }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByLabel('Toute la série').check();
@@ -317,7 +319,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const event = {
       id: 8,
       nom: 'Contrôle documenté',
-      dateevent: '2026-09-05',
+      dateevent: currentCalendarDate(),
       animaux: [3],
       eventtype: 'rdv',
       state: 'À faire',
@@ -344,7 +346,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       } }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: /Contrôle documenté/ }).click();
+      await page.getByRole('button', { name: 'Ouvrir Contrôle documenté', exact: true }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
@@ -367,7 +369,7 @@ test.describe('cycle de vie Firebase Auth', () => {
     const event = {
       id: 8,
       nom: 'Contrôle à joindre',
-      dateevent: '2026-09-05',
+      dateevent: currentCalendarDate(),
       animaux: [3],
       eventtype: 'rdv',
       state: 'À faire',
@@ -398,7 +400,7 @@ test.describe('cycle de vie Firebase Auth', () => {
       } }));
 
       await page.goto('/calendar');
-      await page.getByRole('button', { name: /Contrôle à joindre/ }).click();
+      await page.getByRole('button', { name: 'Ouvrir Contrôle à joindre', exact: true }).click();
       await page.getByRole('button', { name: 'Modifier l’événement' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
       await page.getByRole('button', { name: 'Continuer' }).click();
