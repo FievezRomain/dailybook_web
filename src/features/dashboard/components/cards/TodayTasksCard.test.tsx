@@ -29,6 +29,7 @@ describe('TodayTasksCard', () => {
 
     render(<TodayTasksCard />);
 
+    expect(screen.getAllByRole('heading', { name: 'Aujourd’hui' })[0]?.closest('[data-slot="card"]')).toHaveClass('p-0');
     expect(screen.getByText(/2 en retard/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'En retard' })).toBeInTheDocument();
     expect(screen.getByText('Vaccin en retard')).toBeInTheDocument();

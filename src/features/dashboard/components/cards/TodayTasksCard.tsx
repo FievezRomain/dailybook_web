@@ -27,7 +27,7 @@ export default function TodayTasksCard() {
     : 0;
 
   return (
-    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 py-0 shadow-sm">
+    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 p-0 shadow-sm">
       <CardHeader className="space-y-3 border-b border-border/60 bg-muted/25 px-3 py-3 sm:px-4">
         <div className="flex items-center gap-3 pr-10">
           <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarCheck2 className="size-5" aria-hidden="true" /></span>
