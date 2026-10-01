@@ -8,6 +8,7 @@ import { getAdminAuth } from '@/lib/firebase-admin';
 import { WebApiError } from './api-error';
 import { resolveBackendApiUrl } from './backend-url';
 import { normalizeUpstreamRoute, writeBffLog } from './bff-logger';
+import { measureBackendRequest } from './bff-metrics';
 
 export type BackendApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -61,7 +62,7 @@ export async function backendApiClient<T = unknown>(
   const startedAt = performance.now();
 
   try {
-    const response = await axios.request<BackendSuccessEnvelope<T>>({
+    const response = await measureBackendRequest(path, method, () => axios.request<BackendSuccessEnvelope<T>>({
       url: `${apiUrl}/${path.replace(/^\/+/, '')}`,
       method,
       headers: {
@@ -74,7 +75,7 @@ export async function backendApiClient<T = unknown>(
       timeout: 10_000,
       maxContentLength: 2_000_000,
       maxBodyLength: 2_000_000,
-    });
+    }));
     const durationMs = performance.now() - startedAt;
     if (durationMs >= 1_000) {
       writeBffLog('info', 'bff_upstream_slow', {
@@ -104,7 +105,7 @@ export async function backendApiClient<T = unknown>(
 export async function backendApiBinary(path: string): Promise<BackendBinaryResponse> {
   const { requestId, apiUrl, sessionCookie } = await backendRequestContext();
   try {
-    const response = await axios.request<ArrayBuffer>({
+    const response = await measureBackendRequest(path, 'GET', () => axios.request<ArrayBuffer>({
       url: `${apiUrl}/${path.replace(/^\/+/, '')}`,
       method: 'GET',
       headers: {
@@ -117,7 +118,7 @@ export async function backendApiBinary(path: string): Promise<BackendBinaryRespo
       timeout: 30_000,
       maxContentLength: 35 * 1024 * 1024,
       maxBodyLength: 35 * 1024 * 1024,
-    });
+    }));
     return {
       body: response.data,
       contentType: String(response.headers['content-type'] ?? 'application/octet-stream'),

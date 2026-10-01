@@ -325,6 +325,8 @@ Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I0 
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.
 - [ ] Monitoring frontend/BFF avec request ID corrélé au backend.
+  - [x] US-017 : métriques du transport BFF centralisées, export privé opt-in et tests ciblés (14 scénarios avec journalisation). Voir `bff-metrics.md`.
+  - [ ] US-017 : qualifier la collecte Prometheus et les panneaux Grafana API/BFF ; aucune validation de production à ce stade.
 - [ ] Budgets de performance et taille de bundle.
 - [ ] Revue régulière des dépendances et secrets.
   - [ ] Traiter l’audit de production du 19 septembre 2026 : corriger l’avis critique Next.js 16.3.2 et l’avis élevé Sharp/libheif, puis rejouer lint, typecheck, tests, build et E2E ; réévaluer séparément les 6 modérées transitives Firebase Admin.

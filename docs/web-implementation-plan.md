@@ -19,6 +19,8 @@ Ce document est le backlog exécutable de la phase 5 de `refactor-plan.md`. Il d
 
 ## Statut global
 
+Maintenance US-017 : instrumentation serveur du transport BFF et export Prometheus privé documentés dans [bff-metrics.md](bff-metrics.md). Les 14 tests ciblés métriques/journalisation passent. Aucun changement UX/UI ; collecte et visualisation restent à qualifier avant clôture de l'US.
+
 - [x] **Clôture globale de l’implémentation Vasco Web** — les lots I0 à I18 et leurs critères de sortie sont validés.
 - [x] Maquettes Figma et handoff terminés — 21 pages, M0–M10, 17 overlays et 16 flows.
 - [x] Architecture `features/shared`, BFF Next et contrats FastAPI préparés par les phases 0 à 4.

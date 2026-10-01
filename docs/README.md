@@ -34,6 +34,8 @@ Ces documents définissent la cible web. Le code actuel n'est jamais une source 
 
 ## Références d’implémentation web
 
+- [Métriques BFF privées — US-017](bff-metrics.md)
+
 - [Stack et décisions techniques](stack.md)
 - [Baseline tests, performance et accessibilité](quality-baseline.md)
 - [Gestion de l’état](contexts.md)
