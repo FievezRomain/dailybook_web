@@ -8,6 +8,8 @@ process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 const app = initializeApp({ projectId: 'vasco-e2e' });
 const auth = getAuth(app);
 const token = readFileSync(process.argv[2], 'utf8').trim();
+const production = process.argv[3] === '--production';
+const origin = production ? 'http://127.0.0.1:3013' : 'http://127.0.0.1:3012';
 let uid;
 try {
   const signup = await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key', {
@@ -18,14 +20,14 @@ try {
   const identity = await signup.json();
   uid = identity.localId;
   const session = await auth.createSessionCookie(identity.idToken, { expiresIn: 3600_000 });
-  const headers = { Cookie: `session=${session}` };
+  const headers = { Cookie: `${production ? '__Secure-vasco-session' : 'session'}=${session}` };
   for (const [offset, expected] of [[0, 200], [1, 500], [2, 502]]) {
-    const response = await fetch(`http://127.0.0.1:3012/api/events?offset=${offset}`, {
+    const response = await fetch(`${origin}/api/events?offset=${offset}`, {
       headers, signal: AbortSignal.timeout(60_000), redirect: 'error',
     });
     assert.equal(response.status, expected, `Unexpected response for case ${offset}`);
   }
-  const endpoint = 'http://127.0.0.1:3012/api/internal/metrics';
+  const endpoint = `${origin}/api/internal/metrics`;
   assert.equal((await fetch(endpoint)).status, 401);
   const exportResponse = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
   assert.equal(exportResponse.status, 200);

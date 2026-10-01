@@ -78,3 +78,8 @@ Succès, erreur API 500 et timeout réel à 10 s passent et sont visibles depuis
 l'export (registre partagé entre routes). Prometheus les collecte ; les secrets
 de test sont absents des métriques. Le build de production reste à qualifier.
 Le compte émulé créé par la recette est supprimé dans un `finally`.
+
+Complément : build standalone et même recette HTTP réussis en mode production
+local sur 3013 (`--production` sur les deux scripts). La signature du handler
+Agenda exige désormais explicitement `Request`, conformément aux types générés
+Next ; ses cinq tests passent avec de vraies requêtes, sans valeur implicite.
