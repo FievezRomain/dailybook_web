@@ -40,7 +40,8 @@ function replaceGroup(current: Group[] | undefined, group: Group) {
 
 export function useGroupsQuery() {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: groupsQueryKey, queryFn: getGroups, staleTime: 30_000 });
+  const query = useQuery({ queryKey: groupsQueryKey, queryFn: getGroups, staleTime: 30_000,
+    meta: { refreshOnSubscriptionChange: true } });
   const create = useMutation({
     mutationFn: createGroup,
     onSuccess: (group) => queryClient.setQueryData<Group[]>(groupsQueryKey, (current = []) => [...current, group]),
@@ -70,7 +71,8 @@ export function useGroupsQuery() {
 
 export function useGroupInvitationsQuery() {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: invitationsQueryKey, queryFn: getInvitations, staleTime: 30_000 });
+  const query = useQuery({ queryKey: invitationsQueryKey, queryFn: getInvitations, staleTime: 30_000,
+    meta: { refreshOnSubscriptionChange: true } });
   const respond = useMutation({
     mutationFn: ({ id, input }: { id: number; input: RespondInvitationInput }) => respondInvitation(id, input),
     onSuccess: (group, variables) => {
@@ -134,13 +136,15 @@ export function useGroupManagement(groupId: number) {
 }
 
 export function useGroupAnimalsQuery(groupId: number) {
-  return useQuery({ queryKey: groupAnimalsQueryKey(groupId), queryFn: () => getGroupAnimals(groupId), enabled: groupId > 0 });
+  return useQuery({ queryKey: groupAnimalsQueryKey(groupId), queryFn: () => getGroupAnimals(groupId), enabled: groupId > 0,
+    meta: { refreshOnSubscriptionChange: true } });
 }
 
 export function usePendingAnimalSharesQuery(groupId: number) {
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: pendingAnimalSharesQueryKey(groupId),
+    meta: { refreshOnSubscriptionChange: true },
     queryFn: () => getPendingAnimalShares(groupId),
     enabled: groupId > 0,
   });
