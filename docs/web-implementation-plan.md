@@ -2,6 +2,7 @@
 
 Maintenance hors cycle graphique, 02/10/2026 — Admin US-012 :
 - [x] Rafraîchir uniquement le profil au retour au premier plan/réseau ; quatre tests et typage réussis.
+- [x] Invalider les caches Groupes marqués lors d’un changement d’abonnement confirmé ; neuf tests ciblés et typage réussis.
 - [ ] Recette complète cadeau/révocation/groupes avec un compte local autorisé.
 Voir [le suivi de maintenance](subscription-focus-refresh.md).
 

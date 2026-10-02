@@ -12,16 +12,24 @@ hook reçoivent le nouveau droit, cadeau ou révocation. Une erreur conserve la
 dernière valeur connue avec `isError`, sans annoncer une actualisation réussie.
 Le backend reste responsable de chaque autorisation Premium.
 
+Les requêtes Groupes (liste, invitations, animaux et propositions) portent la
+métadonnée `refreshOnSubscriptionChange`. Lorsqu’une réponse du profil confirme
+un changement d’abonnement pour le même compte, ces caches sont invalidés ; les
+requêtes actives sont relues, les autres deviennent obsolètes. Cette invalidation
+est portée par l’exécution partagée de la query du profil, pas par chacun de ses
+composants consommateurs. Un droit inchangé ne relance pas les groupes.
+
 ## Vérifications et recette restante
 
-Quatre tests du hook passent : attribution, révocation, reconnexion réseau,
-échec du rafraîchissement. Le typage passe également.
+Cinq tests du hook et quatre tests Groupes passent : attribution, révocation,
+reconnexion réseau, échec du rafraîchissement et invalidation sélective lors
+d’un changement confirmé. Le typage passe également.
 
 Sur un compte local autorisé : ouvrir le web, changer ses droits depuis l’admin,
 revenir à l’onglet et vérifier profil et gates Premium sans déconnexion. Répéter
-avec révocation, expiration et autre droit actif. Vérifier séparément les listes
-de groupes déjà en cache : cette correction rafraîchit le profil, pas toutes les
-listes métier. Contrôler aussi les refus serveur avec une interface obsolète.
+avec révocation, expiration et autre droit actif. Vérifier les listes Groupes
+déjà en cache avec le backend réel ; les autres listes métier ne sont pas
+systématiquement relues. Contrôler les refus serveur avec une interface obsolète.
 Ces recettes complètes ne sont pas déclarées effectuées et l’US reste ouverte.
 
 Aucun déploiement de production n’est réalisé par ce changement.

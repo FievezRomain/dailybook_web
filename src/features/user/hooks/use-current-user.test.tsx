@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider, focusManager, onlineManager } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryObserver, focusManager, onlineManager } from '@tanstack/react-query';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
@@ -10,9 +10,10 @@ import { useCurrentUser } from './use-current-user';
 
 const profile = { id: 1, name: 'Fixture', email: 'fixture@example.invalid', picture: null, expotoken: null, timezone: 'Europe/Paris', dailyReminderEnabled: true, subscription: 'Free' };
 const clients: QueryClient[] = [];
-function setup() {
+function setup(configure?: (client: QueryClient) => void) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } } });
   clients.push(client);
+  configure?.(client);
   const wrapper = ({ children }: PropsWithChildren) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
   return renderHook(useCurrentUser, { wrapper });
 }
@@ -50,4 +51,31 @@ it('exposes an error and keeps last-known data when the refresh fails', async ()
   await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.isPremium).toBe(false);
   expect(result.current.user?.subscription).toBe('Free');
+});
+
+it('refreshes marked active queries only when a confirmed subscription changes', async () => {
+  const loadGroups = vi.fn().mockResolvedValue([]);
+  let stop: () => void = () => undefined;
+  let unmarkedLoad = vi.fn();
+  const { result } = setup(client => {
+    const observer = new QueryObserver(client, {
+      queryKey: ['groups'], queryFn: loadGroups, initialData: [], staleTime: Infinity,
+      meta: { refreshOnSubscriptionChange: true },
+    });
+    stop = observer.subscribe(() => undefined);
+    unmarkedLoad = vi.fn().mockResolvedValue([]);
+    client.setQueryDefaults(['contacts'], { queryFn: unmarkedLoad });
+    client.setQueryData(['contacts'], []);
+  });
+  try {
+    await waitFor(() => expect(result.current.user).toBeDefined());
+    act(() => { focusManager.setFocused(false); focusManager.setFocused(true); });
+    await waitFor(() => expect(api.getCurrentUser).toHaveBeenCalledTimes(2));
+    expect(loadGroups).not.toHaveBeenCalled();
+    api.getCurrentUser.mockResolvedValue({ ...profile, subscription: 'Premium' });
+    act(() => { focusManager.setFocused(false); focusManager.setFocused(true); });
+    await waitFor(() => expect(result.current.isPremium).toBe(true));
+    await waitFor(() => expect(loadGroups).toHaveBeenCalledTimes(1));
+    expect(unmarkedLoad).not.toHaveBeenCalled();
+  } finally { stop(); }
 });
