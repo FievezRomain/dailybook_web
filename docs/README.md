@@ -34,6 +34,8 @@ Ces documents définissent la cible web. Le code actuel n'est jamais une source 
 
 ## Références d’implémentation web
 
+- [Droits au retour dans l’onglet](subscription-focus-refresh.md) — maintenance Admin US-012 et limites de recette.
+
 - [Stack et décisions techniques](stack.md)
 - [Baseline tests, performance et accessibilité](quality-baseline.md)
 - [Gestion de l’état](contexts.md)

@@ -1,5 +1,10 @@
 # Plan d’implémentation de Vasco Web
 
+Maintenance hors cycle graphique, 02/10/2026 — Admin US-012 :
+- [x] Rafraîchir uniquement le profil au retour au premier plan/réseau ; quatre tests et typage réussis.
+- [ ] Recette complète cadeau/révocation/groupes avec un compte local autorisé.
+Voir [le suivi de maintenance](subscription-focus-refresh.md).
+
 ## Objectif
 
 Implémenter dans l’application Next.js les maquettes validées de [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp), sans coexistence V1/V2 et sans recopier l’architecture visuelle legacy.

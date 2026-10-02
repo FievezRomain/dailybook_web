@@ -20,6 +20,10 @@ export function useCurrentUser() {
       }
     },
     staleTime: 60_000,
+    // Administrative changes may occur while this tab is hidden, even when
+    // the one-minute profile cache is still fresh. Only this query opts in.
+    refetchOnWindowFocus: 'always',
+    refetchOnReconnect: 'always',
   });
 
   return {
