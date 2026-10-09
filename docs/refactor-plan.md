@@ -321,6 +321,12 @@ Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I0 
 
 ## Phase 6 — Industrialisation
 
+Maintenance transverse Admin US-012 (02/10/2026) : le profil est relu au retour
+dans l’onglet et au rétablissement réseau, indépendamment de son cache de 60 s.
+Quatre tests et le typage passent. Voir [le suivi dédié](subscription-focus-refresh.md).
+Le parcours complet cadeau/révocation/groupes n’est pas encore clôturé ; aucune
+phase historique de refonte graphique n’est rouverte.
+
 - [ ] **Clôture de la phase 6** — tous les livrables et le critère de sortie sont vérifiés.
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.

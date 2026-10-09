@@ -6,7 +6,7 @@ import { Check, CheckCircle2, Target } from 'lucide-react'
 import { AnimalSelector } from '@/features/animals/components/AnimalSelector'
 import { useAnimalsQuery } from '@/features/animals/hooks/use-animals'
 import { useObjectivesQuery } from '@/features/objectives/hooks/use-objectives'
-import type { Objective } from '@/features/objectives/types/objective'
+import { isObjectiveCompleted, isObjectiveExpired, isObjectiveInProgress } from '@/features/objectives/utils/objectives'
 import { cn } from '@/lib/utils'
 import { PageShell } from '@/shared/components/layout/PageShell'
 import { Banner } from '@/shared/components/ui/message'
@@ -14,11 +14,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 
 import { ObjectiveList } from './ObjectiveList'
 
-type ObjectiveStatus = 'ongoing' | 'completed'
-
-function isCompleted(objective: Objective) {
-  return objective.sousetapes.length > 0 && objective.sousetapes.every((step) => step.state)
-}
+type ObjectiveStatus = 'ongoing' | 'completed' | 'expired'
 
 export default function ObjectivesContent() {
   const { objectives = [], isLoading, isError, refetch } = useObjectivesQuery()
@@ -28,15 +24,21 @@ export default function ObjectivesContent() {
   const [selectedAnimals, setSelectedAnimals] = useState<number[]>([])
 
   const overview = useMemo(() => {
-    const completed = objectives.filter(isCompleted).length
+    const completed = objectives.filter(isObjectiveCompleted).length
     return {
-      active: objectives.length - completed,
+      active: objectives.filter((objective) => isObjectiveInProgress(objective)).length,
       completed,
+      expired: objectives.filter((objective) => isObjectiveExpired(objective)).length,
     }
   }, [objectives])
 
   const filtered = useMemo(() => objectives.filter((objective) => {
-    if ((status === 'completed') !== isCompleted(objective)) return false
+    const matchesStatus = status === 'ongoing'
+      ? isObjectiveInProgress(objective)
+      : status === 'completed'
+        ? isObjectiveCompleted(objective)
+        : isObjectiveExpired(objective)
+    if (!matchesStatus) return false
     return selectedAnimals.length === 0 || objective.animaux.some((id) => selectedAnimals.includes(id))
   }), [objectives, selectedAnimals, status])
 
@@ -64,10 +66,10 @@ export default function ObjectivesContent() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">{filterLabel}</p>
-            <h3 id="objective-list-heading" className="mt-1 text-2xl font-semibold tracking-[-0.02em]">{status === 'ongoing' ? 'Objectifs en cours' : 'Objectifs terminés'}</h3>
+            <h3 id="objective-list-heading" className="mt-1 text-2xl font-semibold tracking-[-0.02em]">{status === 'ongoing' ? 'Objectifs en cours' : status === 'completed' ? 'Objectifs terminés' : 'Objectifs expirés'}</h3>
           </div>
           <div className="inline-flex rounded-[14px] bg-muted/60 p-1" role="tablist" aria-label="État des objectifs">
-            {([['ongoing', 'En cours', overview.active], ['completed', 'Terminés', overview.completed]] as const).map(([value, label, count]) => (
+            {([['ongoing', 'En cours', overview.active], ['completed', 'Terminés', overview.completed], ['expired', 'Expirés', overview.expired]] as const).map(([value, label, count]) => (
               <button key={value} type="button" role="tab" aria-selected={status === value} onClick={() => setStatus(value)} className={cn('inline-flex min-h-10 items-center gap-2 rounded-[11px] px-4 text-sm font-semibold text-muted-foreground transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', status === value && 'bg-card text-foreground shadow-sm')}>
                 {status === value && <Check className="size-4 text-primary" aria-hidden="true" />}{label}<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] tabular-nums">{count}</span>
               </button>
@@ -81,7 +83,7 @@ export default function ObjectivesContent() {
           <div className="relative flex min-h-64 flex-col items-center justify-center overflow-hidden rounded-[24px] border border-dashed bg-muted/15 p-6 text-center">
             <div aria-hidden="true" className="absolute -bottom-20 size-64 rounded-full bg-primary/5 blur-3xl" />
             {status === 'completed' ? <CheckCircle2 className="relative mb-3 size-9 text-muted-foreground" aria-hidden="true" /> : <Target className="relative mb-3 size-9 text-muted-foreground" aria-hidden="true" />}
-            <h3 className="relative text-lg font-semibold">{selectedAnimals.length ? 'Aucun objectif pour cette sélection' : status === 'completed' ? 'Aucun objectif terminé' : 'Aucun objectif en cours'}</h3>
+            <h3 className="relative text-lg font-semibold">{selectedAnimals.length ? 'Aucun objectif pour cette sélection' : status === 'completed' ? 'Aucun objectif terminé' : status === 'expired' ? 'Aucun objectif expiré' : 'Aucun objectif en cours'}</h3>
             <p className="relative mt-2 max-w-md text-sm leading-6 text-muted-foreground">{selectedAnimals.length ? 'Choisissez un autre animal ou revenez à tous les objectifs.' : 'Utilisez l’action Créer du menu principal pour définir votre prochain cap.'}</p>
           </div>
         )}

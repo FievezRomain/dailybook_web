@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { colorsMap, eventTypeOptions, filterLate, formatWalkDuration, getEventTypeRecurrenceDefaults, iconsMap, mapEventData } from './events'
+import { colorsMap, eventTypeOptions, filterLate, formatWalkDuration, getEventFormInitialValues, getEventTypeRecurrenceDefaults, iconsMap, isRecurringEvent, mapEventData } from './events'
 import type { Event } from '../types/event'
 
 const event = (id: number, dateevent: string, state: string): Event => ({
@@ -20,6 +20,21 @@ describe('event recurrence defaults', () => {
     expect(getEventTypeRecurrenceDefaults('soins')).toEqual({ frequencetype: 'recurring', frequencevalue: 'daily' })
     expect(getEventTypeRecurrenceDefaults('balade')).toEqual({ frequencetype: 'recurring', frequencevalue: 'daily' })
     expect(getEventTypeRecurrenceDefaults('rdv')).toEqual({ frequencetype: undefined, frequencevalue: undefined })
+  })
+  it('applies the daily default only to new recurrence-capable events', () => {
+    expect(getEventFormInitialValues({ eventtype: 'soins' })).toMatchObject({
+      frequencetype: 'recurring',
+      frequencevalue: 'daily',
+    })
+    expect(getEventFormInitialValues({ id: 12, eventtype: 'soins' })).not.toHaveProperty('frequencevalue')
+    expect(getEventFormInitialValues({ eventtype: 'soins', frequencevalue: 'none' }).frequencevalue).toBe('none')
+  })
+
+  it('does not treat simple or non-compatible events as recurring series', () => {
+    expect(isRecurringEvent({ eventtype: 'depense', frequencevalue: 'daily' })).toBe(false)
+    expect(isRecurringEvent({ eventtype: 'soins', frequencevalue: 'none' })).toBe(false)
+    expect(isRecurringEvent({ eventtype: 'soins', frequencevalue: 'daily' })).toBe(true)
+    expect(isRecurringEvent({ eventtype: 'balade', idparent: 4 })).toBe(true)
   })
 })
 
