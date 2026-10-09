@@ -45,6 +45,14 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { SystemState } from "@/shared/components/ui/system-state";
 import { UserPictureControl } from "./UserPictureControl";
 
+function formatSubscriptionEndDate(value: string) {
+  return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 function ProfileEditor({
   user,
   onDone,
@@ -489,6 +497,11 @@ export default function ProfileContent() {
                   ? "Toutes vos fonctionnalités Premium sont actives."
                   : "Les fonctions essentielles pour organiser votre quotidien."}
               </p>
+              {user.subscriptionEndDate ? (
+                <p className="mt-2 text-sm font-medium text-foreground">
+                  Valable jusqu’au {formatSubscriptionEndDate(user.subscriptionEndDate)}
+                </p>
+              ) : null}
               {!premium ? (
                 <Button asChild variant="outline" size="sm" className="mt-4">
                   <a

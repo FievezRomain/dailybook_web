@@ -88,4 +88,62 @@ describe("EventFormDrawer", () => {
     expect(screen.getByRole("form")).toHaveAttribute("aria-busy", "true");
     expect(screen.getByRole("button", { name: "Continuer" })).toBeDisabled();
   });
+
+  it("présélectionne Tous les jours pour un nouveau soin", () => {
+    render(
+      <EventFormDrawer
+        open
+        animals={[]}
+        groups={[]}
+        isPremium
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        onUpdateAnimalImage={vi.fn()}
+        initialEvent={{
+          eventtype: "soins",
+          nom: "Traitement",
+          dateevent: "2026-09-05",
+          datefinsoins: "2026-09-12",
+          animaux: [1],
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(screen.getByRole("combobox", { name: "Répétition" })).toHaveTextContent(
+      "Tous les jours",
+    );
+  });
+
+  it("modifie directement un événement simple sans demander d'occurrence", () => {
+    render(
+      <EventFormDrawer
+        open
+        animals={[]}
+        groups={[]}
+        isPremium
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        onUpdateAnimalImage={vi.fn()}
+        initialEvent={{
+          id: 42,
+          eventtype: "depense",
+          nom: "Croquettes",
+          dateevent: "2026-09-05",
+          animaux: [1],
+          categoriedepense: "alimentation",
+          frequencevalue: "none",
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+
+    expect(
+      screen.queryByText("Modifier une série récurrente"),
+    ).not.toBeInTheDocument();
+  });
 });

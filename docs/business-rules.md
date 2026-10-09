@@ -20,6 +20,8 @@ Sont Premium : statistiques, création et gestion des groupes, création intelli
 
 Un membre Gratuit d’un groupe actif peut accepter/refuser une invitation, consulter le groupe, proposer ses propres animaux et contribuer selon les permissions métier. La création et la gestion du groupe restent Premium.
 
+L’achat d’un abonnement est réalisé sur le site marchand WordPress, jamais par le client web. Après authentification Firebase et confirmation du paiement, seul le serveur marchand appelle l’API d’administration avec une clé conservée côté serveur, le Firebase UID dans `X-Vasco-Firebase-Uid` et un SKU connu du backend. Les clients n’envoient ni niveau arbitraire ni dates. Un renouvellement du même niveau prolonge l’échéance existante ; un changement de niveau repart du jour de l’achat. La date de fin n’est affichée dans le profil que lorsqu’un abonnement commercial actif en possède une.
+
 ## Animaux
 
 - Le créateur d’un animal en est le propriétaire direct.
@@ -29,17 +31,20 @@ Un membre Gratuit d’un groupe actif peut accepter/refuser une invitation, cons
 - Les photos, historiques et documents privés nécessitent un contrôle d’accès avant signature.
 - Le dossier médical retient les soins et rendez-vous éligibles, sans dupliquer les occurrences récurrentes.
 - Le suivi corporel autorise au plus une photo par animal et mois, dans la fenêtre temporelle définie, avec contrôle concurrent côté backend.
+- Les listes d’animaux suivent l’ordre fourni par le backend : espèce, puis nom, puis identifiant comme départage stable.
 
 ## Événements
 
 - Un événement peut concerner un animal possédé ou accessible via un groupe actif.
 - L’auteur contrôle modification, duplication et suppression selon les règles backend.
-- Une série récurrente exige un scope explicite pour modifier ou supprimer une occurrence.
+- Pour les types compatibles avec la récurrence, une nouvelle création propose « tous les jours » par défaut ; l’utilisateur peut toujours choisir aucune récurrence.
+- Une série réellement récurrente exige un scope explicite pour modifier ou supprimer une occurrence. Une valeur absente ou `none`, ainsi que les types non récurrents comme Dépense, restent des événements uniques et ne déclenchent jamais ce choix.
 - L’état initial dépend de la date mais peut être explicitement remplacé.
 - Le partage n’est possible qu’avec les groupes contenant tous les animaux sélectionnés.
 - Un animal reçu par partage ne peut pas être repartagé indirectement vers un autre groupe.
 - Les documents sont limités aux formats autorisés et contrôlés par entitlement et accès.
 - Les anniversaires et rappels annuels proviennent de `/events/highlights` ; le web ne les recalcule pas.
+- L’attribution « réalisé par » est calculée par le backend à partir des droits de partage. Le web n’affiche jamais l’email du réalisateur et accepte une attribution nominative, anonymisée (« membre autorisé » ou « ancien membre ») ou absente.
 
 ## Groupes
 
@@ -58,6 +63,9 @@ Un membre Gratuit d’un groupe actif peut accepter/refuser une invitation, cons
 - Les sous-étapes vides ne sont pas persistées.
 - L’état d’une sous-étape se met à jour par la route dédiée.
 - La duplication crée une nouvelle entité sans réutiliser les identifiants techniques.
+- Un objectif est terminé uniquement lorsque toutes ses sous-étapes sont validées.
+- Un objectif est en cours uniquement s’il reste au moins une sous-étape non validée et si sa date de fin n’est pas passée ; la date du jour est encore active.
+- Un objectif incomplet dont la date de fin est passée est expiré. Il reste consultable mais ne doit apparaître ni comme « en cours » ni comme « terminé ».
 
 ## Notes, souhaits et contacts
 
@@ -74,6 +82,11 @@ Un membre Gratuit d’un groupe actif peut accepter/refuser une invitation, cons
 - Le badge correspond aux notifications non lues fournies par le backend.
 - `dailyReminderEnabled` active ou désactive les notifications quotidiennes de l’utilisateur ; cette préférence est gérée depuis la page Compte et enregistrée immédiatement via le backend.
 - Une préférence utilisateur ne remplace pas les obligations fonctionnelles ou de sécurité.
+
+## Statistiques
+
+- La période initiale du web est le mois calendaire courant, du premier jour du mois à aujourd’hui.
+- Les raccourcis 1 mois, 3 mois et 1 an couvrent des mois calendaires jusqu’à aujourd’hui et leur état sélectionné reste visible et accessible.
 
 ## Fichiers
 
