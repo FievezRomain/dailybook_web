@@ -107,6 +107,13 @@ describe('ProfileContent', () => {
     await waitFor(() => expect(accountActions.changePassword).toHaveBeenCalledWith('ancien-secret', 'NouveauSecret1!'));
   });
 
+  it('affiche la fin de l’abonnement uniquement lorsqu’elle est renseignée', () => {
+    currentUser.mockReturnValue({ user: { name: 'Alice', email: 'alice@example.com', subscription: 'Premium', subscriptionEndDate: '2027-10-01', dailyReminderEnabled: false }, isLoading: false, isError: false });
+    render(<ProfileContent />);
+
+    expect(screen.getByText('Valable jusqu’au 1 octobre 2027')).toBeVisible();
+  });
+
   it('confirme la déconnexion avant de revenir à la connexion', async () => {
     currentUser.mockReturnValue({ user: { name: 'Alice', email: 'alice@example.com', subscription: 'Free', dailyReminderEnabled: false }, isLoading: false, isError: false });
     accountActions.logout.mockResolvedValue(undefined);

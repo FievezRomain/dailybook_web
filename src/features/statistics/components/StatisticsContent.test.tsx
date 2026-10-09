@@ -85,6 +85,20 @@ describe('StatisticsContent', () => {
     expect(document.querySelector('[data-icon-name="size"]')).toHaveAttribute('data-icon-provider', 'material-community');
   });
 
+  it('démarre sur le mois en cours et rend visible le filtre rapide actif', () => {
+    mocks.currentUser.mockReturnValue({ isPremium: true, isLoading: false });
+    render(<StatisticsContent />);
+
+    const today = new Date();
+    const expectedStart = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+    expect(screen.getByLabelText('Du')).toHaveValue(expectedStart);
+    expect(screen.getByRole('button', { name: '1 mois' })).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: '3 mois' }));
+    expect(screen.getByRole('button', { name: '3 mois' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: '1 mois' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('reprend le suivi alimentaire mobile avec une courbe et deux historiques', () => {
     mocks.currentUser.mockReturnValue({ isPremium: true, isLoading: false });
     mocks.statistics.mockImplementation((type: string) => ({

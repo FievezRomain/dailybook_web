@@ -2,10 +2,40 @@ import type { Event, MappedEvent } from '@/features/events/types/event';
 import { differenceInCalendarDays, isAfter, isBefore, isSameDay, parseISO, startOfDay } from 'date-fns';
 import type { IconName } from '@/shared/components/ui/icons';
 
+export function supportsEventRecurrence(eventType?: string) {
+  return eventType === 'soins' || eventType === 'balade';
+}
+
 export function getEventTypeRecurrenceDefaults(eventType: string) {
-  return eventType === 'soins' || eventType === 'balade'
+  return supportsEventRecurrence(eventType)
     ? { frequencetype: 'recurring', frequencevalue: 'daily' }
     : { frequencetype: undefined, frequencevalue: undefined };
+}
+
+export function getEventFormInitialValues(event: Partial<Event> = {}) {
+  if (
+    event.id ||
+    !event.eventtype ||
+    event.frequencevalue !== undefined ||
+    event.frequencetype !== undefined
+  ) {
+    return event;
+  }
+
+  return { ...event, ...getEventTypeRecurrenceDefaults(event.eventtype) };
+}
+
+export function isRecurringEvent(event: Partial<Event>) {
+  if (!supportsEventRecurrence(event.eventtype)) return false;
+
+  const recurrence = event.frequencevalue?.trim().toLocaleLowerCase('fr-FR');
+  if (recurrence === 'none') return false;
+
+  return Boolean(
+    event.idparent ||
+    recurrence ||
+    event.frequencetype?.trim().toLocaleLowerCase('fr-FR') === 'recurring',
+  );
 }
 
 const eventDate = (event: Event) => startOfDay(parseISO(event.dateevent));

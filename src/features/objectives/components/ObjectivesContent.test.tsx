@@ -34,6 +34,18 @@ describe('ObjectivesContent', () => {
     expect(screen.getByText('Poids cible')).toBeInTheDocument()
   })
 
+  it('retire les objectifs dépassés des objectifs en cours et les conserve dans Expirés', () => {
+    queryState = { objectives: [
+      { id: 3, title: 'Ancien objectif', datefin: '2000-01-01', animaux: [], sousetapes: [{ id: 3, state: false }] },
+    ], isLoading: false, isError: false, refetch }
+
+    render(<ObjectivesContent />)
+
+    expect(screen.queryByText('Ancien objectif')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: /Expirés/ }))
+    expect(screen.getByText('Ancien objectif')).toBeInTheDocument()
+  })
+
   it('propose une relance après une erreur et renvoie vers la création globale depuis le vide', () => {
     queryState = { objectives: [], isLoading: false, isError: true, refetch }
     const { rerender } = render(<ObjectivesContent />)

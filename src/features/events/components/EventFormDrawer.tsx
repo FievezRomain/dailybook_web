@@ -19,8 +19,10 @@ import type { Event, RecurrenceScope } from "@/features/events/types/event";
 import {
   eventToneClasses,
   eventTypeOptions,
+  getEventFormInitialValues,
   getEventTypeRecurrenceDefaults,
   iconsMap,
+  isRecurringEvent,
   titleMap,
 } from "@/features/events/utils/events";
 import type { Group } from "@/features/groups/types/group";
@@ -102,14 +104,12 @@ export const EventFormDrawer = ({
     handleTextareaChange,
     handleSubmit,
     setValues,
-  } = useEventForm(initialEvent);
+  } = useEventForm(getEventFormInitialValues(initialEvent));
   const eventtype = values.eventtype as keyof typeof titleMap;
   const eventTitle = titleMap[eventtype] || "Événement";
   const eventTypeIcon = iconsMap[eventtype] || "event";
   const isEdit = Boolean(initialEvent?.id);
-  const isRecurring = Boolean(
-    initialEvent?.idparent || initialEvent?.frequencevalue,
-  );
+  const isRecurring = isRecurringEvent(initialEvent ?? {});
   const [updateScope, setUpdateScope] = useState<RecurrenceScope>("occurrence");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [removedLinkedFiles, setRemovedLinkedFiles] = useState<string[]>([]);
