@@ -2,6 +2,8 @@
 
 ## Modèle retenu
 
+Les données React Query et les préférences locales liées à un compte sont supprimées à la déconnexion et à chaque changement de Firebase UID. Cette seconde garde couvre aussi l’expiration de session ou un changement d’identité déclenché hors du bouton de déconnexion ; aucune réponse de l’ancien compte ne doit être réutilisée par le nouveau.
+
 Le navigateur s’authentifie auprès de Firebase puis envoie son ID token à `POST /api/session/login`. Next.js crée un cookie de session Firebase sécurisé et `HttpOnly`.
 
 Dans l’implémentation web, la frontière Firebase utilise `POST /api/session/login`. Une fois ce cookie posé, `POST /api/auth/session` ouvre la session métier correspondante auprès de FastAPI `/api/v1/auth/session`. La navigation privée ne commence qu’après la réussite des deux opérations ; un échec de la seconde déclenche `POST /api/session/logout` pour éviter une demi-session. La lecture `GET /api/me` ne crée ni ne rafraîchit implicitement un utilisateur.
