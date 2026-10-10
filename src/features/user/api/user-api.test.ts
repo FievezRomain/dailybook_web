@@ -20,6 +20,7 @@ const currentUser = {
   timezone: 'Europe/Paris',
   dailyReminderEnabled: true,
   subscription: 'Premium',
+  subscriptionEndDate: null,
 };
 
 describe('user API', () => {
