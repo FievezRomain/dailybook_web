@@ -1,5 +1,21 @@
 # Métriques BFF — US-017
 
+## Vérification locale du 10/10/2026
+
+La branche instrumentée a intégré `main` (abonnements et correctifs courants).
+Le typage et les 12 tests du registre métrique passent. Le vrai serveur Next
+est démarré sur loopback 3010 avec la configuration locale existante et l'API
+locale 8080 ; aucun utilisateur Firebase émulé ni réponse métier factice.
+
+L'export retourne 401 sans credential et 200 au format Prometheus avec le
+secret local dédié. Ce secret correspond au fichier de collecte déjà monté,
+sans être affiché. Le contrôle initial attendait à tort 404 pour l'accès anonyme ;
+il a été corrigé conformément au contrat 401 puis rejoué avec succès.
+
+Cette preuve couvre démarrage et protection de l'export, pas encore un parcours
+authentifié produisant du trafic collecté ni le raccordement Prometheus de cette
+instance. Aucun déploiement en production et aucune modification de données métier.
+
 ## Périmètre
 
 Les deux clients backend communs mesurent chaque tentative HTTP vers Vasco :
