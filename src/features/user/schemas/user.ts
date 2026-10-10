@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const subscriptionSchema = z.enum(['Free', 'Premium']);
+export const subscriptionSchema = z.enum(['Free', 'Premium', 'Pioneer']);
 
 export const backendSessionSchema = z.object({
   subscription: subscriptionSchema,
