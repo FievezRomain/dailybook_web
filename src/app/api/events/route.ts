@@ -9,7 +9,7 @@ const allowedEventQueryKeys = new Set([
   'include_overdue_open', 'limit', 'offset',
 ]);
 
-export async function GET(request = new Request('http://localhost/api/events')) {
+export async function GET(request: Request) {
   try {
     const source = new URL(request.url).searchParams;
     for (const key of source.keys()) {
