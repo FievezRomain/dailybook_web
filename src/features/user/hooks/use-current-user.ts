@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser } from '../api/user-api';
 import { getUserPictureUrl } from '../api/user-picture';
 import type { UserWithPicture } from '../types/user';
+import { isPremiumSubscription } from '@/shared/subscription/subscription';
 
 export const currentUserQueryKey = ['current-user'] as const;
 
@@ -40,7 +41,7 @@ export function useCurrentUser() {
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error,
-    isPremium: query.data?.subscription === 'Premium',
+    isPremium: isPremiumSubscription(query.data?.subscription),
     refetch: query.refetch,
   };
 }

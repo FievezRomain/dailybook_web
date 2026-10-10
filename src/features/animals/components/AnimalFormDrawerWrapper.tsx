@@ -4,6 +4,8 @@ import { useAnimalsQuery } from "@/features/animals/hooks/use-animals";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/react";
 import type { Animal, CreateAnimalInput, UpdateAnimalInput } from "@/features/animals/types/animal";
+import { usePremiumDialog } from '@/shared/components/feedback/PremiumGate';
+import { isAnimalQuotaExceededError } from '@/shared/premium/premium-error';
 
 function optionalText(value: unknown): string | null | undefined {
   if (value === undefined) return undefined;
@@ -44,6 +46,7 @@ function changedAnimalInput(input: UpdateAnimalInput, initial: Partial<Animal>):
 export function AnimalFormDrawerWrapper() {
   const { drawer, closeDrawer } = useAnimalFormDrawer();
   const { createAnimal, updateAnimal, isMutating } = useAnimalsQuery();
+  const { openPremiumDialog } = usePremiumDialog();
 
   async function handleSubmit(data: Partial<Animal>, imageFile?: File) {
     try {
@@ -70,6 +73,10 @@ export function AnimalFormDrawerWrapper() {
         extra: { data, isEdit: drawer.isEdit },
       });
       console.error(e);
+      if (isAnimalQuotaExceededError(e)) {
+        openPremiumDialog('animalLimit');
+        return;
+      }
       toast.error("Une erreur est survenue. Veuillez réessayer.");
     }
   }

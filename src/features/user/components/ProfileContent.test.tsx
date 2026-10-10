@@ -114,6 +114,15 @@ describe('ProfileContent', () => {
     expect(screen.getByText('Valable jusqu’au 1 octobre 2027')).toBeVisible();
   });
 
+  it('affiche le statut Pionnier sans le présenter comme Premium', () => {
+    currentUser.mockReturnValue({ user: { name: 'Alice', email: 'alice@example.com', subscription: 'Pioneer', dailyReminderEnabled: false }, isLoading: false, isError: false });
+    render(<ProfileContent />);
+
+    expect(screen.getByText('Version Pionnier')).toBeVisible();
+    expect(screen.getByText(/autant d’animaux/)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Passer à la version Premium' })).toBeVisible();
+  });
+
   it('confirme la déconnexion avant de revenir à la connexion', async () => {
     currentUser.mockReturnValue({ user: { name: 'Alice', email: 'alice@example.com', subscription: 'Free', dailyReminderEnabled: false }, isLoading: false, isError: false });
     accountActions.logout.mockResolvedValue(undefined);

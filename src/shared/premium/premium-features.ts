@@ -15,6 +15,10 @@ export const premiumFeatures = {
     title: 'Statistiques',
     description: 'Avec Premium, vous pouvez visualiser les tendances et les indicateurs issus du suivi de vos animaux.',
   },
+  animalLimit: {
+    title: 'Limite de 3 animaux atteinte',
+    description: 'Un compte Gratuit peut posséder jusqu’à 3 animaux. Passez à Premium pour en ajouter autant que vous le souhaitez.',
+  },
 } as const;
 
 export type PremiumFeatureKey = keyof typeof premiumFeatures;

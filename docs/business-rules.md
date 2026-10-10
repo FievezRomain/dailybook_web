@@ -32,6 +32,9 @@ L’achat d’un abonnement est réalisé sur le site marchand WordPress, jamais
 - Le dossier médical retient les soins et rendez-vous éligibles, sans dupliquer les occurrences récurrentes.
 - Le suivi corporel autorise au plus une photo par animal et mois, dans la fenêtre temporelle définie, avec contrôle concurrent côté backend.
 - Les listes d’animaux suivent l’ordre fourni par le backend : espèce, puis nom, puis identifiant comme départage stable.
+- Un compte `Free` peut posséder au maximum trois animaux ; les animaux partagés ne consomment pas ce quota.
+- Les comptes `Premium` et `Pioneer` restent illimités. `Pioneer` désigne les comptes présents avant l’entrée en vigueur du quota et ne donne aucun autre droit Premium.
+- FastAPI reste l’autorité du quota et renvoie `QUOTA_EXCEEDED` si une création concurrente ou un cache périmé contourne le verrou anticipé du navigateur.
 
 ## Événements
 
