@@ -1,17 +1,27 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser } from '../api/user-api';
 import { getUserPictureUrl } from '../api/user-picture';
 import type { UserWithPicture } from '../types/user';
+import { isPremiumSubscription } from '@/shared/subscription/subscription';
 
 export const currentUserQueryKey = ['current-user'] as const;
 
 export function useCurrentUser() {
+  const queryClient = useQueryClient();
   const query = useQuery<UserWithPicture>({
     queryKey: currentUserQueryKey,
     queryFn: async () => {
       const user = await getCurrentUser();
+      const previous = queryClient.getQueryData<UserWithPicture>(currentUserQueryKey);
+      if (previous?.id === user.id && previous.subscription !== user.subscription) {
+        // Query execution is shared across all consumers of this profile key:
+        // invalidate once per confirmed transition, not once per rendered hook.
+        void queryClient.invalidateQueries({
+          predicate: (cached) => cached.meta?.refreshOnSubscriptionChange === true,
+        });
+      }
       if (!user.picture) return user;
       try {
         return { ...user, pictureUrl: await getUserPictureUrl(user.picture) };
@@ -20,6 +30,10 @@ export function useCurrentUser() {
       }
     },
     staleTime: 60_000,
+    // Administrative changes may occur while this tab is hidden, even when
+    // the one-minute profile cache is still fresh. Only this query opts in.
+    refetchOnWindowFocus: 'always',
+    refetchOnReconnect: 'always',
   });
 
   return {
@@ -27,7 +41,7 @@ export function useCurrentUser() {
     isLoading: query.isPending,
     isError: query.isError,
     error: query.error,
-    isPremium: query.data?.subscription === 'Premium',
+    isPremium: isPremiumSubscription(query.data?.subscription),
     refetch: query.refetch,
   };
 }

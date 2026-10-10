@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const subscriptionSchema = z.enum(['Free', 'Premium']);
+export const subscriptionSchema = z.enum(['Free', 'Premium', 'Pioneer']);
 
 export const backendSessionSchema = z.object({
   subscription: subscriptionSchema,
@@ -15,6 +15,7 @@ export const backendUserSchema = z.object({
   timezone: z.string().nullable().optional(),
   daily_reminder_enabled: z.boolean().optional().default(true),
   subscription: subscriptionSchema,
+  subscription_date_fin: z.string().nullable().optional(),
 });
 
 export const currentUserSchema = z.object({
@@ -26,6 +27,7 @@ export const currentUserSchema = z.object({
   timezone: z.string().nullable(),
   dailyReminderEnabled: z.boolean(),
   subscription: subscriptionSchema,
+  subscriptionEndDate: z.string().nullable().optional().default(null),
 });
 
 export const openUserSessionSchema = z.object({

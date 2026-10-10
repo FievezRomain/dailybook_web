@@ -14,6 +14,7 @@ const backendUser = {
   timezone: 'Europe/Paris',
   daily_reminder_enabled: false,
   subscription: 'Premium',
+  subscription_date_fin: '2027-10-01',
 };
 
 function patchRequest(body: unknown) {
@@ -46,6 +47,7 @@ describe('/api/me', () => {
       timezone: 'Europe/Paris',
       dailyReminderEnabled: false,
       subscription: 'Premium',
+      subscriptionEndDate: '2027-10-01',
     });
   });
 

@@ -43,7 +43,16 @@ import { Input } from "@/shared/components/ui/input";
 import { PasswordInput } from "@/shared/components/ui/specialized-inputs";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { SystemState } from "@/shared/components/ui/system-state";
+import { getSubscriptionLabel, isPioneerSubscription, isPremiumSubscription } from '@/shared/subscription/subscription';
 import { UserPictureControl } from "./UserPictureControl";
+
+function formatSubscriptionEndDate(value: string) {
+  return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
 
 function ProfileEditor({
   user,
@@ -398,7 +407,11 @@ export default function ProfileContent() {
       </PageShell>
     );
 
-  const premium = user.subscription === "Premium";
+  const premium = isPremiumSubscription(user.subscription);
+  const pioneer = isPioneerSubscription(user.subscription);
+  const subscriptionLabel = premium || pioneer
+    ? `Version ${getSubscriptionLabel(user.subscription)}`
+    : 'Version gratuite';
 
   async function updateDailyNotifications(enabled: boolean) {
     try {
@@ -482,13 +495,20 @@ export default function ProfileContent() {
                 Votre abonnement
               </p>
               <p className="mt-1 text-xl font-semibold">
-                {premium ? "Version Premium" : "Version gratuite"}
+                {subscriptionLabel}
               </p>
               <p className="mt-2 text-sm leading-5 text-muted-foreground">
                 {premium
                   ? "Toutes vos fonctionnalités Premium sont actives."
-                  : "Les fonctions essentielles pour organiser votre quotidien."}
+                  : pioneer
+                    ? "Votre statut Pionnier vous permet de gérer autant d’animaux que vous le souhaitez."
+                    : "Les fonctions essentielles pour organiser votre quotidien."}
               </p>
+              {user.subscriptionEndDate ? (
+                <p className="mt-2 text-sm font-medium text-foreground">
+                  Valable jusqu’au {formatSubscriptionEndDate(user.subscriptionEndDate)}
+                </p>
+              ) : null}
               {!premium ? (
                 <Button asChild variant="outline" size="sm" className="mt-4">
                   <a

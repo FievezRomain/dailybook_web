@@ -16,6 +16,7 @@ function toCurrentUser(user: BackendUser) {
     timezone: user.timezone ?? null,
     dailyReminderEnabled: user.daily_reminder_enabled,
     subscription: user.subscription,
+    subscriptionEndDate: user.subscription_date_fin ?? null,
   };
 }
 

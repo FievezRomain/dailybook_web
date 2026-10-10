@@ -10,6 +10,8 @@ import { usePremiumDialog } from '@/shared/components/feedback/PremiumGate';
 import { useGlobalCreate } from '@/shared/components/providers/GlobalCreateProvider';
 import { cn } from '@/lib/utils';
 import { Icon, type IconName } from '@/shared/components/ui/icons';
+import { useAnimalsQuery } from '@/features/animals/hooks/use-animals';
+import { canCreateAnimal } from '@/shared/subscription/subscription';
 
 type CreateAction = {
   label: string;
@@ -36,6 +38,7 @@ export function GlobalCreate({
   const { user, isPremium } = useCurrentUser();
   const { openPremiumDialog } = usePremiumDialog();
   const { openEntityForm } = useGlobalCreate();
+  const { animals } = useAnimalsQuery();
 
   // Utilise le context pour ouvrir le formulaire
   const { openDrawer } = useEventFormDrawer();
@@ -47,6 +50,11 @@ export function GlobalCreate({
     openDrawer({ initialEvent: { eventtype: type, todisplay: true, dateevent: getLocalDateString() } });
   }
   function onCreateAnimal() {
+    const ownedAnimalCount = (animals ?? []).filter((animal) => animal.provenance === 'owner').length;
+    if (!canCreateAnimal(user?.subscription, ownedAnimalCount)) {
+      openPremiumDialog('animalLimit');
+      return;
+    }
     openAnimalDrawer({ initialAnimal: { datenaissance: getLocalDateString(), email: user?.email } });
   }
   function onCreateNote() {

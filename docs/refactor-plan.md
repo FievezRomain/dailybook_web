@@ -321,6 +321,14 @@ Suivi détaillé de l’implémentation : `docs/web-implementation-plan.md`. I0 
 
 ## Phase 6 — Industrialisation
 
+Maintenance transverse Admin US-012 (02/10/2026) : le profil est relu au retour
+dans l’onglet et au rétablissement réseau, indépendamment de son cache de 60 s.
+Quatre tests et le typage passent. Voir [le suivi dédié](subscription-focus-refresh.md).
+Le parcours complet cadeau/révocation/groupes n’est pas encore clôturé ; aucune
+phase historique de refonte graphique n’est rouverte.
+
+Maintenance Animaux (07/10/2026) : les comptes `Free` sont limités à trois animaux possédés. Les comptes historiques migrés vers `Pioneer` et les comptes `Premium` restent illimités ; les animaux partagés ne consomment pas le quota. Le web anticipe le verrou, conserve le contrôle FastAPI `QUOTA_EXCEEDED` comme autorité et affiche le statut Pionnier dans le profil.
+
 - [ ] **Clôture de la phase 6** — tous les livrables et le critère de sortie sont vérifiés.
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.

@@ -10,12 +10,14 @@ const mocks = vi.hoisted(() => ({
   openPremium: vi.fn(),
   openEntityForm: vi.fn(),
   currentUser: vi.fn(),
+  animals: vi.fn(),
 }))
 
 vi.mock('@/features/events/context/event-form-drawer-context', () => ({ useEventFormDrawer: () => ({ openDrawer: mocks.openEvent }) }))
 vi.mock('@/features/animals/context/animal-form-drawer-context', () => ({ useAnimalFormDrawer: () => ({ openDrawer: mocks.openAnimal }) }))
 vi.mock('@/features/objectives/context/objective-form-drawer-context', () => ({ useObjectiveFormDrawer: () => ({ openDrawer: mocks.openObjective }) }))
 vi.mock('@/features/user/hooks/use-current-user', () => ({ useCurrentUser: mocks.currentUser }))
+vi.mock('@/features/animals/hooks/use-animals', () => ({ useAnimalsQuery: mocks.animals }))
 vi.mock('@/shared/components/feedback/PremiumGate', () => ({ usePremiumDialog: () => ({ openPremiumDialog: mocks.openPremium }) }))
 vi.mock('@/shared/components/providers/GlobalCreateProvider', () => ({ useGlobalCreate: () => ({ openEntityForm: mocks.openEntityForm }) }))
 
@@ -23,6 +25,7 @@ describe('GlobalCreate', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.currentUser.mockReturnValue({ user: { email: 'romain@example.test' }, isPremium: false })
+    mocks.animals.mockReturnValue({ animals: [] })
   })
 
   it('reprend les sept choix mobiles dans le même ordre avec les mêmes textes et icônes', () => {
@@ -75,5 +78,29 @@ describe('GlobalCreate', () => {
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${label}`) }))
 
     expect(mocks.openEntityForm).toHaveBeenCalledWith(entity)
+  })
+
+  it('explique la limite au compte Gratuit qui possède déjà trois animaux', () => {
+    mocks.currentUser.mockReturnValue({ user: { email: 'romain@example.test', subscription: 'Free' }, isPremium: false })
+    mocks.animals.mockReturnValue({ animals: [1, 2, 3].map((id) => ({ id, provenance: 'owner' })) })
+    render(<GlobalCreate currentPath="/dashboard" />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Créer' }))
+    fireEvent.click(screen.getByRole('button', { name: /Animal/ }))
+
+    expect(mocks.openPremium).toHaveBeenCalledWith('animalLimit')
+    expect(mocks.openAnimal).not.toHaveBeenCalled()
+  })
+
+  it('ne limite ni Pioneer ni les animaux simplement partagés', () => {
+    mocks.currentUser.mockReturnValue({ user: { email: 'romain@example.test', subscription: 'Pioneer' }, isPremium: false })
+    mocks.animals.mockReturnValue({ animals: [1, 2, 3, 4].map((id) => ({ id, provenance: id === 4 ? 'shared' : 'owner' })) })
+    render(<GlobalCreate currentPath="/dashboard" />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Créer' }))
+    fireEvent.click(screen.getByRole('button', { name: /Animal/ }))
+
+    expect(mocks.openAnimal).toHaveBeenCalled()
+    expect(mocks.openPremium).not.toHaveBeenCalled()
   })
 })

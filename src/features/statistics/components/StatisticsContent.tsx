@@ -132,10 +132,8 @@ function localDate(date: Date) {
 }
 
 function defaultDates() {
-  const end = new Date();
-  const start = new Date(end);
-  start.setMonth(start.getMonth() - 3);
-  return { dateDebut: localDate(start), dateFin: localDate(end) };
+  const preset = applyPreset(1);
+  return { dateDebut: preset.start, dateFin: preset.end };
 }
 
 function formatPeriodDate(value: string) {
@@ -146,10 +144,9 @@ function formatPeriodDate(value: string) {
   });
 }
 
-function applyPreset(months: number) {
-  const end = new Date();
-  const start = new Date(end);
-  start.setMonth(start.getMonth() - months);
+function applyPreset(months: number, today = new Date()) {
+  const end = new Date(today);
+  const start = new Date(end.getFullYear(), end.getMonth() - (months - 1), 1);
   return { start: localDate(start), end: localDate(end) };
 }
 
@@ -832,6 +829,10 @@ export default function StatisticsContent() {
   const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const [dateDebut, setDateDebut] = useState(initialDates.dateDebut);
   const [dateFin, setDateFin] = useState(initialDates.dateFin);
+  const activePreset = [1, 3, 12].find((months) => {
+    const preset = applyPreset(months);
+    return preset.start === dateDebut && preset.end === dateFin;
+  });
   const requiresSingleAnimal = singleAnimalTypes.has(type);
   const hasValidAnimalSelection =
     selectedAnimals.length > 0 &&
@@ -986,7 +987,13 @@ export default function StatisticsContent() {
                   <button
                     key={preset.months}
                     type="button"
-                    className="min-h-9 rounded-[9px] px-3 text-xs font-semibold text-muted-foreground hover:bg-card hover:text-foreground"
+                    aria-pressed={activePreset === preset.months}
+                    className={cn(
+                      "min-h-9 rounded-[9px] px-3 text-xs font-semibold transition-[background-color,color,box-shadow]",
+                      activePreset === preset.months
+                        ? "bg-card text-foreground shadow-sm ring-1 ring-primary/25"
+                        : "text-muted-foreground hover:bg-card hover:text-foreground",
+                    )}
                     onClick={() => setPreset(preset.months)}
                   >
                     {preset.label}
