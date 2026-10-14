@@ -1,0 +1,17 @@
+export const STORAGE_TEXT_LIMITS = {
+  accountEmail: 80,
+  accountFirstName: 20,
+  accountExpoToken: 100,
+  contact: 50,
+  eventCategory: 50,
+  eventName: 100,
+  eventState: 20,
+  eventText: 100,
+  eventTime: 20,
+  groupInformation: 2_000,
+  groupName: 255,
+  noteTitle: 50,
+  objectiveTitle: 200,
+  objectiveTemporality: 100,
+  wish: 50,
+} as const;

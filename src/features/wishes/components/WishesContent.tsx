@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Input } from "@/shared/components/ui/input";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { cn } from "@/lib/utils";
 import {
@@ -174,7 +175,7 @@ export function WishForm({
               <Input
                 autoFocus
                 required
-                maxLength={255}
+                maxLength={STORAGE_TEXT_LIMITS.wish}
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
@@ -214,7 +215,7 @@ export function WishForm({
             <label className="grid gap-2">
               <span className="text-sm font-medium">Destinataire</span>
               <Input
-                maxLength={255}
+                maxLength={STORAGE_TEXT_LIMITS.wish}
                 value={recipient}
                 onChange={(event) => setRecipient(event.target.value)}
               />

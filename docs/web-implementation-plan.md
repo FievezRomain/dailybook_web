@@ -6,10 +6,10 @@ Maintenance hors cycle graphique, 02/10/2026 — Admin US-012 :
 - [ ] Recette complète cadeau/révocation/groupes avec un compte local autorisé.
 Voir [le suivi de maintenance](subscription-focus-refresh.md).
 
-Maintenance Animaux hors cycle graphique, 14/10/2026 :
-- [x] Borner à 50 caractères les champs texte d'identité animale exposés par le formulaire et le schéma BFF.
-- [x] Porter l'alimentation et son historique à 100 caractères dans le formulaire et les schémas BFF.
-- [x] Vérifier les bornes avec 19 tests ciblés et un typecheck réussis.
+Maintenance des contrats de saisie hors cycle graphique, 14/10/2026 :
+- [x] Aligner les limites des animaux, contacts, événements, notes, objectifs, souhaits et du profil sur les colonnes PostgreSQL bornées ; porter l'alimentation animale et son historique à 100 caractères.
+- [x] Harmoniser les groupes entre clients et API (`name` 255, `informations` 2 000) et limiter les e-mails de compte ou d'invitation à 80 caractères.
+- [x] Appliquer les bornes dans les schémas BFF, les gardes de mutation et les formulaires, puis les vérifier avec la suite complète de 495 tests, le typecheck et le lint CI.
 
 ## Objectif
 

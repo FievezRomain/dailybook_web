@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Input } from "@/shared/components/ui/input";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { useContactsQuery } from "../hooks/use-contacts";
 import type { Contact, CreateContactInput } from "../types/contact";
@@ -113,7 +114,7 @@ export function ContactForm({
               <Input
                 autoFocus
                 required
-                maxLength={255}
+                maxLength={STORAGE_TEXT_LIMITS.contact}
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
@@ -121,7 +122,7 @@ export function ContactForm({
             <label className="grid gap-2">
               <span className="text-sm font-medium">Profession</span>
               <Input
-                maxLength={255}
+                maxLength={STORAGE_TEXT_LIMITS.contact}
                 value={profession}
                 onChange={(event) => setProfession(event.target.value)}
               />
@@ -130,7 +131,7 @@ export function ContactForm({
               <span className="text-sm font-medium">Téléphone</span>
               <Input
                 type="tel"
-                maxLength={50}
+                maxLength={STORAGE_TEXT_LIMITS.contact}
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
               />
@@ -139,7 +140,7 @@ export function ContactForm({
               <span className="text-sm font-medium">E-mail</span>
               <Input
                 type="email"
-                maxLength={320}
+                maxLength={STORAGE_TEXT_LIMITS.contact}
                 value={email}
                 aria-invalid={!emailIsValid}
                 onChange={(event) => setEmail(event.target.value)}

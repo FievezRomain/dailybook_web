@@ -14,6 +14,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { DateInput } from "@/shared/components/ui/form-feedback";
 import { Input } from "@/shared/components/ui/input";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 import type { ImageSigned } from "@/types/image";
 
 type ObjectiveFormDrawerProps = {
@@ -90,6 +91,7 @@ export const ObjectiveFormDrawer = ({
                       value={values.title || ""}
                       name="title"
                       onChange={handleChange}
+                      maxLength={STORAGE_TEXT_LIMITS.objectiveTitle}
                       required
                       aria-invalid={Boolean(errors.title)}
                       aria-describedby={
@@ -193,6 +195,7 @@ export const ObjectiveFormDrawer = ({
                     <Input
                       aria-label={`Étape ${index + 1}`}
                       value={etape.etape}
+                      maxLength={500}
                       onChange={(event) =>
                         handleEtapeChange(index, event.target.value)
                       }

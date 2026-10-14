@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
 const optionalText = z.string().nullable().optional();
@@ -43,14 +44,14 @@ export const groupSchema = z.object({
 export const groupListSchema = z.array(groupSchema);
 
 const groupFields = {
-  name: z.string().trim().min(1).max(255),
-  informations: z.string().trim().max(2_000).nullable().optional(),
+  name: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.groupName),
+  informations: z.string().trim().max(STORAGE_TEXT_LIMITS.groupInformation).nullable().optional(),
 } as const;
 
 export const createGroupSchema = z.object(groupFields).strict();
 export const updateGroupSchema = z.object(groupFields).strict();
 export const inviteMembersSchema = z.object({
-  members: z.array(z.string().trim().email().max(320)).min(1).max(50),
+  members: z.array(z.string().trim().email().max(STORAGE_TEXT_LIMITS.accountEmail)).min(1).max(50),
 }).strict();
 
 export const invitationSchema = z.object({
@@ -65,7 +66,7 @@ export const invitationSchema = z.object({
 export const invitationListSchema = z.array(invitationSchema);
 export const respondInvitationSchema = z.object({
   status: statusSchema,
-  email: z.string().trim().email().max(320).optional(),
+  email: z.string().trim().email().max(STORAGE_TEXT_LIMITS.accountEmail).optional(),
 }).strict();
 
 export const proposeAnimalsSchema = z.object({
@@ -99,7 +100,7 @@ export const respondAnimalShareSchema = z.object({
 }).strict();
 
 export const deleteMemberSchema = z.object({
-  email: z.string().trim().email().max(320),
+  email: z.string().trim().email().max(STORAGE_TEXT_LIMITS.accountEmail),
 }).strict();
 
 export const optionalGroupResponseSchema = z.union([groupSchema, z.object({}).strict(), z.null()])
