@@ -8,6 +8,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { ConfirmDialog } from "@/shared/components/feedback/ConfirmDialog";
 import { useAnimalHistory } from "../hooks/use-animal-history";
+import { ANIMAL_FOOD_MAX_LENGTH } from "../schemas/animal";
 import type { AnimalHistory, AnimalHistoryItem } from "../types/animal";
 
 const ITEMS: Array<{
@@ -275,6 +276,7 @@ export function AnimalHistoryPanel({
                 step={config.numeric ? "any" : undefined}
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
+                maxLength={config.numeric ? undefined : ANIMAL_FOOD_MAX_LENGTH}
                 required
               />
             </label>

@@ -1,9 +1,11 @@
 import { z } from 'zod';
 import { storedFilenameSchema } from '@/shared/schemas/file';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const optionalDate = dateSchema.nullable().optional().transform((value) => value ?? undefined);
 const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
+const optionalLimitedText = (maximum: number) => z.string().max(maximum).nullable().optional().transform((value) => value ?? undefined);
 const optionalNumber = z.number().nullable().optional().transform((value) => value ?? undefined);
 const optionalRating = z.preprocess(
   (value) => value === 0 ? undefined : value,
@@ -75,33 +77,33 @@ export const eventListQuerySchema = z.object({
 );
 
 const eventMutationFields = {
-  nom: z.string().trim().min(1).max(255),
+  nom: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.eventName),
   dateevent: dateSchema,
   animaux: z.array(positiveId).min(1),
   eventtype: z.string().trim().min(1).max(100),
-  state: z.string().trim().min(1).max(100).optional(),
-  heuredebutevent: optionalText,
-  lieu: optionalText,
-  specialiste: optionalText,
+  state: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.eventState).optional(),
+  heuredebutevent: optionalLimitedText(STORAGE_TEXT_LIMITS.eventTime),
+  lieu: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
+  specialiste: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
   depense: z.number().nonnegative().nullable().optional(),
-  categoriedepense: optionalText,
+  categoriedepense: optionalLimitedText(STORAGE_TEXT_LIMITS.eventCategory),
   notif: optionalText,
   optionnotif: optionalText,
   rappelnotification: optionalText,
-  heuredebutbalade: optionalText,
+  heuredebutbalade: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
   datefinbalade: optionalDate,
-  heurefinbalade: optionalText,
-  discipline: optionalText,
+  heurefinbalade: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
+  discipline: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
   note: z.number().min(1).max(5).nullable().optional(),
-  epreuve: optionalText,
-  dossart: optionalText,
-  placement: optionalText,
-  traitement: optionalText,
+  epreuve: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
+  dossart: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
+  placement: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
+  traitement: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
   datefinsoins: optionalDate,
   commentaire: optionalText,
   todisplay: z.boolean().optional(),
-  frequencetype: optionalText,
-  frequencevalue: optionalText,
+  frequencetype: optionalLimitedText(STORAGE_TEXT_LIMITS.eventState),
+  frequencevalue: optionalLimitedText(STORAGE_TEXT_LIMITS.eventState),
   idparent: positiveId.nullable().optional(),
   documents: z.array(eventFileNameSchema).default([]),
   shared_groups: z.array(positiveId).default([]),
@@ -110,11 +112,11 @@ const eventMutationFields = {
 export const createEventSchema = z.object(eventMutationFields).strict();
 export const updateEventSchema = z.object({ ...eventMutationFields, update_scope: recurrenceScopeSchema }).strict();
 export const patchEventSchema = z.object({
-  state: optionalText,
+  state: optionalLimitedText(STORAGE_TEXT_LIMITS.eventState),
   commentaire: optionalText,
   note: z.number().min(1).max(5).nullable().optional(),
   depense: z.number().nonnegative().nullable().optional(),
-  placement: optionalText,
+  placement: optionalLimitedText(STORAGE_TEXT_LIMITS.eventText),
   animaux: z.array(positiveId).optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, { message: 'Au moins une modification est requise.' });
 

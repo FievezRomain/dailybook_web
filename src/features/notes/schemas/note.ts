@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
 const nullableDateTime = z.string().datetime({ offset: true }).nullable().optional().transform((value) => value ?? undefined);
@@ -19,7 +20,7 @@ export const noteSchema = z.object({
 export const noteListSchema = z.array(noteSchema);
 
 const noteMutationFields = {
-  titre: z.string().trim().min(1).max(255),
+  titre: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.noteTitle),
   note: z.string().max(50_000).optional().default(''),
   is_pinned: z.boolean().optional().default(false),
 } as const;

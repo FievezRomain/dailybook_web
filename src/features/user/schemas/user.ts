@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 export const subscriptionSchema = z.enum(['Free', 'Premium', 'Pioneer']);
 
@@ -31,16 +32,16 @@ export const currentUserSchema = z.object({
 });
 
 export const openUserSessionSchema = z.object({
-  firstName: z.string().trim().min(1).max(100).optional(),
-  expotoken: z.string().trim().min(1).max(4096).nullable().optional(),
+  firstName: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.accountFirstName).optional(),
+  expotoken: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.accountExpoToken).nullable().optional(),
   timezone: z.string().trim().min(1).max(100).optional(),
 }).strict();
 
 const pictureFilenameSchema = z.string().regex(/^[a-f0-9]{32}\.(?:jpg|png|webp)$/);
 
 export const updateCurrentUserSchema = z.object({
-  newEmail: z.string().trim().email().max(320).optional(),
-  prenom: z.string().trim().min(1).max(100).optional(),
+  newEmail: z.string().trim().email().max(STORAGE_TEXT_LIMITS.accountEmail).optional(),
+  prenom: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.accountFirstName).optional(),
   image: pictureFilenameSchema.nullable().optional(),
 }).strict().refine((value) => Object.values(value).some((item) => item !== undefined), {
   message: 'Au moins une modification est requise.',

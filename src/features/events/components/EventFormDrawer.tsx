@@ -36,6 +36,7 @@ import { StarRating } from "@/shared/components/forms/StarRating";
 import { Button } from "@/shared/components/ui/button";
 import { DateInput, TimeInput } from "@/shared/components/ui/form-feedback";
 import { Input } from "@/shared/components/ui/input";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 import {
   Select,
   SelectContent,
@@ -399,6 +400,7 @@ export const EventFormDrawer = ({
                         name="nom"
                         value={values.nom || ""}
                         onChange={handleChange}
+                        maxLength={STORAGE_TEXT_LIMITS.eventName}
                         required
                         placeholder="Ex. Vaccin annuel"
                         aria-invalid={Boolean(errors.nom)}
@@ -435,6 +437,7 @@ export const EventFormDrawer = ({
                         name="lieu"
                         value={values.lieu || ""}
                         onChange={handleChange}
+                        maxLength={STORAGE_TEXT_LIMITS.eventText}
                         placeholder="Adresse ou lieu"
                       />
                     </Field>
@@ -571,6 +574,7 @@ export const EventFormDrawer = ({
                           name="specialiste"
                           value={values.specialiste || ""}
                           onChange={handleChange}
+                          maxLength={STORAGE_TEXT_LIMITS.eventText}
                         />
                       </Field>
                     )}
@@ -643,6 +647,7 @@ export const EventFormDrawer = ({
                           name="discipline"
                           value={values.discipline || ""}
                           onChange={handleChange}
+                          maxLength={STORAGE_TEXT_LIMITS.eventText}
                         />
                       </Field>
                     )}
@@ -653,6 +658,7 @@ export const EventFormDrawer = ({
                             name="epreuve"
                             value={values.epreuve || ""}
                             onChange={handleChange}
+                            maxLength={STORAGE_TEXT_LIMITS.eventText}
                           />
                         </Field>
                         <Field label="Dossard">
@@ -660,6 +666,7 @@ export const EventFormDrawer = ({
                             name="dossart"
                             value={values.dossart || ""}
                             onChange={handleChange}
+                            maxLength={STORAGE_TEXT_LIMITS.eventText}
                           />
                         </Field>
                         <Field label="Classement">
@@ -667,6 +674,7 @@ export const EventFormDrawer = ({
                             name="placement"
                             value={values.placement || ""}
                             onChange={handleChange}
+                            maxLength={STORAGE_TEXT_LIMITS.eventText}
                           />
                         </Field>
                       </>
@@ -678,6 +686,7 @@ export const EventFormDrawer = ({
                             name="traitement"
                             value={values.traitement || ""}
                             onChange={handleChange}
+                            maxLength={STORAGE_TEXT_LIMITS.eventText}
                           />
                         </Field>
                         <Field label="Fin des soins">

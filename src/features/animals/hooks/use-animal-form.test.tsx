@@ -40,4 +40,18 @@ describe('useAnimalForm', () => {
     expect(result.current.errors.nom).toBe('Le nom est requis');
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it('refuse les textes qui dépassent les limites PostgreSQL', () => {
+    const onSubmit = vi.fn();
+    const { result } = renderHook(() => useAnimalForm({
+      nom: 'Moka',
+      espece: 'Chat',
+      food: 'a'.repeat(101),
+    }));
+
+    act(() => result.current.handleSubmit(onSubmit)(submitEvent()));
+
+    expect(result.current.errors.food).toContain('100 caractères');
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });

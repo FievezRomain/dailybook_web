@@ -2,6 +2,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { webApiClient } from '@/shared/api/web-api-client';
 import { currentUserSchema, backendSessionSchema } from '../schemas/user';
 import type { CurrentUser, OpenUserSessionInput, UpdateCurrentUserInput } from '../types/user';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 export async function openUserSession(input: OpenUserSessionInput) {
   const response = await webApiClient.post('/auth/session', input);
@@ -13,7 +14,7 @@ export async function establishAuthenticatedSession(user: FirebaseUser): Promise
   await webApiClient.post('/session/login', { idToken });
   try {
     await openUserSession({
-      firstName: user.displayName?.trim() || undefined,
+      firstName: user.displayName?.trim().slice(0, STORAGE_TEXT_LIMITS.accountFirstName) || undefined,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
   } catch (error) {

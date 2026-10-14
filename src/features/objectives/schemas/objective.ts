@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -38,8 +39,8 @@ export const objectiveSubtaskInputSchema = z.object({
 }).strict();
 
 const objectiveMutationFields = {
-  title: z.string().trim().min(1).max(255),
-  temporalityobjectif: z.string().trim().min(1).max(100).nullable().optional(),
+  title: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.objectiveTitle),
+  temporalityobjectif: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.objectiveTemporality).nullable().optional(),
   datedebut: dateSchema.nullable().optional(),
   datefin: dateSchema.nullable().optional(),
   animaux: z.array(positiveId).default([]),

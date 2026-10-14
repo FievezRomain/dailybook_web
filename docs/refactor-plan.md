@@ -329,6 +329,8 @@ phase historique de refonte graphique n’est rouverte.
 
 Maintenance Animaux (07/10/2026) : les comptes `Free` sont limités à trois animaux possédés. Les comptes historiques migrés vers `Pioneer` et les comptes `Premium` restent illimités ; les animaux partagés ne consomment pas le quota. Le web anticipe le verrou, conserve le contrôle FastAPI `QUOTA_EXCEEDED` comme autorité et affiche le statut Pionnier dans le profil.
 
+Maintenance des contrats de saisie (14/10/2026) : les champs bornés des animaux, contacts, événements, notes, objectifs, souhaits et du profil suivent désormais les tailles PostgreSQL dans les schémas BFF, les gardes de mutation et les formulaires. L'alimentation animale et son historique passent à 100 caractères. Les groupes sont harmonisés à 255 caractères pour le nom, 2 000 pour les informations et 80 pour les e-mails de membre. La suite complète de 495 tests, le typage et le lint CI passent.
+
 - [ ] **Clôture de la phase 6** — tous les livrables et le critère de sortie sont vérifiés.
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.
