@@ -6,6 +6,11 @@ Maintenance hors cycle graphique, 02/10/2026 — Admin US-012 :
 - [ ] Recette complète cadeau/révocation/groupes avec un compte local autorisé.
 Voir [le suivi de maintenance](subscription-focus-refresh.md).
 
+Maintenance des contrats de saisie hors cycle graphique, 14/10/2026 :
+- [x] Aligner les limites des animaux, contacts, événements, notes, objectifs, souhaits et du profil sur les colonnes PostgreSQL bornées ; porter l'alimentation animale et son historique à 100 caractères.
+- [x] Harmoniser les groupes entre clients et API (`name` 255, `informations` 2 000) et limiter les e-mails de compte ou d'invitation à 80 caractères.
+- [x] Appliquer les bornes dans les schémas BFF, les gardes de mutation et les formulaires, puis les vérifier avec la suite complète de 495 tests, le typecheck et le lint CI.
+
 ## Objectif
 
 Implémenter dans l’application Next.js les maquettes validées de [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp), sans coexistence V1/V2 et sans recopier l’architecture visuelle legacy.

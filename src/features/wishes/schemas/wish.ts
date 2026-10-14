@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { storedFilenameSchema } from '@/shared/schemas/file';
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
 const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
@@ -27,10 +28,10 @@ export const wishSchema = z.object({
 export const wishListSchema = z.array(wishSchema);
 
 const wishMutationFields = {
-  nom: z.string().trim().min(1).max(255),
+  nom: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.wish),
   url: safeUrl.nullable().optional(),
   prix: z.string().trim().regex(/^\d{1,7}(?:[.,]\d{1,2})?$/).nullable().optional(),
-  destinataire: z.string().trim().min(1).max(255).nullable().optional(),
+  destinataire: z.string().trim().min(1).max(STORAGE_TEXT_LIMITS.wish).nullable().optional(),
   image: wishFilenameSchema.nullable().optional(),
 } as const;
 

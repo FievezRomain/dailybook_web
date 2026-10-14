@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Input } from "@/shared/components/ui/input";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 import { SearchField } from "@/shared/components/ui/search-field";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useNotesQuery } from "../hooks/use-notes";
@@ -126,7 +127,7 @@ export function NoteForm({
               <Input
                 autoFocus
                 value={title}
-                maxLength={255}
+                maxLength={STORAGE_TEXT_LIMITS.noteTitle}
                 onChange={(event) => setTitle(event.target.value)}
               />
             </label>

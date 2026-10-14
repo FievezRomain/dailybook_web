@@ -31,4 +31,12 @@ describe('AnimalHistoryPanel', () => {
     expect(screen.getByText('Historique partagé en lecture seule.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ajouter' })).not.toBeInTheDocument();
   });
+
+  it('borne les entrées d’alimentation à 100 caractères', () => {
+    render(<AnimalHistoryPanel animalId={1} canEdit />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Aliment' }));
+
+    expect(screen.getByRole('textbox', { name: 'Aliment' })).toHaveAttribute('maxLength', '100');
+  });
 });

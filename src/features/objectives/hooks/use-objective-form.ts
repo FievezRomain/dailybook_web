@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Objective, ObjectiveSubtask } from "@/features/objectives/types/objective";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 
 export type ObjectiveFormValue = Omit<Partial<Objective>, 'sousetapes'> & {
     sousetapes?: Array<Omit<ObjectiveSubtask, 'id'> & { id?: number }>;
@@ -28,10 +29,13 @@ export function useObjectiveForm(initial: ObjectiveFormValue = {}) {
     const validate = (vals: ObjectiveFormValue) => {
         const errs: Record<string, string> = {};
         if (!vals.title) errs.title = "Le titre est requis";
+        else if (vals.title.trim().length > STORAGE_TEXT_LIMITS.objectiveTitle) errs.title = `Le titre ne peut pas dépasser ${STORAGE_TEXT_LIMITS.objectiveTitle} caractères`;
         if (!vals.datedebut) errs.datedebut = "La date de début est requise";
         if (!vals.datefin) errs.datefin = "La date de fin est requise";
         if (!vals.sousetapes || vals.sousetapes.every((subtask) => !subtask.etape.trim())) {
             errs.sousetapes = "Ajoutez au moins une étape";
+        } else if (vals.sousetapes.some((subtask) => subtask.etape.trim().length > 500)) {
+            errs.sousetapes = "Une étape ne peut pas dépasser 500 caractères";
         }
         if (vals.datedebut && vals.datefin && vals.datedebut > vals.datefin) errs.datefin = "La date de fin doit suivre la date de début";
         return errs;

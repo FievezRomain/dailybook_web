@@ -45,6 +45,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { SystemState } from "@/shared/components/ui/system-state";
 import { getSubscriptionLabel, isPioneerSubscription, isPremiumSubscription } from '@/shared/subscription/subscription';
 import { UserPictureControl } from "./UserPictureControl";
+import { STORAGE_TEXT_LIMITS } from "@/shared/constants/storage-limits";
 
 function formatSubscriptionEndDate(value: string) {
   return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", {
@@ -105,6 +106,7 @@ function ProfileEditor({
               <Input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
+                maxLength={STORAGE_TEXT_LIMITS.accountFirstName}
                 required
                 autoFocus
               />
@@ -115,6 +117,7 @@ function ProfileEditor({
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                maxLength={STORAGE_TEXT_LIMITS.accountEmail}
                 required
               />
             </label>

@@ -12,6 +12,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { registerUser, signInWithGoogle } from '@/lib/firebaseService'
 import { getLoginErrorMessage } from '@/features/auth/utils/login-error-message'
+import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits'
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -74,14 +75,14 @@ export default function RegisterForm() {
               <label htmlFor="register-first-name" className="text-sm font-semibold">Prénom</label>
               <div className="relative">
                 <UserRound aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="register-first-name" type="text" value={firstName} onChange={event => setFirstName(event.target.value)} required autoComplete="given-name" placeholder="Votre prénom" size="large" className="rounded-[14px] bg-card pl-11! text-base! shadow-xs" />
+                <Input id="register-first-name" type="text" value={firstName} onChange={event => setFirstName(event.target.value)} maxLength={STORAGE_TEXT_LIMITS.accountFirstName} required autoComplete="given-name" placeholder="Votre prénom" size="large" className="rounded-[14px] bg-card pl-11! text-base! shadow-xs" />
               </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="register-email" className="text-sm font-semibold">Adresse e-mail</label>
               <div className="relative">
                 <Mail aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="register-email" type="email" value={email} onChange={event => setEmail(event.target.value)} required autoComplete="email" inputMode="email" placeholder="vous@exemple.fr" size="large" className="rounded-[14px] bg-card pl-11! text-base! shadow-xs" />
+                <Input id="register-email" type="email" value={email} onChange={event => setEmail(event.target.value)} maxLength={STORAGE_TEXT_LIMITS.accountEmail} required autoComplete="email" inputMode="email" placeholder="vous@exemple.fr" size="large" className="rounded-[14px] bg-card pl-11! text-base! shadow-xs" />
               </div>
             </div>
             <div className="space-y-2">
