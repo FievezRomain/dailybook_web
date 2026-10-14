@@ -46,4 +46,15 @@ describe('AnimalFormDrawer', () => {
     expect(screen.getByRole('textbox', { name: /Taille/ })).toHaveClass('pr-16');
   });
 
+  it('borne les champs texte sur les limites du contrat animal', async () => {
+    const user = userEvent.setup();
+    render(<AnimalFormDrawer open onClose={vi.fn()} onSubmit={vi.fn()} />);
+
+    expect(screen.getByRole('textbox', { name: /Nom/ })).toHaveAttribute('maxLength', '50');
+    await user.click(screen.getByRole('button', { name: 'Continuer' }));
+    await user.click(screen.getByRole('button', { name: 'Continuer' }));
+
+    expect(screen.getByRole('textbox', { name: 'Alimentation' })).toHaveAttribute('maxLength', '100');
+  });
+
 });

@@ -2,6 +2,11 @@ import { z } from 'zod';
 import { storedFilenameSchema } from '@/shared/schemas/file';
 
 const optionalText = z.string().nullable().optional();
+export const ANIMAL_SHORT_TEXT_MAX_LENGTH = 50;
+export const ANIMAL_FOOD_MAX_LENGTH = 100;
+const optionalLimitedText = (maxLength: number) => z.string().max(maxLength).nullable().optional();
+const optionalShortText = optionalLimitedText(ANIMAL_SHORT_TEXT_MAX_LENGTH);
+const optionalFoodText = optionalLimitedText(ANIMAL_FOOD_MAX_LENGTH);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const optionalDate = dateSchema.nullable().optional();
 const optionalNumber = z.number().nullable().optional();
@@ -36,19 +41,19 @@ export const animalSchema = z.object({
 export const animalListSchema = z.array(animalSchema);
 
 const animalMutationFields = {
-  nom: optionalText,
-  espece: optionalText,
+  nom: optionalShortText,
+  espece: optionalShortText,
   datenaissance: optionalDate,
-  race: optionalText,
+  race: optionalShortText,
   taille: optionalNumber,
   poids: optionalNumber,
-  sexe: optionalText,
-  food: optionalText,
+  sexe: optionalShortText,
+  food: optionalFoodText,
   quantity: optionalNumber,
   unity: optionalText,
-  couleur: optionalText,
-  nompere: optionalText,
-  nommere: optionalText,
+  couleur: optionalShortText,
+  nompere: optionalShortText,
+  nommere: optionalShortText,
   image: animalFilenameSchema.nullable().optional(),
   numeroidentification: optionalText,
   informations: optionalText,
@@ -78,7 +83,18 @@ export const animalHistoryMutationSchema = z.object({
   value: z.union([z.string(), z.number()]).nullable().optional(),
   unity: optionalText,
   datemodification: optionalDate,
-}).strict();
+}).strict().superRefine((input, context) => {
+  if (input.item === 'food' && typeof input.value === 'string' && input.value.length > ANIMAL_FOOD_MAX_LENGTH) {
+    context.addIssue({
+      code: z.ZodIssueCode.too_big,
+      maximum: ANIMAL_FOOD_MAX_LENGTH,
+      type: 'string',
+      inclusive: true,
+      path: ['value'],
+      message: `L’alimentation ne peut pas dépasser ${ANIMAL_FOOD_MAX_LENGTH} caractères.`,
+    });
+  }
+});
 
 export const bodyPictureSchema = z.object({
   id: z.number().int().positive(),

@@ -3,6 +3,10 @@ import { HeartPulse, Home, PawPrint, Trash2, Utensils } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAnimalForm } from "@/features/animals/hooks/use-animal-form";
+import {
+  ANIMAL_FOOD_MAX_LENGTH,
+  ANIMAL_SHORT_TEXT_MAX_LENGTH,
+} from "@/features/animals/schemas/animal";
 import type { Animal } from "@/features/animals/types/animal";
 import {
   FormSection,
@@ -167,6 +171,7 @@ export function AnimalFormDrawer({
                     name="nom"
                     value={values.nom || ""}
                     onChange={handleChange}
+                    maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                     required
                     aria-invalid={Boolean(errors.nom)}
                     placeholder="Son nom"
@@ -223,6 +228,7 @@ export function AnimalFormDrawer({
                     name="sexe"
                     value={values.sexe || ""}
                     onChange={handleChange}
+                    maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                     placeholder="Femelle, mâle…"
                   />
                 </Field>
@@ -231,6 +237,7 @@ export function AnimalFormDrawer({
                     name="race"
                     value={values.race || ""}
                     onChange={handleChange}
+                    maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                   />
                 </Field>
                 <Field label="Robe ou couleur">
@@ -238,6 +245,7 @@ export function AnimalFormDrawer({
                     name="couleur"
                     value={values.couleur || ""}
                     onChange={handleChange}
+                    maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                   />
                 </Field>
               </div>
@@ -310,6 +318,7 @@ export function AnimalFormDrawer({
                     name="food"
                     value={values.food || ""}
                     onChange={handleChange}
+                    maxLength={ANIMAL_FOOD_MAX_LENGTH}
                     placeholder="Croquettes, foin…"
                   />
                 </Field>
@@ -413,6 +422,7 @@ export function AnimalFormDrawer({
                       name="nompere"
                       value={values.nompere || ""}
                       onChange={handleChange}
+                      maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                     />
                   </Field>
                   <Field label="Nom de la mère">
@@ -420,6 +430,7 @@ export function AnimalFormDrawer({
                       name="nommere"
                       value={values.nommere || ""}
                       onChange={handleChange}
+                      maxLength={ANIMAL_SHORT_TEXT_MAX_LENGTH}
                     />
                   </Field>
                   <Field label="Date de départ">

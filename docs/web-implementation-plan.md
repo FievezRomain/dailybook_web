@@ -6,6 +6,11 @@ Maintenance hors cycle graphique, 02/10/2026 — Admin US-012 :
 - [ ] Recette complète cadeau/révocation/groupes avec un compte local autorisé.
 Voir [le suivi de maintenance](subscription-focus-refresh.md).
 
+Maintenance Animaux hors cycle graphique, 14/10/2026 :
+- [x] Borner à 50 caractères les champs texte d'identité animale exposés par le formulaire et le schéma BFF.
+- [x] Porter l'alimentation et son historique à 100 caractères dans le formulaire et les schémas BFF.
+- [x] Vérifier les bornes avec 19 tests ciblés et un typecheck réussis.
+
 ## Objectif
 
 Implémenter dans l’application Next.js les maquettes validées de [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp), sans coexistence V1/V2 et sans recopier l’architecture visuelle legacy.
