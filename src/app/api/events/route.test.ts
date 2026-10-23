@@ -21,9 +21,9 @@ describe('/api/events', () => {
   beforeEach(() => vi.clearAllMocks());
   it('lit la liste REST et refuse l’enveloppe rows', async () => {
     backendApiClient.mockResolvedValueOnce([event]);
-    expect((await GET()).status).toBe(200);
+    expect((await GET(new Request('http://localhost/api/events'))).status).toBe(200);
     backendApiClient.mockResolvedValueOnce({ rows: [event] });
-    expect((await GET()).status).toBe(422);
+    expect((await GET(new Request('http://localhost/api/events'))).status).toBe(422);
   });
   it('normalise une note backend a 0 comme une note absente', async () => {
     backendApiClient.mockResolvedValueOnce([
@@ -31,7 +31,7 @@ describe('/api/events', () => {
       { ...event, id: 19, note: 0 },
     ]);
 
-    const response = await GET();
+    const response = await GET(new Request('http://localhost/api/events'));
     const events = await response.json();
 
     expect(response.status).toBe(200);
