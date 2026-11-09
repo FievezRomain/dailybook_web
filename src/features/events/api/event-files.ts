@@ -4,12 +4,22 @@ import { eventFileNameSchema } from '../schemas/event';
 import { storedFilenameSchema } from '@/shared/schemas/file';
 
 type UploadTicket = { url: string; fields: Record<string, string>; filename: string };
-const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png']);
-const MAX_EVENT_FILE_BYTES = 3 * 1024 * 1024;
+const ALLOWED_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+  'image/avif',
+]);
+const MAX_EVENT_DOCUMENT_BYTES = 3 * 1024 * 1024;
+const MAX_EVENT_IMAGE_BYTES = 20 * 1024 * 1024;
 
 export async function uploadEventFile(file: File, eventId?: number) {
-  if (!ALLOWED_TYPES.has(file.type) || file.size < 1 || file.size > MAX_EVENT_FILE_BYTES) {
-    throw new Error('Le document doit être un PDF, JPEG ou PNG de 3 Mo maximum.');
+  const maxSize = file.type === 'application/pdf' ? MAX_EVENT_DOCUMENT_BYTES : MAX_EVENT_IMAGE_BYTES;
+  if (!ALLOWED_TYPES.has(file.type) || file.size < 1 || file.size > maxSize) {
+    throw new Error('Le document doit être un PDF de 3 Mo maximum ou une image compatible de 20 Mo maximum.');
   }
   const response = await webApiClient.post<UploadTicket>('/files/upload-url', {
     filename: file.name,

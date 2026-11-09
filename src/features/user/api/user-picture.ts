@@ -8,8 +8,8 @@ type UploadTicket = {
   filename: string;
 };
 
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_USER_IMAGE_BYTES = 500 * 1024;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
+const MAX_USER_IMAGE_BYTES = 20 * 1024 * 1024;
 
 export async function getUserPictureUrl(filename: string): Promise<string> {
   const safeFilename = userPictureFilenameSchema.parse(filename);

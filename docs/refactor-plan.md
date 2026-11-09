@@ -331,6 +331,8 @@ Maintenance Animaux (07/10/2026) : les comptes `Free` sont limités à trois ani
 
 Maintenance des contrats de saisie (14/10/2026) : les champs bornés des animaux, contacts, événements, notes, objectifs, souhaits et du profil suivent désormais les tailles PostgreSQL dans les schémas BFF, les gardes de mutation et les formulaires. L'alimentation animale et son historique passent à 100 caractères. Les groupes sont harmonisés à 255 caractères pour le nom, 2 000 pour les informations et 80 pour les e-mails de membre. La suite complète de 495 tests, le typage et le lint CI passent.
 
+Maintenance retours produit (09/11/2026) : les résultats filtrés de l’agenda sont triés du plus récent au plus ancien, le sélecteur d’heure utilise des listes natives accessibles et les contrats d’upload acceptent JPEG, PNG, WebP, HEIC/HEIF et AVIF jusqu’à leur normalisation sécurisée par FastAPI. La suite complète de 496 tests, le typecheck et le lint CI passent.
+
 - [ ] **Clôture de la phase 6** — tous les livrables et le critère de sortie sont vérifiés.
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.

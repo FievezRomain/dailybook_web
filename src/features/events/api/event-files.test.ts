@@ -21,7 +21,7 @@ describe('documents d’événement', () => {
 
   it('refuse un type non autorisé avant tout appel BFF', async () => {
     const file = new File(['<svg/>'], 'document.svg', { type: 'image/svg+xml' })
-    await expect(uploadEventFile(file, 7)).rejects.toThrow('PDF, JPEG ou PNG')
+    await expect(uploadEventFile(file, 7)).rejects.toThrow('image compatible')
     expect(mocks.post).not.toHaveBeenCalled()
   })
 

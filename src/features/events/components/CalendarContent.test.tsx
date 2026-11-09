@@ -134,6 +134,14 @@ describe("CalendarContent", () => {
     expect(within(panel).getByRole("heading", { name: "Recherche" })).toBeVisible();
     expect(within(panel).getByLabelText("Carte d’événement Vaccin annuel")).toBeVisible();
     expect(within(panel).getByLabelText("Carte d’événement Vaccin de rappel")).toBeVisible();
+    expect(
+      within(panel)
+        .getAllByLabelText(/^Carte d’événement/)
+        .map((card) => card.getAttribute("aria-label")),
+    ).toEqual([
+      "Carte d’événement Vaccin de rappel",
+      "Carte d’événement Vaccin annuel",
+    ]);
   });
 
   it("reprend l’icône mobile et réinitialise tous les filtres depuis la croix", async () => {

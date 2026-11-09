@@ -180,7 +180,7 @@ export function AnimalEvolutionCard({
                       id={`body-file-${idAnimal}`}
                       type="file"
                       name="image"
-                      accept="image/jpeg,image/png,image/webp"
+                      accept="image/*,.heic,.heif"
                       onChange={handleImageChange}
                       disabled={isUploading}
                       className="cursor-pointer bg-card"

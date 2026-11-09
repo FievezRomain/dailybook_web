@@ -11,6 +11,11 @@ Maintenance des contrats de saisie hors cycle graphique, 14/10/2026 :
 - [x] Harmoniser les groupes entre clients et API (`name` 255, `informations` 2 000) et limiter les e-mails de compte ou d'invitation à 80 caractères.
 - [x] Appliquer les bornes dans les schémas BFF, les gardes de mutation et les formulaires, puis les vérifier avec la suite complète de 495 tests, le typecheck et le lint CI.
 
+Maintenance retours produit hors cycle graphique, 09/11/2026 :
+- [x] Trier les résultats filtrés de l’agenda par date et heure décroissantes.
+- [x] Remplacer le faux sélecteur d’heure par des listes natives clavier/souris/tactile.
+- [x] Accepter les formats photo mobiles JPEG, PNG, WebP, HEIC/HEIF et AVIF jusqu’à la normalisation sécurisée FastAPI ; vérifier les contrats BFF, la suite complète de 496 tests, le typecheck et le lint CI.
+
 ## Objectif
 
 Implémenter dans l’application Next.js les maquettes validées de [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp), sans coexistence V1/V2 et sans recopier l’architecture visuelle legacy.

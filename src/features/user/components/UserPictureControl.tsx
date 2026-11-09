@@ -42,7 +42,7 @@ export function UserPictureControl() {
           id={inputId}
           className="sr-only"
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*,.heic,.heif"
           disabled={isPending}
           onChange={(event) => void onFile(event.target.files?.[0])}
         />

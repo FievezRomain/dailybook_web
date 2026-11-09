@@ -4,8 +4,8 @@ import { wishFilenameSchema } from '../schemas/wish';
 import { storedFilenameSchema } from '@/shared/schemas/file';
 
 type UploadTicket = { url: string; fields: Record<string, string>; filename: string };
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_WISH_IMAGE_BYTES = 750 * 1024;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
+const MAX_WISH_IMAGE_BYTES = 20 * 1024 * 1024;
 
 function query(wishId: number) {
   return new URLSearchParams({ resourceType: 'wish', resourceId: String(wishId) }).toString();

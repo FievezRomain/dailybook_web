@@ -67,10 +67,14 @@ describe('/api/files/upload-url', () => {
     });
   });
 
-  it('refuse un type arbitraire, un identifiant manquant ou une image de souhait trop lourde', async () => {
+  it('accepte HEIC pour normalisation backend et refuse les entrées invalides', async () => {
+    backendApiClient.mockResolvedValueOnce({
+      url: 'https://files.example.test', fields: {}, filename: 'e'.repeat(32) + '.jpg',
+    });
+    expect((await POST(request({ filename: 'iphone.heic', contentType: 'image/heic', sizeBytes: 5_000_000, resourceType: 'wish', resourceId: 1 }))).status).toBe(200);
     expect((await POST(request({ filename: 'x.jpg', contentType: 'image/jpeg', sizeBytes: 10, resourceType: 'group', resourceId: 1 }))).status).toBe(422);
     expect((await POST(request({ filename: 'x.jpg', contentType: 'image/jpeg', sizeBytes: 10, resourceType: 'animal' }))).status).toBe(422);
-    expect((await POST(request({ filename: 'x.jpg', contentType: 'image/jpeg', sizeBytes: 750 * 1024 + 1, resourceType: 'wish', resourceId: 1 }))).status).toBe(422);
-    expect(backendApiClient).not.toHaveBeenCalled();
+    expect((await POST(request({ filename: 'x.jpg', contentType: 'image/jpeg', sizeBytes: 20 * 1024 * 1024 + 1, resourceType: 'wish', resourceId: 1 }))).status).toBe(422);
+    expect(backendApiClient).toHaveBeenCalledTimes(1);
   });
 });

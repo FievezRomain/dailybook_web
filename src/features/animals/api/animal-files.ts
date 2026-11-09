@@ -6,8 +6,8 @@ import { storedFilenameSchema } from '@/shared/schemas/file';
 type AnimalFileResource = 'animal' | 'body';
 type UploadTicket = { url: string; fields: Record<string, string>; filename: string };
 
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_BYTES: Record<AnimalFileResource, number> = { animal: 500 * 1024, body: 1024 * 1024 };
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
+const MAX_BYTES: Record<AnimalFileResource, number> = { animal: 20 * 1024 * 1024, body: 20 * 1024 * 1024 };
 
 function query(resourceType: AnimalFileResource, resourceId: number) {
   return new URLSearchParams({ resourceType, resourceId: String(resourceId) }).toString();
