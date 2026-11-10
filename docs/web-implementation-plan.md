@@ -14,7 +14,7 @@ Maintenance des contrats de saisie hors cycle graphique, 14/10/2026 :
 Maintenance retours produit hors cycle graphique, 09/11/2026 :
 - [x] Trier les résultats filtrés de l’agenda par date et heure décroissantes.
 - [x] Remplacer le faux sélecteur d’heure par des listes natives clavier/souris/tactile.
-- [x] Accepter les formats photo mobiles JPEG, PNG, WebP, HEIC/HEIF et AVIF jusqu’à la normalisation sécurisée FastAPI ; vérifier les contrats BFF, la suite complète de 496 tests, le typecheck et le lint CI.
+- [x] Accepter JPEG, PNG, WebP, HEIC/HEIF et AVIF, les convertir localement en JPEG borné avant S3, isoler et contrôler le codec HEIC auto-hébergé, puis imposer la même limite finale dans le BFF et FastAPI pour les appels directs.
 
 ## Objectif
 

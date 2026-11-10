@@ -1,6 +1,7 @@
 import { webApiClient } from '@/shared/api/web-api-client';
 import { validatePresignedUrl } from '@/shared/security/presigned-url';
 import { userPictureFilenameSchema } from '../schemas/user';
+import { isSupportedImageUpload, prepareImageUpload } from '@/shared/utils/prepare-image-upload';
 
 type UploadTicket = {
   url: string;
@@ -8,7 +9,6 @@ type UploadTicket = {
   filename: string;
 };
 
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
 const MAX_USER_IMAGE_BYTES = 20 * 1024 * 1024;
 
 export async function getUserPictureUrl(filename: string): Promise<string> {
@@ -18,26 +18,27 @@ export async function getUserPictureUrl(filename: string): Promise<string> {
 }
 
 export async function uploadUserPicture(file: File): Promise<string> {
-  if (!ALLOWED_TYPES.has(file.type) || file.size < 1 || file.size > MAX_USER_IMAGE_BYTES) {
-    throw new Error('La photo doit être au format JPEG, PNG ou WebP et ne pas dépasser 500 Ko.');
+  if (!isSupportedImageUpload(file) || file.size < 1 || file.size > MAX_USER_IMAGE_BYTES) {
+    throw new Error('La photo source doit être compatible et ne pas dépasser 20 Mo ; elle sera compressée à 500 Ko.');
   }
+  const preparedFile = await prepareImageUpload(file, 'user');
 
   const ticketResponse = await webApiClient.post<UploadTicket>('/files/upload-url', {
-    filename: file.name,
-    contentType: file.type,
-    sizeBytes: file.size,
+    filename: preparedFile.name,
+    contentType: preparedFile.type,
+    sizeBytes: preparedFile.size,
   });
   const ticket = ticketResponse.data;
   const form = new FormData();
   for (const [name, value] of Object.entries(ticket.fields)) form.append(name, value);
-  form.append('file', file);
+  form.append('file', preparedFile);
 
   const uploadResponse = await fetch(validatePresignedUrl(ticket.url), { method: 'POST', body: form });
   if (!uploadResponse.ok) throw new Error('Le transfert de la photo a échoué.');
 
   await webApiClient.post('/files/upload-complete', {
     filename: ticket.filename,
-    contentType: file.type,
+    contentType: preparedFile.type,
   });
   try {
     await webApiClient.patch('/me', { image: ticket.filename });

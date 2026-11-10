@@ -26,7 +26,17 @@ export const uploadRequestSchema = z.object({
   }
   if (value.resourceType === undefined && value.contentType === 'application/pdf') context.addIssue({ code: 'custom', message: 'Format interdit.' });
   if (value.resourceType !== 'event' && value.contentType === 'application/pdf') context.addIssue({ code: 'custom', message: 'Format interdit.' });
-  const limit = value.contentType === 'application/pdf' ? 3 * 1024 * 1024 : 20 * 1024 * 1024;
+  const imageLimits = {
+    animal: 500 * 1024,
+    body: 1024 * 1024,
+    event: 3 * 1024 * 1024,
+    wish: 750 * 1024,
+  } as const;
+  const limit = value.contentType === 'application/pdf'
+    ? 3 * 1024 * 1024
+    : value.resourceType
+      ? imageLimits[value.resourceType]
+      : 500 * 1024;
   if (value.sizeBytes > limit) context.addIssue({ code: 'custom', message: 'Fichier trop volumineux.' });
 });
 export const uploadCompleteSchema = z.object({

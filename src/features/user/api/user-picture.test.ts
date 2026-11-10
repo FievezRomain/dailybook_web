@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({
-  get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(), prepare: vi.fn(),
 }));
 
 vi.mock('@/shared/api/web-api-client', () => ({ webApiClient: api }));
+vi.mock('@/shared/utils/prepare-image-upload', () => ({
+  prepareImageUpload: api.prepare,
+  isSupportedImageUpload: (file: File) => file.type.startsWith('image/') && file.type !== 'image/svg+xml',
+}));
 
 import { getUserPictureUrl, removeUserPicture, uploadUserPicture } from './user-picture';
 
@@ -15,11 +19,12 @@ describe('user picture API', () => {
     vi.clearAllMocks();
     vi.stubEnv('NEXT_PUBLIC_BUCKET_HOSTNAME', 'storage.example');
     vi.stubGlobal('fetch', vi.fn());
+    api.prepare.mockImplementation(async (file: File) => new File([file], 'prepared.jpg', { type: 'image/jpeg' }));
   });
 
   it('refuse un type actif avant toute requête', async () => {
     const file = new File(['<svg/>'], 'avatar.svg', { type: 'image/svg+xml' });
-    await expect(uploadUserPicture(file)).rejects.toThrow('JPEG, PNG ou WebP');
+    await expect(uploadUserPicture(file)).rejects.toThrow('20 Mo');
     expect(api.post).not.toHaveBeenCalled();
   });
 

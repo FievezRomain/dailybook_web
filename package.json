@@ -32,6 +32,7 @@
     "test:performance": "playwright test e2e/performance.spec.ts"
   },
   "dependencies": {
+    "@discourse/heic": "1.0.0",
     "@mdi/js": "^7.4.47",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
