@@ -32,6 +32,7 @@ export default defineConfig({
         ...process.env,
         FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
         FIREBASE_ADMIN_PROJECT_ID: 'vasco-e2e',
+        NEXT_PUBLIC_BUCKET_HOSTNAME: 'storage.example',
       },
       url: 'http://localhost:3100',
       reuseExistingServer: !process.env.CI,

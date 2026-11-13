@@ -3,14 +3,14 @@ import { storedFilenameSchema } from '@/shared/schemas/file';
 import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const optionalDate = dateSchema.nullable().optional().transform((value) => value ?? undefined);
-const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
-const optionalLimitedText = (maximum: number) => z.string().max(maximum).nullable().optional().transform((value) => value ?? undefined);
-const optionalNumber = z.number().nullable().optional().transform((value) => value ?? undefined);
+const optionalDate = dateSchema.nullable().transform((value) => value ?? undefined).optional();
+const optionalText = z.string().nullable().transform((value) => value ?? undefined).optional();
+const optionalLimitedText = (maximum: number) => z.string().max(maximum).nullable().transform((value) => value ?? undefined).optional();
+const optionalNumber = z.number().nullable().transform((value) => value ?? undefined).optional();
 const optionalRating = z.preprocess(
   (value) => value === 0 ? undefined : value,
   z.number().min(1).max(5).nullable().optional(),
-).transform((value) => value ?? undefined);
+).transform((value) => value ?? undefined).optional();
 const requiredText = z.string().nullable().optional().transform((value) => value ?? '');
 const positiveId = z.number().int().positive();
 
@@ -52,13 +52,13 @@ export const eventSchema = z.object({
   commentaire: optionalText,
   frequencetype: optionalText,
   frequencevalue: optionalText,
-  idparent: positiveId.nullable().optional().transform((value) => value ?? undefined),
+  idparent: positiveId.nullable().transform((value) => value ?? undefined).optional(),
   optionnotification: optionalText,
   rappelnotification: optionalText,
   documents: z.array(documentSchema).default([]),
   shared_groups: z.array(groupRefSchema).nullable().optional().transform((value) => value ?? []),
-  created_by: userRefSchema.nullable().optional().transform((value) => value ?? undefined),
-  made_by: userRefSchema.nullable().optional().transform((value) => value ?? undefined),
+  created_by: userRefSchema.nullable().transform((value) => value ?? undefined).optional(),
+  made_by: userRefSchema.nullable().transform((value) => value ?? undefined).optional(),
   todisplay: z.boolean().nullable().optional().transform((value) => value ?? true),
 });
 export const eventListSchema = z.array(eventSchema);

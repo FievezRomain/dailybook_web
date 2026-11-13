@@ -68,6 +68,27 @@ describe("DateInput et TimeInput", () => {
     expect(onValueChange).toHaveBeenLastCalledWith("16:30");
   });
 
+  it("permet de choisir l’heure et les minutes avec des listes déroulantes", () => {
+    const onValueChange = vi.fn();
+    render(
+      <TimeInput
+        aria-label="Horaire"
+        defaultValue="14:30"
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByLabelText("Horaire"));
+    fireEvent.change(screen.getByRole("combobox", { name: "Choisir l’heure" }), {
+      target: { value: "18" },
+    });
+    expect(onValueChange).toHaveBeenLastCalledWith("18:30");
+    fireEvent.change(screen.getByRole("combobox", { name: "Choisir les minutes" }), {
+      target: { value: "45" },
+    });
+    expect(onValueChange).toHaveBeenLastCalledWith("18:45");
+  });
+
   it("propose le raccourci Maintenant et ferme avec Échap", () => {
     const onValueChange = vi.fn();
     render(<TimeInput aria-label="Horaire" onValueChange={onValueChange} />);

@@ -172,13 +172,25 @@ export const EventFormDrawer = ({
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(
-      (file) =>
-        ["application/pdf", "image/jpeg", "image/png"].includes(file.type) &&
-        file.size <= 3 * 1024 * 1024,
+      (file) => {
+        const isPdf = file.type === "application/pdf";
+        const isSupportedImage = [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/heic",
+          "image/heif",
+          "image/avif",
+        ].includes(file.type);
+        return (
+          (isPdf && file.size <= 3 * 1024 * 1024) ||
+          (isSupportedImage && file.size <= 20 * 1024 * 1024)
+        );
+      },
     );
     if (validFiles.length !== files.length)
       toast.error(
-        "Seuls les fichiers PDF, JPEG ou PNG de 3 Mo maximum sont acceptés.",
+        "Ajoutez un PDF de 3 Mo maximum ou une image JPEG, PNG, WebP, HEIC, HEIF ou AVIF de 20 Mo maximum.",
       );
     if (allFiles.length + validFiles.length > 3) {
       toast.error("Vous pouvez sélectionner jusqu’à 3 fichiers.");
@@ -771,7 +783,7 @@ export const EventFormDrawer = ({
                 {(eventtype === "soins" || eventtype === "rdv") && (
                   <FormSection
                     title="Documents médicaux"
-                    description="PDF, JPEG ou PNG · 3 fichiers maximum · 3 Mo par fichier."
+                    description="PDF (3 Mo max) ou image JPEG, PNG, WebP, HEIC, HEIF, AVIF (20 Mo max avant optimisation) · 3 fichiers maximum."
                   >
                     {!isPremium ? (
                       <PremiumNotice feature="medicalDocuments" compact />
@@ -781,7 +793,7 @@ export const EventFormDrawer = ({
                           ref={inputRef}
                           type="file"
                           name="documents"
-                          accept="application/pdf,image/jpeg,image/png"
+                          accept="application/pdf,image/*,.heic,.heif"
                           multiple
                           onChange={handleFileChange}
                           disabled={filesLeft <= 0}

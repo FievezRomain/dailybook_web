@@ -3,7 +3,7 @@ import { storedFilenameSchema } from '@/shared/schemas/file';
 import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
-const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
+const optionalText = z.string().nullable().transform((value) => value ?? undefined).optional();
 const safeUrl = z.string().trim().url().max(2_048).refine(
   (value) => ['http:', 'https:'].includes(new URL(value).protocol),
   'Seules les URLs HTTP et HTTPS sont autorisées.',
@@ -12,15 +12,15 @@ const safeUrl = z.string().trim().url().max(2_048).refine(
 export const wishIdSchema = z.coerce.number().int().positive();
 export const wishFilenameSchema = z.string().regex(/^[a-f0-9]{32}\.(?:jpg|png|webp)$/);
 
-const priceSchema = z.union([z.string(), z.number()]).nullable().optional().transform((value) => value == null ? undefined : String(value));
+const priceSchema = z.union([z.string(), z.number()]).nullable().transform((value) => value == null ? undefined : String(value)).optional();
 
 export const wishSchema = z.object({
   id: positiveId,
   nom: optionalText,
-  url: safeUrl.nullable().optional().transform((value) => value ?? undefined),
+  url: safeUrl.nullable().transform((value) => value ?? undefined).optional(),
   prix: priceSchema,
   destinataire: optionalText,
-  image: storedFilenameSchema.nullable().optional().transform((value) => value ?? undefined),
+  image: storedFilenameSchema.nullable().transform((value) => value ?? undefined).optional(),
   acquis: z.boolean().nullable().optional().transform((value) => value ?? false),
   email: z.string().email().nullable().optional(),
 });

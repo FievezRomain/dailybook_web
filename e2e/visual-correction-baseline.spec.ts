@@ -71,6 +71,11 @@ test('les onze destinations privées restent conformes à la référence visuell
         await page.goto(pathname)
         await page.waitForLoadState('networkidle')
         await expect(page.locator('[data-page-title]')).toBeVisible()
+        await page.evaluate(() => document.fonts.ready)
+        await expect.poll(
+          () => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
+          { message: `${viewport.name} ${name} ne doit pas déborder horizontalement` },
+        ).toBe(false)
 
         const observation = await page.evaluate(() => {
           const main = document.querySelector('main')

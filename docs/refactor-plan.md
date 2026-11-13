@@ -331,6 +331,10 @@ Maintenance Animaux (07/10/2026) : les comptes `Free` sont limités à trois ani
 
 Maintenance des contrats de saisie (14/10/2026) : les champs bornés des animaux, contacts, événements, notes, objectifs, souhaits et du profil suivent désormais les tailles PostgreSQL dans les schémas BFF, les gardes de mutation et les formulaires. L'alimentation animale et son historique passent à 100 caractères. Les groupes sont harmonisés à 255 caractères pour le nom, 2 000 pour les informations et 80 pour les e-mails de membre. La suite complète de 495 tests, le typage et le lint CI passent.
 
+Maintenance retours produit (09–10/11/2026) : les résultats filtrés de l’agenda sont triés du plus récent au plus ancien, le sélecteur d’heure utilise des listes natives accessibles et les photos JPEG, PNG, WebP, HEIC/HEIF et AVIF sont converties localement en JPEG borné avant tout transfert S3. Le codec HEIC est isolé dans un worker, auto-hébergé et contrôlé par hash ; le BFF et FastAPI imposent aussi la limite finale aux appels directs.
+
+Maintenance sécurité des dépendances (13/11/2026) : Next.js, Axios et Firebase Admin passent sur leurs correctifs courants, Zod est migré en version 4 et les transitives Firebase vulnérables sont remplacées par des versions corrigées compatibles Node 22. L’audit CI de production ne signale plus aucune vulnérabilité haute ou critique ; une faible et quatre modérées transitives restent sous le seuil bloquant. TypeScript, lint CI, 505 tests, build de production et décodage HEIC réel sous CSP sont validés.
+
 - [ ] **Clôture de la phase 6** — tous les livrables et le critère de sortie sont vérifiés.
 
 - [ ] CI : lint, typecheck, tests, build, audit et E2E.

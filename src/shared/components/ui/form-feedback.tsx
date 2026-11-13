@@ -156,6 +156,9 @@ function TimeInput({
   const id = React.useId();
   const currentValue = value === undefined ? localValue : stringValue(value);
   const [hour = "00", minute = "00"] = currentValue.split(":");
+  const minuteOptions = [...new Set([0, 15, 30, 45, Number(minute) || 0])].sort(
+    (left, right) => left - right,
+  );
   const updateValue = (nextValue: string) => {
     if (value === undefined) setLocalValue(nextValue);
     onValueChange?.(nextValue);
@@ -255,42 +258,40 @@ function TimeInput({
         </div>
         {mode === "picker" ? (
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="mb-1 text-[10px] font-bold text-muted-foreground">
-                Heure
-              </p>
-              <div className="grid max-h-32 gap-1 overflow-y-auto">
+            <label className="grid gap-1 text-[10px] font-bold text-muted-foreground">
+              Heure
+              <select
+                aria-label="Choisir l’heure"
+                value={hour}
+                onChange={(event) =>
+                  commit(Number(event.target.value), Number(minute))
+                }
+                className="h-10 rounded-[10px] border border-foreground/60 bg-card px-3 text-sm font-medium text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
                 {Array.from({ length: 24 }, (_, item) => item).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={Number(hour) === item}
-                    onClick={() => commit(item, Number(minute))}
-                    className="h-8 rounded-[10px] bg-muted text-xs aria-pressed:bg-primary aria-pressed:font-bold aria-pressed:text-primary-foreground"
-                  >
+                  <option key={item} value={String(item).padStart(2, "0")}>
                     {String(item).padStart(2, "0")}
-                  </button>
+                  </option>
                 ))}
-              </div>
-            </div>
-            <div>
-              <p className="mb-1 text-[10px] font-bold text-muted-foreground">
-                Minute
-              </p>
-              <div className="grid gap-1">
-                {[0, 15, 30, 45].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={Number(minute) === item}
-                    onClick={() => commit(Number(hour), item)}
-                    className="h-8 rounded-[10px] bg-muted text-xs aria-pressed:bg-primary aria-pressed:font-bold aria-pressed:text-primary-foreground"
-                  >
+              </select>
+            </label>
+            <label className="grid gap-1 text-[10px] font-bold text-muted-foreground">
+              Minute
+              <select
+                aria-label="Choisir les minutes"
+                value={minute}
+                onChange={(event) =>
+                  commit(Number(hour), Number(event.target.value))
+                }
+                className="h-10 rounded-[10px] border border-foreground/60 bg-card px-3 text-sm font-medium text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                {minuteOptions.map((item) => (
+                  <option key={item} value={String(item).padStart(2, "0")}>
                     {String(item).padStart(2, "0")}
-                  </button>
+                  </option>
                 ))}
-              </div>
-            </div>
+              </select>
+            </label>
           </div>
         ) : (
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">

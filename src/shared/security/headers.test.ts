@@ -9,6 +9,7 @@ describe('security headers', () => {
     });
 
     expect(csp).toContain("script-src 'self' 'nonce-bm9uY2U=' 'strict-dynamic'");
+    expect(csp).toContain("'wasm-unsafe-eval'");
     expect(csp).not.toContain("'unsafe-eval'");
     expect(csp).not.toContain('*');
     expect(csp).toContain('https://vasco-test.firebaseapp.com');

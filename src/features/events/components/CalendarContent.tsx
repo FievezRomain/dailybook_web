@@ -278,7 +278,15 @@ export default function CalendarContent() {
     Number(type !== "all") +
     selectedAnimalIds.length;
   const hasActiveFilters = activeFilterCount > 0;
-  const panelEvents = hasActiveFilters ? filteredEvents : selectedEvents;
+  const panelEvents = hasActiveFilters
+    ? [...filteredEvents].sort((left, right) => {
+        const dateComparison = right.dateevent.localeCompare(left.dateevent);
+        if (dateComparison !== 0) return dateComparison;
+        return (right.heuredebutevent ?? "").localeCompare(
+          left.heuredebutevent ?? "",
+        );
+      })
+    : selectedEvents;
   const panelHighlights = hasActiveFilters ? [] : selectedHighlights;
   const openDetail = (event: Event) => openEventDrawer(mapEventData(event));
   const selectDate = (date: Date) => {

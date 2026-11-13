@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
-const optionalText = z.string().nullable().optional().transform((value) => value ?? undefined);
+const optionalText = z.string().nullable().transform((value) => value ?? undefined).optional();
 
 export const contactIdSchema = z.coerce.number().int().positive();
 

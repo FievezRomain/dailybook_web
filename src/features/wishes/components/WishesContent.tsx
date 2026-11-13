@@ -224,7 +224,7 @@ export function WishForm({
               <span className="text-sm font-medium">Image</span>
               <Input
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/*,.heic,.heif"
                 onChange={(event) => setFile(event.target.files?.[0])}
               />
               <span className="text-xs text-muted-foreground">

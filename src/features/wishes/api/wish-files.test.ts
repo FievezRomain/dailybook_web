@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   post: vi.fn(),
   delete: vi.fn(),
   validatePresignedUrl: vi.fn((value: unknown) => String(value)),
+  prepare: vi.fn(),
 }));
 
 vi.mock('@/shared/api/web-api-client', () => ({
@@ -13,13 +14,20 @@ vi.mock('@/shared/api/web-api-client', () => ({
 vi.mock('@/shared/security/presigned-url', () => ({
   validatePresignedUrl: mocks.validatePresignedUrl,
 }));
+vi.mock('@/shared/utils/prepare-image-upload', () => ({
+  prepareImageUpload: mocks.prepare,
+  isSupportedImageUpload: (file: File) => file.type.startsWith('image/') && file.type !== 'image/svg+xml',
+}));
 
 import { deleteOrphanWishImage, getWishImageUrl, uploadWishImage } from './wish-files';
 
 const storedFilename = `${'a'.repeat(32)}.jpg`;
 
 describe('wish-files', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.prepare.mockImplementation(async (file: File) => new File([file], 'prepared.jpg', { type: 'image/jpeg' }));
+  });
   afterEach(() => vi.unstubAllGlobals());
 
   it('récupère une image dans le contexte du souhait', async () => {
@@ -54,7 +62,8 @@ describe('wish-files', () => {
     await expect(uploadWishImage(file, 12)).resolves.toBe(storedFilename);
 
     expect(mocks.post).toHaveBeenNthCalledWith(1, '/files/upload-url', expect.objectContaining({
-      filename: 'souhait.jpg',
+      filename: 'prepared.jpg',
+      contentType: 'image/jpeg',
       resourceType: 'wish',
       resourceId: 12,
     }));

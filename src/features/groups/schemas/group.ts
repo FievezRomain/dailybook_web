@@ -104,9 +104,9 @@ export const deleteMemberSchema = z.object({
 }).strict();
 
 export const optionalGroupResponseSchema = z.union([groupSchema, z.object({}).strict(), z.null()])
-  .transform((value) => value && 'id' in value ? value : null);
+  .transform((value) => value && 'id' in value ? groupSchema.parse(value) : null);
 export const memberMutationResponseSchema = z.union([
   groupSchema,
   z.object({ message: z.string() }).strict(),
   z.null(),
-]).transform((value) => value && 'id' in value ? value : null);
+]).transform((value) => value && 'id' in value ? groupSchema.parse(value) : null);

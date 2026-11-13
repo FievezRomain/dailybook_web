@@ -78,7 +78,7 @@ La production doit définir et tester :
 
 Les domaines Firebase et S3/CDN autorisés sont ajoutés précisément. Ne pas utiliser `*` ni `unsafe-eval`.
 
-Implémentation web : `src/proxy.ts` génère un nonce par requête de page et transmet la CSP à Next.js, qui nonce ses scripts de rendu. `next-themes` reçoit explicitement ce nonce depuis le layout racine. Deux styles inline stables générés par Next sont autorisés par hash ; aucun `unsafe-inline` n’est permis pour les scripts et `unsafe-eval` est limité au serveur de développement. Les origines Firebase et stockage sont normalisées puis ajoutées aux seules directives qui en ont besoin.
+Implémentation web : `src/proxy.ts` génère un nonce par requête de page et transmet la CSP à Next.js, qui nonce ses scripts de rendu. `next-themes` reçoit explicitement ce nonce depuis le layout racine. Deux styles inline stables générés par Next sont autorisés par hash ; aucun `unsafe-inline` n’est permis pour les scripts et `unsafe-eval` est limité au serveur de développement. `wasm-unsafe-eval`, plus étroit, autorise uniquement le décodeur HEIC auto-hébergé exécuté dans un worker ; son binaire et les modules publics sont vérifiés contre la dépendance épinglée. Les origines Firebase et stockage sont normalisées puis ajoutées aux seules directives qui en ont besoin.
 
 Les headers globaux sont `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` et une `Permissions-Policy` qui refuse notamment caméra, microphone, géolocalisation, paiement, USB et tracking publicitaire. Une future fonctionnalité nécessitant un de ces capteurs devra recevoir une décision produit et une ouverture minimale dédiée.
 
