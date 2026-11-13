@@ -16,6 +16,10 @@ Maintenance retours produit hors cycle graphique, 09/11/2026 :
 - [x] Remplacer le faux sélecteur d’heure par des listes natives clavier/souris/tactile.
 - [x] Accepter JPEG, PNG, WebP, HEIC/HEIF et AVIF, les convertir localement en JPEG borné avant S3, isoler et contrôler le codec HEIC auto-hébergé, puis imposer la même limite finale dans le BFF et FastAPI pour les appels directs.
 
+Maintenance sécurité des dépendances hors cycle graphique, 13/11/2026 :
+- [x] Mettre à niveau Next.js 16, Axios et Firebase Admin vers leurs correctifs de sécurité, migrer les schémas vers Zod 4 et conserver Firebase 12 avec des transitives corrigées compatibles Node 22.
+- [x] Valider l’installation verrouillée, l’audit de production sans alerte haute ou critique, le typecheck, le lint CI, les 505 tests, le build et le décodage HEIC réel sous CSP.
+
 ## Objectif
 
 Implémenter dans l’application Next.js les maquettes validées de [Vasco Web](https://www.figma.com/design/CzdthSttGqMnjCh3ycZECp), sans coexistence V1/V2 et sans recopier l’architecture visuelle legacy.

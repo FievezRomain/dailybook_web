@@ -5,8 +5,8 @@ const positiveId = z.number().int().positive();
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const backendDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}(?:[T ][^\s]+)?$/)
   .transform((value) => value.slice(0, 10));
-const optionalDateSchema = backendDateSchema.nullable().optional().transform((value) => value ?? undefined);
-const optionalTextSchema = z.string().nullable().optional().transform((value) => value ?? undefined);
+const optionalDateSchema = backendDateSchema.nullable().transform((value) => value ?? undefined).optional();
+const optionalTextSchema = z.string().nullable().transform((value) => value ?? undefined).optional();
 
 export const objectiveIdSchema = z.coerce.number().int().positive();
 export const subtaskIdSchema = z.coerce.number().int().positive();
@@ -15,7 +15,7 @@ export const objectiveSubtaskSchema = z.object({
   id: positiveId,
   etape: z.string(),
   state: z.boolean().nullable().optional().transform((value) => value ?? false),
-  order: z.number().int().nullable().optional().transform((value) => value ?? undefined),
+  order: z.number().int().nullable().transform((value) => value ?? undefined).optional(),
   objectif_id: positiveId.optional(),
 });
 

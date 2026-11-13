@@ -88,7 +88,7 @@ export const animalHistoryMutationSchema = z.object({
     context.addIssue({
       code: z.ZodIssueCode.too_big,
       maximum: ANIMAL_FOOD_MAX_LENGTH,
-      type: 'string',
+      origin: 'string',
       inclusive: true,
       path: ['value'],
       message: `L’alimentation ne peut pas dépasser ${ANIMAL_FOOD_MAX_LENGTH} caractères.`,

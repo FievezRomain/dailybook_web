@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createVerifiedFirebaseUser, exchangeIdTokenForSession } from './firebase-auth.fixture';
+import { uploadImagePath } from './image.fixture';
 
 async function mockCurrentUser(page: Page) {
   await page.route('**/api/me', route => route.fulfill({ json: { id: 1, name: 'Vasco', email: 'vasco@example.test', picture: null, expotoken: null, timezone: 'Europe/Paris', dailyReminderEnabled: true, subscription: 'Premium' } }));
@@ -68,7 +69,7 @@ test.describe('I8 — Notes, Contacts et Souhaits', () => {
       await page.goto('/wishes');
       await page.getByRole('button', { name: 'Actions pour Selle' }).click();
       await page.getByRole('menuitem', { name: 'Modifier' }).click();
-      await page.locator('input[type=file]').setInputFiles({ name: 'selle.png', mimeType: 'image/png', buffer: Buffer.from('small-png') });
+      await page.locator('input[type=file]').setInputFiles(uploadImagePath);
       await page.getByRole('button', { name: 'Enregistrer' }).click();
       await expect.poll(() => uploads).toHaveLength(1);
       await expect(page.getByText('Souhait mis à jour.')).toBeVisible();

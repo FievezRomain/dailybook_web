@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { STORAGE_TEXT_LIMITS } from '@/shared/constants/storage-limits';
 
 const positiveId = z.number().int().positive();
-const nullableDateTime = z.string().datetime({ offset: true }).nullable().optional().transform((value) => value ?? undefined);
+const nullableDateTime = z.string().datetime({ offset: true }).nullable().transform((value) => value ?? undefined).optional();
 
 export const noteIdSchema = z.coerce.number().int().positive();
 

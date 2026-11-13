@@ -3,6 +3,7 @@ import {
   createVerifiedFirebaseUser,
   exchangeIdTokenForSession,
 } from './firebase-auth.fixture';
+import { uploadImagePath } from './image.fixture';
 
 const currentUser = {
   id: 1, name: 'Vasco', email: 'vasco@example.test', picture: null, expotoken: null,
@@ -199,9 +200,7 @@ test.describe('parcours Animaux', () => {
       await page.route('https://storage.example/**', (route) => route.fulfill({ status: 204 }));
 
       await page.goto('/animals');
-      await page.locator('input[name="image"][accept="image/jpeg,image/png,image/webp"]').setInputFiles({
-        name: 'suivi.png', mimeType: 'image/png', buffer: Buffer.from('image'),
-      });
+      await page.locator('input[name="image"]').setInputFiles(uploadImagePath);
       await expect.poll(() => bodyPictureInput).toMatchObject({ filename });
       await expect.poll(() => uploadCompleted).toBe(true);
     } finally {
